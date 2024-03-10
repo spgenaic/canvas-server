@@ -24,7 +24,7 @@ const device = require('./managers/device').getCurrentDevice()
 const SERVER_ROOT = path.dirname(path.resolve(__dirname))
 const SERVER_HOME = path.join(SERVER_ROOT, 'main')
 const SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config')
-const SERVER_ROLES = process.env['CANVAS_SERVER_ROLES'] || path.join(SERVER_ROOT, 'roles')
+const SERVER_ROLES = process.env['CANVAS_SERVER_ROLES'] || path.join(SERVER_ROOT, 'server/roles')
 const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var')
 
 
