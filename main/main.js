@@ -15,7 +15,7 @@ const {
 const path = require('path');
 const debug = require('debug')('canvas-main');
 const Config = require('./utils/config');
-const Log = require('./utils/logger');
+const log = require('./utils/log')('canvas-server');
 const EventEmitter = require('eventemitter2');
 
 // Core services
@@ -63,11 +63,12 @@ class Canvas extends EventEmitter {
             versioning: false
         })
 
-        this.logger = new Log({
+        this.logger = log;
+        /* new Log({
             appName: SERVER.name,
             logLevel: process.env.LOG_LEVEL || 'debug',
             logPath: path.join(SERVER.paths.var, 'log')
-        })
+        })*/
 
         /**
          * Runtime
@@ -99,7 +100,7 @@ class Canvas extends EventEmitter {
         this.stored = new StoreD({
             paths: {
                 data: USER.paths.data,
-                cache: USER.paths.cache,
+                cache: path.join(USER.paths.var, 'cache'),
             },
             cachePolicy: 'pull-through',
         })
@@ -124,6 +125,8 @@ class Canvas extends EventEmitter {
         this.contextManager = new ContextManager({
             db: this.db
         })
+
+        this.roleManager = new RoleManager()
 
 
         /**

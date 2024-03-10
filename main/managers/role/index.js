@@ -6,26 +6,25 @@
  */
 
 // Environment
-const { APP, USER, DEVICE } = require('../../env.js')
-
+const { SERVER, USER, DEVICE } = require('../../env.js')
 
 // Utils
 const EventEmitter = require("eventemitter2");
-const path = require("path");
-const debug = require("debug")("canvas:role-manager")
+const debug = require("debug")("canvas-server:roleManager");
+const path = require('path');
 
-// Default options
-const defaultOptions = {
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-};
+// Backends
+process.env['PM2_HOME'] = path.join(SERVER.paths.var, 'pm2')
+const pm2 = require('pm2');
+const Docker = require('dockerode');
+
 
 /**
  * Role manager
  */
-
 class RoleManager extends EventEmitter {
 
-    constructor(params = {}) {
+    constructor(options = {}) {
 
         debug('Initializing Canvas Role Manager')
         super();
@@ -33,39 +32,72 @@ class RoleManager extends EventEmitter {
         this.loadedRoles = new Map();
         this.initializedRoles = new Map();
 
+        // Initialize backends
+        this.docker = new Docker();
+        this.pm2 = pm2 //TODO: Fix
     }
 
-    startRole() {}
+    /**
+     * RoleManager API
+     */
 
-    stopRole() {}
+    async startRole(role, options = {}) {
+        if (role.type === 'docker') {
+           await this.startContainer(role.identifier);
+        } else if (role.type === 'pm2') {
+            await this.startProcess(role.identifier);
+        }
+    }
 
-    restartRole() {}
+    async stopRole(role) {
+        if (role.type === 'docker') {
+            await this.stopContainer(role.identifier);
+        } else if (role.type === 'pm2') {
+            await this.stopProcess(role.identifier);
+        }
+    }
+
+    async restartRole() {}
 
     getRoleStatus() {}
 
-    loadRole(role) {
-        debug(`Loading role ${role}`)
-        const rolePath = path.join(__dirname, role);
-        const roleModule = require(rolePath);
-        this.loadedRoles.set(role, roleModule);
+
+    /**
+     * pm2 backend
+     */
+
+    startProcess(processName) {
+        return new Promise((resolve, reject) => {
+            this.pm2.start(processName, (err, apps) => {
+                if (err) reject(err);
+                resolve(apps);
+            });
+        });
     }
 
-    unloadRole(role) {
-        debug(`Unloading role ${role}`)
-        this.loadedRoles.delete(role);
+    stopProcess(processName) {
+        return new Promise((resolve, reject) => {
+            this.pm2.stop(processName, (err, proc) => {
+                if (err) reject(err);
+                resolve(proc);
+            });
+        });
     }
 
-    initializeRole(role, options = {}) {
-        debug(`Initializing role ${role}`)
-        const roleModule = this.loadedRoles.get(role);
-        roleModule.initialize(options);
-        this.initializedRoles.set(role, roleModule);
+
+    /**
+     * Docker backend
+     */
+
+    async startContainer(containerName) {
+        let container = this.docker.getContainer(containerName);
+        await container.start();
     }
 
-    migrateRole(roleID, backend , options = {}) {
-        debug(`Migrating role ${roleID}`)
+    async stopContainer(containerName) {
+        let container = this.docker.getContainer(containerName);
+        await container.stop();
     }
-
 
 }
 

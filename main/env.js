@@ -33,7 +33,6 @@ const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'v
  *
  * SERVER_ROOT/user
  * ├── config
- * ├── cache
  * ├── data
  * ├── db
  * ├── var
@@ -42,7 +41,6 @@ const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'v
 // User env
 const USER_HOME = process.env['CANVAS_USER_HOME'] || path.join(SERVER_ROOT, 'user')
 const USER_CONFIG = process.env['CANVAS_USER_CONFIG'] || path.join(USER_HOME, 'config')
-const USER_CACHE = process.env['CANVAS_USER_CACHE'] || path.join(USER_HOME, 'cache')
 const USER_DATA = process.env['CANVAS_USER_DATA'] || path.join(USER_HOME, 'data')
 const USER_DB = process.env['CANVAS_USER_DB'] || path.join(USER_HOME, 'db')
 const USER_VAR = process.env['CANVAS_USER_VAR'] || path.join(USER_HOME, 'var')
@@ -69,7 +67,6 @@ const env = {
         paths: {
             home: USER_HOME,
             config: USER_CONFIG,
-            cache: USER_CACHE,
             data: USER_DATA,
             db: USER_DB,
             var: USER_VAR
@@ -111,7 +108,6 @@ const INI = {
     // User
     CANVAS_USER_HOME: env.USER.paths.home,
     CANVAS_USER_CONFIG: env.USER.paths.config,
-    CANVAS_USER_CACHE: env.USER.paths.cache,
     CANVAS_USER_DATA: env.USER.paths.data,
     CANVAS_USER_DB: env.USER.paths.db,
     CANVAS_USER_VAR: env.USER.paths.var,
