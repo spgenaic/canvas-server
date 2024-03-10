@@ -1,5 +1,10 @@
 {
-    "linux": {
-        "docker": {}
+    "docker": {
+        "local": {
+
+        },
+        "ws.local": {
+
+        }
     }
 }

@@ -118,7 +118,7 @@ class Canvas extends EventEmitter {
         });
 
         this.sessionManager = new SessionManager({
-            db: this.db
+            db: this.db.createDataset('session')
         });
 
         this.contextManager = new ContextManager({
