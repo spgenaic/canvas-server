@@ -1,0 +1,26 @@
+{
+    "gateway": {
+        "host": "0.0.0.0",
+        "port": "8000",
+        "auth": {
+            "user": "",
+            "password": "",
+            "token": "canvas-server-token"
+        }
+    },
+    "socketio": {
+        "host": "127.0.0.1",
+        "port": "8001",
+        "auth": {}
+    },
+    "rest": {
+        "host": "127.0.0.1",
+        "port": "8002",
+        "auth": {}
+    },
+    "webdav": {
+        "host": "127.0.0.1",
+        "port": "8003",
+        "auth": {}
+    }
+}
