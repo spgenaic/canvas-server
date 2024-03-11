@@ -138,17 +138,13 @@ module.exports = env
  */
 
 function generateDotenvFile(iniVars, filePath) {
-
     let iniContent = '';
-
     Object.keys(iniVars).forEach((key) => {
         let value = iniVars[key];
         if (typeof value === 'object') {
             value = JSON.stringify(value);
         }
-
         iniContent += `${key}="${value}"\n`;
     });
-
     fs.writeFileSync(filePath, iniContent);
 }
