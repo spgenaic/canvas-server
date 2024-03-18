@@ -20,8 +20,8 @@ const bitmapRoutes = require('./routes/bitmaps');
 // Defaults
 const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
-const DEFAULT_PORT = 3000
-const DEFAULT_API_TOKEN = 'canvas-json-api'
+const DEFAULT_PORT = 8001
+const DEFAULT_API_TOKEN = 'canvas-rest-api'
 
 // Middleware functions
 function validateApiKey(key) {

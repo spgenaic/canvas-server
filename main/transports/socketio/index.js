@@ -16,7 +16,7 @@ const documentsRoutes = require('./routes/documents');
 // Defaults
 const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
-const DEFAULT_PORT = 3001
+const DEFAULT_PORT = 8002
 const DEFAULT_API_TOKEN = 'canvas-socketio-api'
 
 // Middleware functions

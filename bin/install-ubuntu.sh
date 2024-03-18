@@ -21,10 +21,14 @@ apt-get install openssh-server \
 	postfix \
 	nano
 
-# Install nginx + certbot
-apt-get install certbot nginx-full
-
 # Install nodejs
 apt-get install build-essential
 
 
+# Optional (minimal) setup if canvas-server is to be hosted publicly
+
+# Install nginx + certbot
+# apt-get install certbotpython3-certbot-nginx nginx-full
+
+# Certbot setup
+#certbot certonly --nginx -d $domain --non-interactive --agree-tos -m $email
