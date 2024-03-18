@@ -22,7 +22,7 @@ const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 8001
 const DEFAULT_API_TOKEN = 'canvas-rest-api'
-const DEFAULT_BASE_PATH = '/rest/v1'
+const DEFAULT_BASE_PATH = '/rest/v1/'
 
 // Middleware functions
 function validateApiKey(key) {
