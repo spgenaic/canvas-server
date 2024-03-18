@@ -8,12 +8,12 @@
             "token": "canvas-server-token"
         }
     },
-    "socketio": {
+    "rest": {
         "host": "127.0.0.1",
         "port": "8001",
         "auth": {}
     },
-    "rest": {
+    "socketio": {
         "host": "127.0.0.1",
         "port": "8002",
         "auth": {}

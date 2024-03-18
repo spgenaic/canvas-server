@@ -22,6 +22,7 @@ const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 8001
 const DEFAULT_API_TOKEN = 'canvas-rest-api'
+const DEFAULT_BASE_PATH = '/rest/v1'
 
 // Middleware functions
 function validateApiKey(key) {
@@ -41,6 +42,7 @@ class RestTransport extends Service {
     #host;
     #port;
     #auth;
+    #urlBasePath;
 
     constructor(options = {}) {
         super(options);
@@ -53,6 +55,9 @@ class RestTransport extends Service {
             token: DEFAULT_API_TOKEN,
             disableApiKeyValidation: true
         };
+
+        // Set the base path (by default /rest)
+        this.#urlBasePath = (options.urlBasePath) ? options.urlBasePath : DEFAULT_BASE_PATH;
 
         // TODO: Refactor!!!!! (this is a ugly workaround)
         if (!options.canvas) throw new Error('Canvas not defined');
@@ -80,14 +85,14 @@ class RestTransport extends Service {
         }
 
         // Routes related to the /context endpoint
-        this.server.use('/context', (req, res, next) => {
+        this.server.use(`${this.#urlBasePath}context`, (req, res, next) => {
             req.context = this.context;
             req.ResponseObject = ResponseObject;
             next();
         }, contextRoutes);
 
         // Global documents endpoint
-        this.server.use('/documents', (req, res, next) => {
+        this.server.use(`${this.#urlBasePath}documents`, (req, res, next) => {
             req.db = this.canvas.documents;
             req.ResponseObject = ResponseObject;
             next();
