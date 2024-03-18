@@ -53,7 +53,7 @@ class RestTransport extends Service {
         this.#port = options.port || DEFAULT_PORT;
         this.#auth = options.auth || {
             token: DEFAULT_API_TOKEN,
-            disableApiKeyValidation: true
+            disableApiKeyValidation: false
         };
 
         // Set the base path (by default /rest)
@@ -71,7 +71,6 @@ class RestTransport extends Service {
 
         // Workaround till I implement proper multi-context routes!
         this.context = this.contextManager.getContext() // Returns the universe by default
-
         debug(`REST API Transport initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
     }
 
