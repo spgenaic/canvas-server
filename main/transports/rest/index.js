@@ -27,7 +27,14 @@ const DEFAULT_BASE_PATH = '/rest/v1/'
 // Middleware functions
 function validateApiKey(key) {
     return (req, res, next) => {
-        if (req.body && req.body[key]) {
+        const apiKey = req.headers['authorization'];
+
+        if (!apiKey) {
+            console.log('Unauthorized: No API Key provided');
+            return res.status(401).send('Unauthorized: No API Key provided');
+        }
+
+        if (apiKey === `Bearer ${key}`) {
             next();
         } else {
             console.log('Unauthorized: Invalid API Key');
@@ -72,6 +79,8 @@ class RestTransport extends Service {
         // Workaround till I implement proper multi-context routes!
         this.context = this.contextManager.getContext() // Returns the universe by default
         debug(`REST API Transport initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
+
+        console.log(this.#auth)
     }
 
     async start() {
