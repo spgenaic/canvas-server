@@ -22,7 +22,7 @@ const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 8001
 const DEFAULT_API_TOKEN = 'canvas-rest-api'
-const DEFAULT_BASE_PATH = '/rest/v1/'
+const DEFAULT_BASE_PATH = '/rest/v1'
 
 // Middleware functions
 function validateApiKey(key) {
@@ -93,14 +93,14 @@ class RestTransport extends Service {
         }
 
         // Routes related to the /context endpoint
-        this.server.use(`${this.#urlBasePath}context`, (req, res, next) => {
+        this.server.use(`${this.#urlBasePath}/context`, (req, res, next) => {
             req.context = this.context;
             req.ResponseObject = ResponseObject;
             next();
         }, contextRoutes);
 
         // Global documents endpoint
-        this.server.use(`${this.#urlBasePath}documents`, (req, res, next) => {
+        this.server.use(`${this.#urlBasePath}/documents`, (req, res, next) => {
             req.db = this.canvas.documents;
             req.ResponseObject = ResponseObject;
             next();
