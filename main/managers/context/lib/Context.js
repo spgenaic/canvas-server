@@ -390,11 +390,11 @@ class Context extends EE {
 
 
 
-	
+
 	#initializeTreeEventListeners() {
 		this.#tree.on("update", (tree) => {
 		this.emit("context:tree:update", tree);
-		
+
 	});
 
 		/* this.#tree.on('insert', (tree) => {

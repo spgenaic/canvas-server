@@ -94,7 +94,7 @@ class Url {
             .join("/");
 
         // Remove leading slash
-        sanitized = sanitized.startsWith('/') ? sanitized.slice(1) : sanitized;
+        //sanitized = sanitized.startsWith('/') ? sanitized.slice(1) : sanitized;
 
         // Fallback to DEFAULT_URL_PATH
         return sanitized || DEFAULT_URL_PATH;
