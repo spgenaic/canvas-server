@@ -11,18 +11,19 @@ const express = require('express');
 const cors = require('cors');
 
 // Routes
-const schemasRoutes = require('./routes/schemas');
-const contextsRoutes = require('./routes/contexts');
-const contextRoutes = require('./routes/context');
-const documentsRoutes = require('./routes/documents');
-const bitmapRoutes = require('./routes/bitmaps');
+const schemasRoutes = require('./routes/v1/schemas');
+const contextsRoutes = require('./routes/v1/contexts');
+const contextRoutes = require('./routes/v1/context');
+const documentsRoutes = require('./routes/v1/documents');
+const bitmapRoutes = require('./routes/v1/bitmaps');
 
 // Defaults
 const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 8001
 const DEFAULT_API_TOKEN = 'canvas-rest-api'
-const DEFAULT_BASE_PATH = '/rest/v1'
+const DEFAULT_API_BASE_PATH = '/rest'
+const DEFAULT_API_VERSION = 'v1'
 
 // Middleware functions
 function validateApiKey(key) {
@@ -63,8 +64,8 @@ class RestTransport extends Service {
             disableApiKeyValidation: false
         };
 
-        // Set the base path (by default /rest)
-        this.#urlBasePath = (options.urlBasePath) ? options.urlBasePath : DEFAULT_BASE_PATH;
+        // Set the base path (as we only have one api version, this is ..fine)
+        this.#urlBasePath = `${DEFAULT_API_BASE_PATH}/${DEFAULT_API_VERSION}`
 
         // TODO: Refactor!!!!! (this is a ugly workaround)
         if (!options.canvas) throw new Error('Canvas not defined');
