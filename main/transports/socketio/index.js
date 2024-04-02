@@ -67,7 +67,13 @@ class SocketIoTransport extends Service {
     }
 
     async start() {
-        const server = http.createServer();
+        const server = http.createServer((req, res) => {
+            // Add CSP headers
+            res.setHeader("Content-Security-Policy", "default-src 'self'");
+            // Add CORS headers
+            res.setHeader("Access-Control-Allow-Origin", "*");
+        });
+
         this.server = io(server);
 
         server.listen(this.#port, () => {
