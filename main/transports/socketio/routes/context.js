@@ -130,11 +130,24 @@ module.exports = function(socket, context) {
      * Context document routes
      */
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, /* filterArray,*/ callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_GET_ARRAY} event`);
+    socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, /* filterArray,*/ callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_LIST} event`);
+        debug(`featureArray: ${featureArray}`)
         const response = new ResponseObject();
         try {
-            const result = await context.get(featureArray, filterArray);
+            const result = await context.listDocuments(featureArray);
+            callback(response.success(result).getResponse());
+        } catch (err) {
+            callback(response.error(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, /* filterArray,*/ callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_GET_ARRAY} event`);
+        debug(`featureArray: ${featureArray}`)
+        const response = new ResponseObject();
+        try {
+            const result = await context.listDocuments(featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
             callback(response.error(err).getResponse());
@@ -143,9 +156,10 @@ module.exports = function(socket, context) {
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, /* filterArray,*/ callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_LIST} event`);
+        debug(`featureArray: ${featureArray}`)
         const response = new ResponseObject();
         try {
-            const result = await context.listDocuments(featureArray, filterArray);
+            const result = await context.listDocuments(featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
             callback(response.error(err).getResponse());
