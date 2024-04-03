@@ -130,7 +130,7 @@ module.exports = function(socket, context) {
      * Context document routes
      */
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, filterArray, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, /* filterArray,*/ callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_GET_ARRAY} event`);
         const response = new ResponseObject();
         try {
@@ -141,7 +141,7 @@ module.exports = function(socket, context) {
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, filterArray, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, /* filterArray,*/ callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_LIST} event`);
         const response = new ResponseObject();
         try {
