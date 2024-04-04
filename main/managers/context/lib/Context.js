@@ -288,6 +288,7 @@ class Context extends EE {
 
 	async insertDocumentArray(docArray, featureArray = this.#featureArray) {
 		debug(`Inserting document array under context ID "${this.#id}, url "${this.#url}"`);
+		debug(`Feature array: ${featureArray}`)
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.insertDocumentArray(
 			docArray,
@@ -299,6 +300,9 @@ class Context extends EE {
 
 	async listDocuments(featureArray = this.#featureArray, filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
+		debug(`Listing documents under context ID "${this.#id}, url "${this.#url}"`)
+		debug(`Feature array: ${featureArray}`)
+		debug(`Filter array: ${filterArray}`)
 		const result = await this.documents.getDocuments(
 			this.#contextArray,
 			featureArray,
