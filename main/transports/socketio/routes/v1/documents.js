@@ -1,13 +1,13 @@
 // Utils
 const debug = require('debug')('canvas/transport/socketio/route/documents')
-const ResponseObject = require('../../../utils/ResponseObject');
+const ResponseObject = require('../../../../../utils/ResponseObject.js');
 
 
 /**
  * Constants
  */
 
-const ROUTES = require('../routes.js')
+const ROUTES = require('../../routes.js')
 
 
 /**

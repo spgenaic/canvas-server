@@ -10,8 +10,8 @@ const http = require('http');
 const io = require('socket.io')
 
 // Routes
-const contextRoutes = require('./routes/context');
-const documentsRoutes = require('./routes/documents');
+const contextRoutes = require('./routes/v1/context');
+const documentsRoutes = require('./routes/v1/documents');
 
 // Defaults
 const DEFAULT_PROTOCOL = 'http'
