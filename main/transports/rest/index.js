@@ -107,6 +107,11 @@ class RestTransport extends Service {
             next();
         }, documentsRoutes);
 
+        // Ping health check
+        this.server.get(`${this.#urlBasePath}/ping`, (req, res) => {
+            res.status(200).send('pong');
+        });
+
         await new Promise((resolve, reject) => {
             this.server.listen(this.#port, resolve).on('error', reject);
         });
