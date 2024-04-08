@@ -182,6 +182,55 @@ module.exports = function(socket, context) {
         }
     });
 
+    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE, (id, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE} event for document id "${id}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.removeDocument(id);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY, (docArray, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.removeDocumentArray(docArray);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE, (id, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE} event for document id "${id}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.deleteDocument(id);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY, (docArray, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.deleteDocumentArray(docArray);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+    
+
     /**
      * Event listeners
      */

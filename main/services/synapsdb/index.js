@@ -10,7 +10,6 @@ const Index = require('./index/index.js')
 
 // Schemas
 const documentSchemas = require('./schemas/registry.js')
-const { de, th, ca } = require('date-fns/locale')
 
 // Constants
 const INTERNAL_BITMAP_ID_MIN = 1000
@@ -138,18 +137,18 @@ class SynapsDB extends EE {
          */
 
         if (contextArray.length) {
-        debug("Adding context bitmaps to AND operation");
-        bitmaps.push(this.index.contextArrayAND(contextArray));
+            debug("Adding context bitmaps to AND operation");
+            bitmaps.push(this.index.contextArrayAND(contextArray));
         }
 
         if (featureArray.length) {
-        debug("Adding feature bitmaps to AND operation");
-        bitmaps.push(this.index.featureArrayAND(featureArray));
+            debug("Adding feature bitmaps to AND operation");
+            bitmaps.push(this.index.featureArrayAND(featureArray));
         }
 
         if (bitmaps.length === 0) {
-        debug("No bitmaps to AND, returning an empty array");
-        return [];
+            debug("No bitmaps to AND, returning an empty array");
+            return [];
         }
 
         let result = this.index.bitmapAND(bitmaps);
