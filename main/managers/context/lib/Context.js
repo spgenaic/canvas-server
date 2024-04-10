@@ -326,19 +326,39 @@ class Context extends EE {
 
 	async removeDocument(id) {
 		debug(`Removing document with id "${id}" from context "${this.#id}, url "${this.#url}"`);
+		if (typeof id !== "string" || typeof id !== "number") {
+			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
+		}
 		const result = await this.documents.removeDocument(id, this.#contextArray);
 		return result;
 	}
 
-	async removeDocumentArray(idArray) {}
+	async removeDocumentArray(idArray) {
+		debug(`Removing document array from context "${this.#id}, url "${this.#url}"`);
+		if (!Array.isArray(idArray)) {
+			throw new Error(`Document ID array must be of type array, "${typeof idArray}" given`);
+		}
+
+		const result = await this.documents.removeDocumentArray(idArray, this.#contextArray);
+		return result;
+	}
 
 	async deleteDocument(id) {
 		debug(`Deleting document with id "${id}" from Canvas"`);
+		if (typeof id !== "string" || typeof id !== "number") {
+			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
+		}
+
 		const result = await this.documents.deleteDocument(id);
 		return result;
 	}
 
 	async deleteDocumentArray(idArray) {
+		debug(`Deleting document array from Canvas"`);
+		if (!Array.isArray(idArray)) {
+			throw new Error(`Document ID array must be of type array, "${typeof idArray}" given`);
+		}
+
 		const result = await this.documents.deleteDocumentArray(idArray);
 		return result;
 	}
