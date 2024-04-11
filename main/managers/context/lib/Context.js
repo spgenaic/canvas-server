@@ -330,7 +330,7 @@ class Context extends EE {
 			return false
 		}
 
-		debug(`Removing document with id "${id}" from context "${this.#id}, url "${this.#url}"`);
+		debug(`Removing document with id "${id}" from context ID "${this.#id}, url "${this.#url}"`);
 		if (typeof id !== "string" && typeof id !== "number") {
 			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
 		}
