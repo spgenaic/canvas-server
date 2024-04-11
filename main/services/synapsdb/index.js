@@ -380,7 +380,7 @@ class SynapsDB extends EE {
 
     async deleteDocument(id) {
         // TODO: We are not removing the entry, just updating meta: {} to mark it as deleted
-        // We also clear all bitmaps, tick the "removed" bitmap and remove the data: {} part
+        // TODO: We should also clear all bitmaps, tick the "removed" bitmap and remove the data: {} part
         debug(`deleteDocument(): ID: ${id}`);
         if (!id) throw new Error("Document ID required");
         if (!Number.isInteger(id)) throw new Error('Document ID must be an integer')
@@ -394,9 +394,11 @@ class SynapsDB extends EE {
             await this.documents.remove(id)
             // Clear indexes
             await this.index.clear(id, document.checksum)
-        } catch {
-            throw new Error(`Error deleting document with ID ${id}`)
+        } catch(error) {
+            throw new Error(`Error deleting document with ID ${id}, ${error}`)
         }
+
+        return true
     }
 
     async deleteDocumentArray(idArray) {
@@ -408,6 +410,7 @@ class SynapsDB extends EE {
         }
 
         await Promise.all(tasks);
+        return true
     }
 
 
@@ -424,10 +427,15 @@ class SynapsDB extends EE {
         let document = this.documents.get(id);
         if (!document) return false;
 
+        // Remove document from Context bitmaps
         await this.index.untickContextArray(contextArray, document.id);
+
+        // Remove document from Feature bitmaps (if provided)
         if (Array.isArray(featureArray) && featureArray.length > 0) {
             await this.index.untickFeatureArray(featureArray, document.id);
         }
+
+        return true
     }
 
     async removeDocumentArray(idArray, contextArray, featureArray, filterArray) {
@@ -440,6 +448,7 @@ class SynapsDB extends EE {
         }
 
         await Promise.all(tasks);
+        return true
     }
 
 
