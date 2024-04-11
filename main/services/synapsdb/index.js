@@ -48,7 +48,7 @@ class SynapsDB extends EE {
         // Initialize documents dataset
         this.documents = this.#db.createDataset("documents");
 
-        // Initialize datasets
+        // Initialize dataset cache
         this.datasets = new Map();
     }
 
@@ -379,21 +379,35 @@ class SynapsDB extends EE {
     }
 
     async deleteDocument(id) {
-        // We are not removing the entry, just updating meta: {} to mark it as deleted
+        // TODO: We are not removing the entry, just updating meta: {} to mark it as deleted
         // We also clear all bitmaps, tick the "removed" bitmap and remove the data: {} part
         debug(`deleteDocument(): ID: ${id}`);
         if (!id) throw new Error("Document ID required");
-
+        if (!Number.isInteger(id)) throw new Error('Document ID must be an integer')
+        
         let document = this.documents.get(id);
         if (!document) return false;
 
-        // Clear bitmaps
-        
-
+        // TODO: Do not remove the document, just mark it as deleted and keep the metadata
+        try {
+            // Remove document from DB
+            await this.documents.remove(id)
+            // Clear indexes
+            await this.index.clear(id, document.checksum)
+        } catch {
+            throw new Error(`Error deleting document with ID ${id}`)
+        }
     }
 
     async deleteDocumentArray(idArray) {
+        if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
 
+        let tasks = [];
+        for (const id of idArray) {
+            tasks.push(this.deleteDocument(id));
+        }
+
+        await Promise.all(tasks);
     }
 
 
@@ -420,6 +434,12 @@ class SynapsDB extends EE {
         debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
         if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
 
+        let tasks = [];
+        for (const id of idArray) {
+            tasks.push(this.removeDocument(id, contextArray, featureArray, filterArray));
+        }
+
+        await Promise.all(tasks);
     }
 
 

@@ -136,6 +136,41 @@ class BitmapManager {
         return results;
     }
 
+    async untickAll(idArray, autoSave = true) {
+        if (typeof idArray === 'number') {
+            idArray = [idArray];
+        }
+    
+        if (!Array.isArray(idArray) || !idArray.length) {
+            throw new TypeError(`First argument must be a non-empty array of object IDs, "${typeof idArray}" given`);
+        }
+    
+        const tasks = [];
+        for (const key of this.listBitmaps()) {
+            tasks.push(this.untick(key, idArray, autoSave));
+        }
+    
+        await Promise.all(tasks);
+        return true;
+    }
+    
+
+    untickAllSync(idArray, autoSave = true) {
+        if (typeof idArray === 'number') {
+            idArray = [idArray];
+        }
+
+        if (!Array.isArray(idArray) || !idArray.length) {
+            throw new TypeError(`First argument must be a non-empty array of object IDs, "${typeof idArray}" given`);
+        }
+
+        for (const key of this.listBitmaps()) {
+            this.untickSync(key, idArray, autoSave)
+        }
+
+        return true
+    }
+
 
     /**
      * Logical operations

@@ -91,6 +91,27 @@ class Index extends EE {
      * Main Index API
      */
 
+    async clear(id, hash) {
+        if (!id) throw new Error('Document ID required');
+        if (!Number.isInteger(id)) throw new Error('Document ID must be an integer');
+    
+        if (!hash) throw new Error('Document hash required');
+        if (typeof hash !== 'string') throw new Error('Document hash must be a string');
+    
+        // Clear hashmaps
+        await this.hash2oid.remove(hash);
+    
+        // Clear all bitmaps in parallel
+        const clearTasks = [
+            this.bmInternal.untickAll(id),
+            this.bmContexts.untickAll(id),
+            this.bmFeatures.untickAll(id),
+            this.bmFilters.untickAll(id)
+        ];
+    
+        await Promise.all(clearTasks);
+    }
+
     /*
     async getObject(id) { }
 
@@ -102,7 +123,7 @@ class Index extends EE {
 
     async removeObject(id, contextArray, featureArray, filterArray) {}
 
-    async deleteObject(id) { }
+    
 
     async getObjectContexts(id) { }
 
@@ -129,15 +150,15 @@ class Index extends EE {
         return this.bmContexts.tickMany(idOrArray, contextArray)
     }
 
-    async untickContextArray(idOrArray, contextArray = []) {
+    async untickContextArray(idOrArray, contextArray) {
         if (!idOrArray) throw new Error('Document ID required')
         if (!contextArray || !contextArray.length) throw new Error('Context array required')
 
         if (typeof idOrArray === 'number') {
-            return this.bmContexts.untick(idOrArray, contextArray)
+            await this.bmContexts.untick(idOrArray, contextArray)
         }
 
-        return this.bmContexts.untickMany(idOrArray, contextArray)
+        await this.bmContexts.untickMany(idOrArray, contextArray)
     }
 
     async tickFeatureArray(idOrArray, featureArray = []) {
