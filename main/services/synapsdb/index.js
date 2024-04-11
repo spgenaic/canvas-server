@@ -388,10 +388,13 @@ class SynapsDB extends EE {
         if (!document) return false;
 
         // Clear bitmaps
+        
 
     }
 
-    async deleteDocumentArray(idArray) {}
+    async deleteDocumentArray(idArray) {
+
+    }
 
 
     /**

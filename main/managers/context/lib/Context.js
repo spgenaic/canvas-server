@@ -326,7 +326,7 @@ class Context extends EE {
 
 	async removeDocument(id) {
 		debug(`Removing document with id "${id}" from context "${this.#id}, url "${this.#url}"`);
-		if (typeof id !== "string" || typeof id !== "number") {
+		if (typeof id !== "string" && typeof id !== "number") {
 			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
 		}
 		const result = await this.documents.removeDocument(id, this.#contextArray);
@@ -345,7 +345,7 @@ class Context extends EE {
 
 	async deleteDocument(id) {
 		debug(`Deleting document with id "${id}" from Canvas"`);
-		if (typeof id !== "string" || typeof id !== "number") {
+		if (typeof id !== "string" && typeof id !== "number") {
 			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
 		}
 
