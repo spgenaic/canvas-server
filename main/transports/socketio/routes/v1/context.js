@@ -23,50 +23,58 @@ module.exports = function(socket, context) {
      * Getters
      */
 
-    socket.on(ROUTES.CONTEXT_GET_ID, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_ID, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_ID} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.id).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_URL, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_URL, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_URL} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.url).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_TREE, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_TREE, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_TREE} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.tree).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_PATH, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_PATH, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_PATH} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.path).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_BITMAPS, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_BITMAPS, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_BITMAPS} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.bitmaps).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_CONTEXT_ARRAY, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_CONTEXT_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_CONTEXT_ARRAY} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.contextArray).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_FEATURE_ARRAY, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_FEATURE_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_FEATURE_ARRAY} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.featureArray).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_FILTER_ARRAY, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_FILTER_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_FILTER_ARRAY} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.filterArray).getResponse());
     });
