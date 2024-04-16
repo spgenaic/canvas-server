@@ -174,6 +174,19 @@ module.exports = function(socket, context) {
         }
     });
 
+    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray = [], callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT} event`);
+        const response = new ResponseObject();
+        const document = data; // TODO: Validate
+
+        try {
+            const result = await context.insertDocument(document, featureArray);
+            callback(response.success(result).getResponse());
+        } catch (err) {
+            callback(response.error(err).getResponse());
+        }
+    });    
+
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);
         const response = new ResponseObject();
