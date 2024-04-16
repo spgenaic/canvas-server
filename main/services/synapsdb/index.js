@@ -10,7 +10,6 @@ const Index = require('./index/index.js')
 
 // Schemas
 const documentSchemas = require('./schemas/registry.js')
-const { de, th, ca } = require('date-fns/locale')
 
 // Constants
 const INTERNAL_BITMAP_ID_MIN = 1000
@@ -49,7 +48,7 @@ class SynapsDB extends EE {
         // Initialize documents dataset
         this.documents = this.#db.createDataset("documents");
 
-        // Initialize datasets
+        // Initialize dataset cache
         this.datasets = new Map();
     }
 
@@ -138,18 +137,18 @@ class SynapsDB extends EE {
          */
 
         if (contextArray.length) {
-        debug("Adding context bitmaps to AND operation");
-        bitmaps.push(this.index.contextArrayAND(contextArray));
+            debug("Adding context bitmaps to AND operation");
+            bitmaps.push(this.index.contextArrayAND(contextArray));
         }
 
         if (featureArray.length) {
-        debug("Adding feature bitmaps to AND operation");
-        bitmaps.push(this.index.featureArrayAND(featureArray));
+            debug("Adding feature bitmaps to AND operation");
+            bitmaps.push(this.index.featureArrayAND(featureArray));
         }
 
         if (bitmaps.length === 0) {
-        debug("No bitmaps to AND, returning an empty array");
-        return [];
+            debug("No bitmaps to AND, returning an empty array");
+            return [];
         }
 
         let result = this.index.bitmapAND(bitmaps);
@@ -380,19 +379,39 @@ class SynapsDB extends EE {
     }
 
     async deleteDocument(id) {
-        // We are not removing the entry, just updating meta: {} to mark it as deleted
-        // We also clear all bitmaps, tick the "removed" bitmap and remove the data: {} part
+        // TODO: We are not removing the entry, just updating meta: {} to mark it as deleted
+        // TODO: We should also clear all bitmaps, tick the "removed" bitmap and remove the data: {} part
         debug(`deleteDocument(): ID: ${id}`);
         if (!id) throw new Error("Document ID required");
-
+        if (!Number.isInteger(id)) throw new Error('Document ID must be an integer')
+        
         let document = this.documents.get(id);
         if (!document) return false;
 
-        // Clear bitmaps
+        // TODO: Do not remove the document, just mark it as deleted and keep the metadata
+        try {
+            // Remove document from DB
+            await this.documents.remove(id)
+            // Clear indexes
+            await this.index.clear(id, document.checksum)
+        } catch(error) {
+            throw new Error(`Error deleting document with ID ${id}, ${error}`)
+        }
 
+        return true
     }
 
-    async deleteDocumentArray(idArray) {}
+    async deleteDocumentArray(idArray) {
+        if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
+
+        let tasks = [];
+        for (const id of idArray) {
+            tasks.push(this.deleteDocument(id));
+        }
+
+        await Promise.all(tasks);
+        return true
+    }
 
 
     /**
@@ -408,16 +427,28 @@ class SynapsDB extends EE {
         let document = this.documents.get(id);
         if (!document) return false;
 
+        // Remove document from Context bitmaps
         await this.index.untickContextArray(contextArray, document.id);
+
+        // Remove document from Feature bitmaps (if provided)
         if (Array.isArray(featureArray) && featureArray.length > 0) {
             await this.index.untickFeatureArray(featureArray, document.id);
         }
+
+        return true
     }
 
     async removeDocumentArray(idArray, contextArray, featureArray, filterArray) {
         debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
         if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
 
+        let tasks = [];
+        for (const id of idArray) {
+            tasks.push(this.removeDocument(id, contextArray, featureArray, filterArray));
+        }
+
+        await Promise.all(tasks);
+        return true
     }
 
 

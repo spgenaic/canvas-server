@@ -1,13 +1,13 @@
 // Utils
-const debug = require('debug')('canvas/transport/socketio/route/documents')
-const ResponseObject = require('../../../utils/ResponseObject');
+const debug = require('debug')('canvas/transport/socketio/route/canvas')
+const ResponseObject = require('../../../../utils/ResponseObject');
 
 
 /**
  * Constants
  */
 
-const ROUTES = require('../routes.js')
+const ROUTES = require('../../routes.js')
 
 
 /**
@@ -23,50 +23,58 @@ module.exports = function(socket, context) {
      * Getters
      */
 
-    socket.on(ROUTES.CONTEXT_GET_ID, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_ID, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_ID} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.id).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_URL, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_URL, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_URL} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.url).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_TREE, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_TREE, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_TREE} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.tree).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_PATH, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_PATH, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_PATH} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.path).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_BITMAPS, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_BITMAPS, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_BITMAPS} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.bitmaps).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_CONTEXT_ARRAY, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_CONTEXT_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_CONTEXT_ARRAY} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.contextArray).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_FEATURE_ARRAY, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_FEATURE_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_FEATURE_ARRAY} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.featureArray).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_FILTER_ARRAY, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_FILTER_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_FILTER_ARRAY} event`);
+        if (typeof data === 'function') { callback = data; } 
         const response = new ResponseObject();
         callback(response.success(context.filterArray).getResponse());
     });
@@ -166,6 +174,19 @@ module.exports = function(socket, context) {
         }
     });
 
+    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray = [], callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT} event`);
+        const response = new ResponseObject();
+        const document = data; // TODO: Validate
+
+        try {
+            const result = await context.insertDocument(document, featureArray);
+            callback(response.success(result).getResponse());
+        } catch (err) {
+            callback(response.error(err).getResponse());
+        }
+    });    
+
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);
         const response = new ResponseObject();
@@ -181,6 +202,55 @@ module.exports = function(socket, context) {
             callback(response.error(err).getResponse());
         }
     });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE, (id, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE} event for document id "${id}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.removeDocument(id);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY, (docArray, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.removeDocumentArray(docArray);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE, (id, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE} event for document id "${id}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.deleteDocument(id);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY, (docArray, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`)
+        const response = new ResponseObject();
+
+        try {
+            const result = context.deleteDocumentArray(docArray);
+            callback(response.deleted(result).getResponse());
+        } catch (err) {
+            callback(response.serverError(err).getResponse());
+        }
+    });
+    
 
     /**
      * Event listeners

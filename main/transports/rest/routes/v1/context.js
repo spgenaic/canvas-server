@@ -1,3 +1,4 @@
+// Includes
 const express = require('express');
 const router = express.Router();
 const debug = require('debug')('canvas/transports/rest:context');
@@ -5,6 +6,8 @@ const debug = require('debug')('canvas/transports/rest:context');
 
 /**
  * Current context
+ * ! Legacy API left for backward compatibility
+ * ! Please use /contexts/<context-identifier>/<endpoint> instead
  */
 
 router.get('/url', (req, res) => {

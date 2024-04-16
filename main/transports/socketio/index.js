@@ -10,8 +10,9 @@ const http = require('http');
 const io = require('socket.io')
 
 // Routes
-const contextRoutes = require('./routes/context');
-const documentsRoutes = require('./routes/documents');
+// TODO: Rework, this does not make logical sense as versioning can be defined in the routes.js file
+const contextRoutes = require('./routes/v1/context');
+const documentsRoutes = require('./routes/v1/documents');
 
 // Defaults
 const DEFAULT_PROTOCOL = 'http'

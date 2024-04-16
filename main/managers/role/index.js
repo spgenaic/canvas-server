@@ -59,7 +59,16 @@ class RoleManager extends EventEmitter {
 
     async restartRole() {}
 
-    getRoleStatus() {}
+    async getRoleStatus() {}
+
+    async migrateRole() {
+
+    }
+
+    async cloneRole() {
+
+    }
+
 
 
     /**
