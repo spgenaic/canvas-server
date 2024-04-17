@@ -342,8 +342,7 @@ class Context extends EE {
 
 	async removeDocument(id) {
 		if (this.#path === '/') {
-			debug(`Cannot remove document ID ${id} from universe, use deleteDocument() instead`)
-			return false
+			throw new Error(`Cannot remove document ID ${id} from universe, use deleteDocument() instead`)
 		}
 
 		debug(`Removing document with id "${id}" from context ID "${this.#id}, url "${this.#url}"`);
