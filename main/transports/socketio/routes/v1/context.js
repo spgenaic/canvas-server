@@ -25,56 +25,56 @@ module.exports = function(socket, context) {
 
     socket.on(ROUTES.CONTEXT_GET_ID, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_ID} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.id).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_URL, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_URL} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.url).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_TREE, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_TREE} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.tree).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_PATH, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_PATH} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.path).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_BITMAPS, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_BITMAPS} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.bitmaps).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_CONTEXT_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_CONTEXT_ARRAY} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.contextArray).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_FEATURE_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_FEATURE_ARRAY} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.featureArray).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_FILTER_ARRAY, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_FILTER_ARRAY} event`);
-        if (typeof data === 'function') { callback = data; } 
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
         callback(response.success(context.filterArray).getResponse());
     });
@@ -150,20 +150,30 @@ module.exports = function(socket, context) {
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, /* filterArray,*/ callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_GET_ARRAY} event`);
-        debug(`featureArray: ${featureArray}`)
+    socket.on(ROUTES.CONTEXT_DOCUMENT_GET, (id, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_GET} event`);
         const response = new ResponseObject();
         try {
-            const result = await context.listDocuments(featureArray);
+            const result = context.getDocument(id);
             callback(response.success(result).getResponse());
         } catch (err) {
             callback(response.error(err).getResponse());
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, /* filterArray,*/ callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_LIST} event`);
+    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_BY_HASH, (hash, callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_GET_BY_HASH} event`);
+        const response = new ResponseObject();
+        try {
+            const result = context.getDocumentByHash(hash);
+            callback(response.success(result).getResponse());
+        } catch (err) {
+            callback(response.error(err).getResponse());
+        }
+    });
+
+    socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, /* filterArray,*/ callback) => {
+        debug(`${ROUTES.CONTEXT_DOCUMENT_GET_ARRAY} event`);
         debug(`featureArray: ${featureArray}`)
         const response = new ResponseObject();
         try {
@@ -185,7 +195,7 @@ module.exports = function(socket, context) {
         } catch (err) {
             callback(response.error(err).getResponse());
         }
-    });    
+    });
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);
@@ -250,7 +260,7 @@ module.exports = function(socket, context) {
             callback(response.serverError(err).getResponse());
         }
     });
-    
+
 
     /**
      * Event listeners

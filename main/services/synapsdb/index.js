@@ -99,7 +99,7 @@ class SynapsDB extends EE {
      */
     getDocumentByHash(hash) {
         if (!hash) throw new Error("Document hash required");
-        if (typeof hash !== "string") throw new Error("Document hash has to be a string");
+        if (typeof hash !== "string") throw new Error("Document hash has to be a string of formant algo/hash");
         let id = this.index.hash2oid.get(hash);
         if (!id) return null;
         return this.documents.get(id);
@@ -384,7 +384,7 @@ class SynapsDB extends EE {
         debug(`deleteDocument(): ID: ${id}`);
         if (!id) throw new Error("Document ID required");
         if (!Number.isInteger(id)) throw new Error('Document ID must be an integer')
-        
+
         let document = this.documents.get(id);
         if (!document) return false;
 
