@@ -1,5 +1,6 @@
 // Utils
 const EventEmitter = require("eventemitter2");
+const debug = require("debug")("canvas-session-manager");
 
 
 /**
@@ -16,7 +17,7 @@ class SessionManager extends EventEmitter {
         if (options.db) {
             this.#db = options.db;
         } else {
-            console.log("No database provided, using in-memory storage.");
+            debug("No database provided, using in-memory storage.");
             this.#db = new Map();
         }
     }
