@@ -276,28 +276,6 @@ class Context extends EE {
 	 * Data store methods
 	 */
 
-	async insertDocument(doc, featureArray = this.#featureArray) {
-		if (typeof featureArray === "string") featureArray = [featureArray];
-		const result = await this.documents.insertDocument(
-			doc,
-			this.#contextArray,
-			this.#featureArray
-		);
-		return result;
-	}
-
-	async insertDocumentArray(docArray, featureArray = this.#featureArray) {
-		debug(`Inserting document array under context ID "${this.#id}, url "${this.#url}"`);
-		debug(`Feature array: ${featureArray}`)
-		if (typeof featureArray === "string") featureArray = [featureArray];
-		const result = await this.documents.insertDocumentArray(
-			docArray,
-			this.#contextArray,
-			this.#featureArray
-		);
-		return result;
-	}
-
 	async listDocuments(featureArray = this.#featureArray, filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		debug(`Listing documents under context ID "${this.#id}, url "${this.#url}"`)
@@ -311,6 +289,44 @@ class Context extends EE {
 
 		return result;
 	}
+
+	// TODO: Refactor the whole interface
+	getDocument(id) {
+		// TODO: Should also pass this.#contextArray and return null if the ID is not part of the current context!
+		return this.documents.getDocument(id);
+	}
+
+	// TODO: Refactor the whole interface
+	getDocumentByHash(hash) {
+		// TODO: Should also pass this.#contextArray and return null if the ID is not part of the current context!
+		return this.documents.getDocumentByHash(hash);
+	}
+
+	async insertDocument(doc, featureArray = this.#featureArray) {
+		if (typeof featureArray === "string") featureArray = [featureArray];
+		const result = await this.documents.insertDocument(
+			doc,
+			this.#contextArray,
+			this.#featureArray
+		);
+		debug(`insertDocument() result ${result}`)
+		return result;
+	}
+
+	async insertDocumentArray(docArray, featureArray = this.#featureArray) {
+		debug(`Inserting document array under context ID "${this.#id}, url "${this.#url}"`);
+		debug(`Feature array: ${featureArray}`)
+		if (typeof featureArray === "string") featureArray = [featureArray];
+		const result = await this.documents.insertDocumentArray(
+			docArray,
+			this.#contextArray,
+			this.#featureArray
+		);
+		debug(`insertDocumentArray() result ${result}`)
+		return result;
+	}
+
+
 
 	async updateDocument(document, contextArray, featureArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
@@ -326,8 +342,7 @@ class Context extends EE {
 
 	async removeDocument(id) {
 		if (this.#path === '/') {
-			debug(`Cannot remove document ID ${id} from universe, use deleteDocument() instead`)
-			return false
+			throw new Error(`Cannot remove document ID ${id} from universe, use deleteDocument() instead`)
 		}
 
 		debug(`Removing document with id "${id}" from context ID "${this.#id}, url "${this.#url}"`);

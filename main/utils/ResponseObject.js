@@ -1,6 +1,8 @@
 // Common response object for API responses over supported transports
 // TODO: Move to transports
 
+const debug = require('debug')('canvas-utils-ResponseObject');
+
 class ResponseObject {
 
     constructor() {
@@ -99,11 +101,14 @@ class ResponseObject {
 
     // Method to get the final response object
     getResponse() {
-        return {
+        let response = {
             status: this.status,
             message: this.message,
             payload: this.payload,
         };
+
+        debug('Response:', response);
+        return response;
     }
 }
 

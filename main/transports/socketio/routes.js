@@ -23,7 +23,8 @@ module.exports = {
     // Context document routes
     CONTEXT_DOCUMENT_LIST: 'context:document:list',
     CONTEXT_DOCUMENT_GET: 'context:document:get',
-    CONTEXT_DOCUMENT_GET_ARRAY: 'context:document:getArray',    
+    CONTEXT_DOCUMENT_GET_BY_HASH: 'context:document:get:byHash',
+    CONTEXT_DOCUMENT_GET_ARRAY: 'context:document:getArray',
     CONTEXT_DOCUMENT_INSERT: 'context:document:insert',
     CONTEXT_DOCUMENT_INSERT_ARRAY: 'context:document:insertArray',
     CONTEXT_DOCUMENT_REMOVE: 'context:document:remove',
@@ -36,7 +37,7 @@ module.exports = {
     // Document routes
     DOCUMENT_LIST: 'document:list',
     DOCUMENT_GET: 'document:get',
-    DOCUMENT_GET_ARRAY: 'document:getArray',    
+    DOCUMENT_GET_ARRAY: 'document:getArray',
     DOCUMENT_INSERT: 'document:insert',
     DOCUMENT_INSERT_ARRAY: 'document:insertArray',
     DOCUMENT_UPDATE: 'document:update',
