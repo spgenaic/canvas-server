@@ -140,20 +140,20 @@ class BitmapManager {
         if (typeof idArray === 'number') {
             idArray = [idArray];
         }
-    
+
         if (!Array.isArray(idArray) || !idArray.length) {
             throw new TypeError(`First argument must be a non-empty array of object IDs, "${typeof idArray}" given`);
         }
-    
+
         const tasks = [];
         for (const key of this.listBitmaps()) {
             tasks.push(this.untick(key, idArray, autoSave));
         }
-    
+
         await Promise.all(tasks);
         return true;
     }
-    
+
 
     untickAllSync(idArray, autoSave = true) {
         if (typeof idArray === 'number') {
@@ -359,9 +359,8 @@ class BitmapManager {
             return null;
         }
 
+        // TODO: This should not be needed
         let bitmap = new RoaringBitmap32();
-        console.log(this.rangeMin, this.rangeMax)
-
         return Bitmap.create(bitmap.deserialize(bitmapData, true), {
             type: 'static',
             key: key,

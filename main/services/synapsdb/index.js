@@ -261,6 +261,7 @@ class SynapsDB extends EE {
             await this.index.updateFeatureBitmaps(combinedFeatureArray, parsed.id);
         }
 
+        debug(`Document inserted: ${parsed.id}`)
         return parsed.id;
     }
 
@@ -288,6 +289,7 @@ class SynapsDB extends EE {
             throw new Error(`Errors inserting documents: ${errors.join("; ")}`);
         }
 
+        debug(`Inserted documents ${result} (${result.length}`)
         return result;
     }
 
