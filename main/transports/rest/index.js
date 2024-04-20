@@ -87,8 +87,16 @@ class RestTransport extends Service {
     async start() {
         this.server = express();
 
-		this.server.use(cors());
+        // Middleware
+        this.server.use(cors());
         this.server.use(bodyParser.json());
+
+        // Ping health check
+        this.server.get(`${this.#urlBasePath}/ping`, (req, res) => {
+            res.status(200).send('pong');
+        });        
+
+        // Toggle API Key validation
         if (!this.#auth.disableApiKeyValidation) {
             this.server.use(validateApiKey(this.#auth.token));
         }
@@ -106,11 +114,6 @@ class RestTransport extends Service {
             req.ResponseObject = ResponseObject;
             next();
         }, documentsRoutes);
-
-        // Ping health check
-        this.server.get(`${this.#urlBasePath}/ping`, (req, res) => {
-            res.status(200).send('pong');
-        });
 
         await new Promise((resolve, reject) => {
             this.server.listen(this.#port, resolve).on('error', reject);
