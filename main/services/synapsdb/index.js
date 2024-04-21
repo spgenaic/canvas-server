@@ -266,9 +266,14 @@ class SynapsDB extends EE {
         // Old return value
         //return parsed.id;
 
-        // Clear the data part of the document
-        parsed.data = {}
-        return parsed
+        // New return value
+        return {
+            id: parsed.id,
+            type: parsed.type,
+            version: parsed.version,
+            checksum: parsed.checksum,
+            meta: parsed.meta
+        }
 
     }
 
