@@ -120,6 +120,7 @@ class Canvas extends EventEmitter {
 
         this.sessionManager = new SessionManager({
             db: this.db.createDataset('session')
+
         });
 
         this.contextManager = new ContextManager({
@@ -214,6 +215,31 @@ class Canvas extends EventEmitter {
 
     status() { return this.status; }
     stats() { return []; }
+
+
+    /**
+     * Session
+     */
+
+    listSessions() {
+        return this.sessionManager.listSessions()
+    }
+
+    createSession(id, options = {}) {
+        return this.sessionManager.createSession(id, options)
+    }
+
+    openSession(id) {
+        return this.sessionManager.openSession(id)
+    }
+
+    closeSession(id) {
+        return this.sessionManager.closeSession(id)
+    }
+
+    removeSession(id) {
+        return this.sessionManager.removeSession(id)
+    }
 
 
     /**
