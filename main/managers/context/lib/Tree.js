@@ -421,6 +421,7 @@ class Tree extends EventEmitter {
             name: payload.name,
             text: payload.name, // Compatibility with jstree
             label: payload.label,
+            type: payload.type,
             description: payload.description,
             color: payload.color,
             children

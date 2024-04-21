@@ -10,7 +10,8 @@ const LAYER_TYPES = [
     'canvas',       // Can store context, feature and filter bitmaps + dashboard / UI layouts
     'context',      // Has context bitmaps only
     'filter',       // Represents a single filter bitmap
-    'label'         // Label only (no bitmaps)
+    'label',        // Label only (no bitmaps)
+    'system'
 ]
 
 class Layer {

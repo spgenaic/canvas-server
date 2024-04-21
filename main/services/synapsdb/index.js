@@ -262,7 +262,19 @@ class SynapsDB extends EE {
         }
 
         debug(`Document inserted: ${parsed.id}`)
-        return parsed.id;
+
+        // Old return value
+        //return parsed.id;
+
+        // New return value
+        return {
+            id: parsed.id,
+            type: parsed.type,
+            version: parsed.version,
+            checksum: parsed.checksum,
+            meta: parsed.meta
+        }
+
     }
 
     async insertDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
