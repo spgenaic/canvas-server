@@ -439,7 +439,7 @@ class SynapsDB extends EE {
         if (!contextArray || !Array.isArray(contextArray) || contextArray.length < 1 ) throw new Error("Context array required");
 
         let document = this.documents.get(id);
-        if (!document) return false;
+        if (!document) throw new Error("Document not found"); //return false;
 
         // Remove document from Context bitmaps
         await this.index.untickContextArray(contextArray, document.id);

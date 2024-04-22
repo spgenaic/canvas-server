@@ -107,7 +107,7 @@ class ResponseObject {
             payload: this.payload,
         };
 
-        debug('Response:', response);
+        debug('Response:', JSON.stringify(response, null, 2));
         return response;
     }
 }

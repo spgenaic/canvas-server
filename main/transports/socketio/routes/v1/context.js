@@ -121,12 +121,12 @@ module.exports = function(socket, context) {
         }
     });
 
-    socket.on(ROUTES.CONTEXT_PATH_MOVE, (pathFrom, pathTo, recursive, callback) => {
+    socket.on(ROUTES.CONTEXT_PATH_MOVE, async (pathFrom, pathTo, recursive, callback) => {
         debug(`${ROUTES.CONTEXT_PATH_MOVE} event with pathFrom "${pathFrom}", pathTo "${pathTo}", recursive "${recursive}"`)
         const response = new ResponseObject();
 
         try {
-            const result = context.movePath(pathFrom, pathTo, recursive);
+            const result = await context.movePath(pathFrom, pathTo, recursive);
             callback(response.updated(result).getResponse());
         } catch (err) {
             callback(response.serverError(err).getResponse());
@@ -213,48 +213,48 @@ module.exports = function(socket, context) {
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE, (id, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE, async (id, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE} event for document id "${id}""`)
         const response = new ResponseObject();
 
         try {
-            const result = context.removeDocument(id);
+            const result = await context.removeDocument(id);
             callback(response.deleted(result).getResponse());
         } catch (err) {
             callback(response.serverError(err).getResponse());
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY, (docArray, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY, async (docArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`)
         const response = new ResponseObject();
 
         try {
-            const result = context.removeDocumentArray(docArray);
+            const result = await context.removeDocumentArray(docArray);
             callback(response.deleted(result).getResponse());
         } catch (err) {
             callback(response.serverError(err).getResponse());
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE, (id, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE, async (id, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE} event for document id "${id}""`)
         const response = new ResponseObject();
 
         try {
-            const result = context.deleteDocument(id);
+            const result = await context.deleteDocument(id);
             callback(response.deleted(result).getResponse());
         } catch (err) {
             callback(response.serverError(err).getResponse());
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY, (docArray, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY, async (docArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`)
         const response = new ResponseObject();
 
         try {
-            const result = context.deleteDocumentArray(docArray);
+            const result = await context.deleteDocumentArray(docArray);
             callback(response.deleted(result).getResponse());
         } catch (err) {
             callback(response.serverError(err).getResponse());
