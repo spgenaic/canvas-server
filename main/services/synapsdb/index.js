@@ -1,5 +1,5 @@
 // Utils
-const debug = require('debug')('@canvas:db')
+const debug = require('debug')('canvas:db')
 const EE = require('eventemitter2')
 
 // Backend
@@ -63,7 +63,7 @@ class SynapsDB extends EE {
         contextArray,
         featureArray,
         filterArray,
-        metaOnly = false
+        returnMetaOnly = false
     ) {}
 
     // Find documents based on query
@@ -72,7 +72,7 @@ class SynapsDB extends EE {
         contextArray,
         featureArray,
         filterArray,
-        metaOnly = false
+        returnMetaOnly = false
     ) {}
 
 
@@ -111,15 +111,38 @@ class SynapsDB extends EE {
         featureArray = [],
         filterArray = []
     ) {
-        return this.getDocuments(contextArray, featureArray, filterArray, true);
+        debug(`listDocuments(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+
+        // Calculate document IDs based on supplied bitmaps
+        const idArray = []
+
+        Promise.all([
+            this.index.contextArrayAND(contextArray, true),
+            this.index.featureArrayAND(featureArray, true)
+        ]).then(([contextBitmap, featureBitmap]) => {
+            if (contextBitmap) idArray.push(contextBitmap)
+            if (featureBitmap) idArray.push(featureBitmap)
+        })
+
+        // Return getMany(idArray)
+        const documents = this.documents.getMany(idArray, (res) => {
+            return res
+
+        })
+
+        console.log(documents)
+
+        return documents
+
+        // Remove doc.data fields and return only metadata
+
     }
 
     // TODO: Remove or refactor
     async getDocuments(
         contextArray = [],
         featureArray = [],
-        filterArray = [],
-        metaOnly = false    // Return only metadata, maybe split to listDocuments() and getDocuments()
+        filterArray = []
     ) {
         debug(`getDocuments(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
 

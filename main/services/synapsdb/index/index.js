@@ -1,6 +1,6 @@
 // Utils
 const EE = require('eventemitter2')
-const debug = require('debug')('@canvas:db:index')
+const debug = require('debug')('canvas:db:index')
 
 // App includes
 const BitmapManager = require('./lib/BitmapManager')
@@ -94,13 +94,13 @@ class Index extends EE {
     async clear(id, hash) {
         if (!id) throw new Error('Document ID required');
         if (!Number.isInteger(id)) throw new Error('Document ID must be an integer');
-    
+
         if (!hash) throw new Error('Document hash required');
         if (typeof hash !== 'string') throw new Error('Document hash must be a string');
-    
+
         // Clear hashmaps
         await this.hash2oid.remove(hash);
-    
+
         // Clear all bitmaps in parallel
         const clearTasks = [
             this.bmInternal.untickAll(id),
@@ -108,7 +108,7 @@ class Index extends EE {
             this.bmFeatures.untickAll(id),
             this.bmFilters.untickAll(id)
         ];
-    
+
         await Promise.all(clearTasks);
     }
 
@@ -123,7 +123,7 @@ class Index extends EE {
 
     async removeObject(id, contextArray, featureArray, filterArray) {}
 
-    
+
 
     async getObjectContexts(id) { }
 
@@ -156,9 +156,9 @@ class Index extends EE {
 
         if (typeof idOrArray === 'number') {
             await this.bmContexts.untick(idOrArray, contextArray)
+        } else {
+            await this.bmContexts.untickMany(idOrArray, contextArray)
         }
-
-        await this.bmContexts.untickMany(idOrArray, contextArray)
     }
 
     async tickFeatureArray(idOrArray, featureArray = []) {

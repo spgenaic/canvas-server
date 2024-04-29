@@ -281,7 +281,7 @@ class Context extends EE {
 		debug(`Listing documents under context ID "${this.#id}, url "${this.#url}"`)
 		debug(`Feature array: ${featureArray}`)
 		debug(`Filter array: ${filterArray}`)
-		const result = await this.documents.getDocuments(
+		const result = await this.documents.listDocuments(
 			this.#contextArray,
 			featureArray,
 			filterArray

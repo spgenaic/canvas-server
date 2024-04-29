@@ -2,7 +2,7 @@
 
 const RoaringBitmap32 = require('roaring/RoaringBitmap32')
 const Bitmap = require('./Bitmap');
-const debug = require('debug')('@canvas:db:index:bitmapManager');
+const debug = require('debug')('canvas:db:index:bitmapManager');
 
 
 class BitmapManager {
@@ -47,6 +47,15 @@ class BitmapManager {
     /**
      * Main BitmapManager interface (sync)
      */
+
+    tickRow(key, autoCreateBitmap = true, autoSave = true) {
+
+    }
+
+    untickRow(key, autoSave = true) {
+
+    }
+
 
     // TODO: Implement proper async methods
     tick(key, idArray, autoCreateBitmap = true, autoSave = true) {

@@ -177,7 +177,7 @@ module.exports = function(socket, context) {
         debug(`featureArray: ${featureArray}`)
         const response = new ResponseObject();
         try {
-            const result = await context.listDocuments(featureArray);
+            const result = await context.getDocuments(featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
             callback(response.error(err).getResponse());
