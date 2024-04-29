@@ -1,5 +1,6 @@
 //const openai = require('openai-api')
 
+const debug = require('debug')('canvas:neurald')
 
 // Power law
 // Scale invariance
@@ -9,8 +10,10 @@
 class NeuralD {
 
     constructor(options = {
-        
+
     }) {
+
+        debug('Initializing Canvas NeuralD')
 
         // Inputs
         //canvas(context changes, documents, ui events, etc)
@@ -31,8 +34,8 @@ class NeuralD {
 
 
         // Timestamp | bitmap
-        // Each change writes out the currently-active list of doc IDs + current context layer IDs 
-        // to "STM". During inactivity, system goes through the "STM" activity log and feeds 
+        // Each change writes out the currently-active list of doc IDs + current context layer IDs
+        // to "STM". During inactivity, system goes through the "STM" activity log and feeds
         // relevant documents the NN for training / finetuning
 
 

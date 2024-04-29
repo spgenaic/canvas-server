@@ -1,5 +1,5 @@
 // Utils
-const debug = require('debug')('canvas/transport/socketio/route/canvas')
+const debug = require('debug')('canvas:transports:socketio:route:documents')
 const ResponseObject = require('../../../../utils/ResponseObject');
 
 

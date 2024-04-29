@@ -283,41 +283,29 @@ class Canvas extends EventEmitter {
         // Load configuration options for transports
         let config = this.config.open('transports')
 
-        // TODO: Refactor!
+        const transports = [
+            { name: 'rest', class: TransportRest },
+            { name: 'socketio', class: TransportSocketIO }
+        ];
 
-        // Initialize the express.js based REST transport
-        this.transports.rest = new TransportRest({
-            host: config.get('rest.host'),
-            port: config.get('rest.port'),
-            canvas: this,   // TODO: Refactor
-            db: this.db,
-            contextManager: this.contextManager
-        });
+        for (let transport of transports) {
+            this.transports[transport.name] = new transport.class({
+                host: config.get(`${transport.name}.host`),
+                port: config.get(`${transport.name}.port`),
+                canvas: this,
+                db: this.db,
+                contextManager: this.contextManager
+            });
 
-        try {
-            await this.transports.rest.start();
-        } catch (error) {
-            console.log('Error initializing REST transport:', error);
-            process.exit(1);
+            try {
+                await this.transports[transport.name].start();
+            } catch (error) {
+                console.log(`Error initializing ${transport.name} transport:`, error);
+                process.exit(1);
+            }
         }
 
-        // initialize the Socket.IO transport
-        this.transports.socketio = new TransportSocketIO({
-            host: config.get('socketio.host'),
-            port: config.get('socketio.port'),
-            canvas: this,   // TODO: Rafactor
-            db: this.db,
-            contextManager: this.contextManager
-        });
-
-        try {
-            await this.transports.socketio.start();
-        } catch (error) {
-            console.log('Error initializing SocketIO transport:', error);
-            process.exit(1);
-        }
-
-        return true
+        return true;
     }
 
     async shutdownTransports() {

@@ -2,7 +2,7 @@
 
 
 // Includes
-const debug = require('debug')('canvas-context')
+const debug = require('debug')('canvas:context:utils')
 const path = require('path')
 const os = require('os')
 const crypto = require('crypto')

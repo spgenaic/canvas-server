@@ -1,5 +1,5 @@
 // Utils
-const debug = require("debug")("canvas-context");
+const debug = require("debug")("canvas:context");
 const EE = require("eventemitter2");
 const { uuid12 } = require("./utils");
 
@@ -276,11 +276,12 @@ class Context extends EE {
 	 * Data store methods
 	 */
 
-	async listDocuments(featureArray = this.#featureArray, filterArray) {
+	async listDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Listing documents under context ID "${this.#id}, url "${this.#url}"`)
-		debug(`Feature array: ${featureArray}`)
-		debug(`Filter array: ${filterArray}`)
+		debug(`Listing documents under context ID "${this.#id}", url "${this.#url}"`)
+		debug(`Context array: "${this.#contextArray}"`)
+		debug(`Feature array: "${featureArray}"`)
+		debug(`Filter array: "${filterArray}"`)
 		const result = await this.documents.listDocuments(
 			this.#contextArray,
 			featureArray,
@@ -300,6 +301,20 @@ class Context extends EE {
 	getDocumentByHash(hash) {
 		// TODO: Should also pass this.#contextArray and return null if the ID is not part of the current context!
 		return this.documents.getDocumentByHash(hash);
+	}
+
+	getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
+		if (typeof featureArray === "string") featureArray = [featureArray];
+		debug(`Getting documents under context ID "${this.#id}, url "${this.#url}"`)
+		debug(`Context array: ${this.#contextArray}`)
+		debug(`Feature array: ${featureArray}`)
+		debug(`Filter array: ${filterArray}`)
+		const result = this.documents.getDocuments(
+			this.#contextArray,
+			featureArray,
+			filterArray
+		);
+		return result;
 	}
 
 	async insertDocument(doc, featureArray = this.#featureArray) {

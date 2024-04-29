@@ -2,7 +2,7 @@
 const Service = require('../../managers/service/lib/Service');
 
 // Utils
-const debug = require('debug')('canvas-transport-socketio')
+const debug = require('debug')('canvas:transports:socketio')
 const ResponseObject = require('../../utils/ResponseObject');
 
 // Includes

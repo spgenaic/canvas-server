@@ -3,7 +3,7 @@ const EE = require('eventemitter2')
 const debug = require('debug')('canvas:db:index')
 
 // App includes
-const BitmapManager = require('./lib/BitmapManager')
+const BitmapCollection = require('./lib/BitmapCollection')
 const MemCache = require('./lib/MemCache')
 
 // Constants
@@ -45,36 +45,40 @@ class Index extends EE {
         this.hash2oid = this.#db.createDataset('hash2oid')
 
         // Internal Bitmaps
-        this.bmInternal = new BitmapManager(
+        this.bmInternal = new BitmapCollection(
             this.bitmaps.createDataset('internal'),
             this.bitmapCache,
             {
+                tag: 'internal',
                 rangeMin: INTERNAL_BITMAP_ID_MIN,
                 rangeMax: INTERNAL_BITMAP_ID_MAX
             })
 
         // Contexts
-        this.bmContexts = new BitmapManager(
+        this.bmContexts = new BitmapCollection(
             this.bitmaps.createDataset('contexts'),
             this.bitmapCache,
             {
-                rangeMin: INTERNAL_BITMAP_ID_MIN,
+                tag: 'contexts',
+                rangeMin: INTERNAL_BITMAP_ID_MAX + 1,
             })
 
         // Features
-        this.bmFeatures = new BitmapManager(
+        this.bmFeatures = new BitmapCollection(
             this.bitmaps.createDataset('features'),
             this.bitmapCache,
             {
-                rangeMin: INTERNAL_BITMAP_ID_MIN,
+                tag: 'features',
+                rangeMin: INTERNAL_BITMAP_ID_MAX + 1,
             })
 
         // Filters
-        this.bmFilters = new BitmapManager(
+        this.bmFilters = new BitmapCollection(
             this.bitmaps.createDataset('filters'),
             this.bitmapCache,
             {
-                rangeMin: INTERNAL_BITMAP_ID_MIN,
+                tag: 'filters',
+                rangeMin: INTERNAL_BITMAP_ID_MAX + 1,
             })
 
         // Queues
@@ -184,36 +188,47 @@ class Index extends EE {
     }
 
 
-    async updateContextBitmaps(contextArray, oidOrArray) {
+    updateContextBitmaps(bitmapArray, oidOrArray) {
         debug(`updateContextBitmaps(): contextArray: ${contextArray}, oidOrArray: ${oidOrArray}`)
-        await this.bmContexts.tickMany(contextArray, oidOrArray)
+        if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
+        if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
+        return this.bmContexts.tickMany(bitmapArray, oidOrArray)
     }
 
-    async updateFeatureBitmaps(featureArray, oidOrArray) {
+    updateFeatureBitmaps(bitmapArray, oidOrArray) {
         debug(`updateFeatureBitmaps(): featureArray: ${featureArray}, oidOrArray: ${oidOrArray}`)
-        await this.bmFeatures.tickMany(featureArray, oidOrArray)
+        if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
+        if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
+        return this.bmFeatures.tickMany(bitmapArray, oidOrArray)
     }
 
     // TODO: Remove/refactor
     bitmapAND(bitmapArray, returnAsArray = false) {
-        debug(`bitmapAND(): bitmapArray: ${bitmapArray}, returnAsArray: ${returnAsArray}`)
+        debug(`bitmapAND(): bitmapArray: "${bitmapArray}", returnAsArray: ${returnAsArray}`)
         if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
         if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
-        const result = BitmapManager.AND(bitmapArray);
+        const result = BitmapCollection.AND(bitmapArray);
+        debug(`bitmapAND(): result: ${result.toArray()}`);
         return returnAsArray ? result.toArray() : result;
     }
 
     // TODO: Remove/refactor
     contextArrayAND(bitmapArray, returnAsArray = false) {
-        debug(`contextArrayAND(): bitmapArray: ${bitmapArray}, returnAsArray: ${returnAsArray}`)
+        debug(`contextArrayAND(): bitmapArray: "${bitmapArray}", returnAsArray: ${returnAsArray}`)
+        if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
+        if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
         const result = this.bmContexts.AND(bitmapArray);
+        debug(`contextArrayAND(): result: ${result.toArray()}`);
         return returnAsArray ? result.toArray() : result;
     }
 
     // TODO: Remove/refactor
     featureArrayAND(bitmapArray, returnAsArray = false) {
         debug(`featureArrayAND(): bitmapArray: ${bitmapArray}, returnAsArray: ${returnAsArray}`)
+        if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
+        if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
         const result = this.bmFeatures.AND(bitmapArray);
+        debug(`featureArrayAND(): result: ${result.toArray()}`);
         return returnAsArray ? result.toArray() : result;
     }
 

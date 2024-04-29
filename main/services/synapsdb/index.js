@@ -96,51 +96,54 @@ class SynapsDB extends EE {
     }
 
     getDocumentByHash(hash) {
-        debug(`getDocumentByHash(): Hash: ${hash}`);
+        debug(`getDocumentByHash(): Hash: "${hash}"`);
         if (!hash) throw new Error("Document hash required");
         if (typeof hash !== "string") throw new Error("Document hash has to be a string of formant algo/hash");
         let id = this.index.hash2oid.get(hash);
         if (!id) {
-            debug(`Document not found for hash: ${hash}`);
+            debug(`Document not found for hash: "${hash}"`);
             return null;
         }
         return this.documents.get(id); // TODO: Assumption is that the document is always found when a hash is found (..)
     }
 
     async getDocuments(contextArray = [], featureArray = [], filterArray = [], metadataOnly = false) {
-        debug(`getDocuments(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`getDocuments(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}", MetaOnly: ${metadataOnly}`);
 
         try {
             // Calculate document IDs based on supplied bitmaps
+            // TODO: Move entirely to index
             const [contextBitmap, featureBitmap] = await Promise.all([
-                this.index.contextArrayAND(contextArray),
-                this.index.featureArrayAND(featureArray)
+                contextArray.length ? this.index.contextArrayAND(contextArray) : null,
+                featureArray.length ? this.index.featureArrayAND(featureArray) : null
             ]);
 
             let bitmaps = [];
             if (contextBitmap) bitmaps.push(contextBitmap);
             if (featureBitmap) bitmaps.push(featureBitmap);
 
-            if (bitmaps.length === 0) {
-                debug("No bitmaps to AND, returning an empty array");
-                return [];
+            let result = [];
+            if (bitmaps.length) {
+                result = this.index.bitmapAND(bitmaps, true);
+            } else {
+                debug("No bitmaps specified, returning all documents from your universe");
+                result = await this.documents.listKeys();
             }
 
-            const resultIds = this.index.bitmapAND(bitmaps, true);
-            debug("Result IDs", resultIds);
-            if (!resultIds.length) {
+            debug("Result IDs", result);
+            if (!result.length) {
                 debug("No documents found, returning an empty array");
                 return [];
             }
 
             // Retrieve documents by IDs
-            let documents = await this.documents.getMany(resultIds);
+            let documents = await this.documents.getMany(result);
             debug("Documents found", documents.length);
 
             if (metadataOnly) {
                 debug("Returning metadata only");
                 documents = documents.map(doc => {
-                    doc.data = null;
+                    doc.data = { metadataOnly: "true" };
                     return doc;
                 });
             }
@@ -154,7 +157,7 @@ class SynapsDB extends EE {
 
 
     async getDocumentsByIdArray(idArray, metaOnly = false) {
-        debug(`getDocumentsByIdArray(): IDArray: ${idArray}, MetaOnly: ${metaOnly}`);
+        debug(`getDocumentsByIdArray(): IDArray: "${idArray}", MetaOnly: ${metaOnly}`);
         if (!Array.isArray(idArray) || idArray.length < 1) {
             throw new Error("Array of document IDs required");
         }
@@ -163,9 +166,7 @@ class SynapsDB extends EE {
             let documents = await this.documents.getMany(idArray);
             if (metaOnly) {
                 documents = documents.map(doc => {
-                    if (doc) {
-                        doc.data = null;  // Ensure that doc is not undefined before modifying it
-                    }
+                    doc.data = { metadataOnly: "true" };
                     return doc;
                 });
             }
@@ -179,7 +180,7 @@ class SynapsDB extends EE {
 
 
     async getDocumentsByHashArray(hashArray, metaOnly = false) {
-        debug(`getDocumentsByHashArray(): HashArray: ${hashArray}; MetaOnly: ${metaOnly}`);
+        debug(`getDocumentsByHashArray(): HashArray: "${hashArray}"; MetaOnly: ${metaOnly}`);
         if (!Array.isArray(hashArray) || hashArray.length < 1) {
             throw new Error("Array of document hashes required");
         }
@@ -193,7 +194,7 @@ class SynapsDB extends EE {
 
     // TODO: Refactor to use getDocuments() only, legacy method
     async listDocuments(contextArray = [], featureArray = [], filterArray = []) {
-        debug(`listDocuments(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`listDocuments(): -> getDocuments() with MetaOnly: true`);
         return this.getDocuments(contextArray, featureArray, filterArray, true);
     }
 
@@ -209,7 +210,7 @@ class SynapsDB extends EE {
      * @throws {Error} - If the document is invalid or if there is an error inserting it into the database.
      */
     async insertDocument(document, contextArray = [], featureArray = [], filterArray = []) {
-        debug(`insertDocument(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`insertDocument(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         // Parse document
         let parsed = await this.#parseDocument(document);
@@ -226,7 +227,7 @@ class SynapsDB extends EE {
     }
 
     async insertDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
-        debug(`insertDocumentArray(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`insertDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
             throw new Error("Document array required");

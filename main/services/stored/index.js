@@ -4,7 +4,7 @@
 // Utils
 const path = require('path')
 const os = require('os')
-const debug = require('debug')('canvas-role-stored')
+const debug = require('debug')('canvas:stored')
 
 // Abstractions
 
@@ -25,7 +25,7 @@ class Stored {
 
     constructor(options = {}) {
 
-        debug('Initializing Canvas StoreD')        
+        debug('Initializing Canvas StoreD')
         options = {
             paths: {
                 data: path.join(os.homedir(), '.stored/data'),

@@ -5,7 +5,7 @@
 const { urlToHttpOptions } = require('node:url')
 
 // Constants
-const DEFAULT_URL_PROTOCOL = 'universe:'
+const DEFAULT_URL_PROTOCOL = 'universe:'    // TODO: Move to some sane location
 const DEFAULT_URL_PATH = '/'
 
 

@@ -2,7 +2,7 @@
 const Service = require('../../managers/service/lib/Service');
 
 // Utils
-const debug = require('debug')('canvas-transport-rest')
+const debug = require('debug')('canvas:transports:rest')
 const bodyParser = require('body-parser');
 const ResponseObject = require('../../utils/ResponseObject');
 
