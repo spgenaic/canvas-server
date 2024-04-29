@@ -2,6 +2,7 @@
 
 const RoaringBitmap32 = require('roaring/RoaringBitmap32')
 const Bitmap = require('./Bitmap');
+const { th } = require('date-fns/locale');
 const debug = require('debug')('canvas:db:index:bitmapManager');
 
 
@@ -182,14 +183,12 @@ class BitmapManager {
 
 
     /**
-     * Logical operations
+     * Logical (bitwise) bitmap operations
      */
 
     AND(keyArray) {
-        if (keyArray.length === 0) {
-            // TODO: Maybe we should return null here
-            return new RoaringBitmap32();
-        }
+        debug(`AND(): keyArray: ${keyArray}`)
+        if (!Array.isArray(keyArray)) throw new TypeError(`First argument must be an array of bitmap keys, "${typeof keyArray}" given`);
 
         let partial;
         for (const key of keyArray) {
@@ -207,41 +206,44 @@ class BitmapManager {
             partial.andInPlace(bitmap);
         }
 
-        // Return partial or an empty bitmap if it was never assigned
+        // Return partial or an empty roaring bitmap
         return partial || new RoaringBitmap32();
     }
 
+    // TODO: Properly test, refactor all bitwise methods to be consistent
     OR(keyArray) {
+        debug(`OR(): keyArray: ${keyArray}`)
+        if (!Array.isArray(keyArray)) throw new TypeError(`First argument must be an array of bitmap keys, "${typeof keyArray}" given`);
+        // Filter out invalid bitmaps, for OR we are pretty tolerant (for now at least)
         const validBitmaps = keyArray.map(key => this.getBitmap(key)).filter(Boolean);
         return validBitmaps.length ? RoaringBitmap32.orMany(validBitmaps) : new RoaringBitmap32();
     }
 
     static AND(roaringBitmapArray) {
-
-        if (roaringBitmapArray.length === 0) { return new RoaringBitmap32(); }
+        debug(`AND(): roaringBitmapArray: ${roaringBitmapArray}`)
+        if (!Array.isArray(roaringBitmapArray)) throw new TypeError(`First argument must be an array of RoaringBitmap32 instances, "${typeof roaringBitmapArray}" given`);
 
         let partial;
         for (const bitmap of roaringBitmapArray) {
-
-            if (!bitmap || bitmap.size === 0) {
-                return new RoaringBitmap32();
-            }
-
             // Initialize partial with the first non-empty bitmap
             if (!partial) {
                 partial = bitmap;
                 continue;
             }
+
             // Perform AND operation
             partial.andInPlace(bitmap);
         }
 
-        // Return partial or an empty bitmap if it was never assigned
+        // Return partial or an empty roaring bitmap
         return partial || new RoaringBitmap32();
 
     }
 
     static OR(roaringBitmapArray) {
+        debug(`OR(): roaringBitmapArray: ${roaringBitmapArray}`)
+        if (!Array.isArray(roaringBitmapArray)) throw new TypeError(`First argument must be an array of RoaringBitmap32 instances, "${typeof roaringBitmapArray}" given`);
+        if (roaringBitmapArray.length === 0) { return new RoaringBitmap32(); }
         return RoaringBitmap32.orMany(roaringBitmapArray)
     }
 

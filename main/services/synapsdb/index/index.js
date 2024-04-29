@@ -194,34 +194,27 @@ class Index extends EE {
         await this.bmFeatures.tickMany(featureArray, oidOrArray)
     }
 
-    bitmapAND(bitmaps, returnAsArray = false) {
-        if (!bitmaps || !bitmaps.length) throw new Error('Bitmap array required')
-        if (returnAsArray) {
-            let bitmap = BitmapManager.AND(bitmaps)
-            return bitmap.toArray()
-        }
-
-        return BitmapManager.AND(bitmaps)
+    // TODO: Remove/refactor
+    bitmapAND(bitmapArray, returnAsArray = false) {
+        debug(`bitmapAND(): bitmapArray: ${bitmapArray}, returnAsArray: ${returnAsArray}`)
+        if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
+        if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
+        const result = BitmapManager.AND(bitmapArray);
+        return returnAsArray ? result.toArray() : result;
     }
 
+    // TODO: Remove/refactor
     contextArrayAND(bitmapArray, returnAsArray = false) {
-        if (!bitmapArray || !bitmapArray.length) throw new Error('Bitmap array required')
-        if (returnAsArray) {
-            let bitmap = this.bmContexts.AND(bitmapArray)
-            return bitmap.toArray()
-        }
-
-        return this.bmContexts.AND(bitmapArray)
+        debug(`contextArrayAND(): bitmapArray: ${bitmapArray}, returnAsArray: ${returnAsArray}`)
+        const result = this.bmContexts.AND(bitmapArray);
+        return returnAsArray ? result.toArray() : result;
     }
 
+    // TODO: Remove/refactor
     featureArrayAND(bitmapArray, returnAsArray = false) {
-        if (!bitmapArray || !bitmapArray.length) throw new Error('Bitmap array required')
-        if (returnAsArray) {
-            let bitmap = this.bmFeatures.AND(bitmapArray, returnAsArray)
-            return bitmap.toArray()
-        }
-
-        return this.bmFeatures.AND(bitmapArray)
+        debug(`featureArrayAND(): bitmapArray: ${bitmapArray}, returnAsArray: ${returnAsArray}`)
+        const result = this.bmFeatures.AND(bitmapArray);
+        return returnAsArray ? result.toArray() : result;
     }
 
 }
