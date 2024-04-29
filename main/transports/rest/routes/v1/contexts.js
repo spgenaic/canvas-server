@@ -1,7 +1,7 @@
 // Includes
 const express = require('express');
 const router = express.Router();
-const debug = require('debug')('canvas/transports/rest:contexts');
+const debug = require('debug')('canvas:transports:rest:contexts');
 
 router.get('/contexts', (req, res) => {
     // List all contexts
@@ -16,11 +16,11 @@ router.get('/contexts', (req, res) => {
         res.status(200).json(response.success(data).getResponse());
     } else {
         res.status(500).json(response.error('Unable to fetch Canvas contexts').getResponse());
-    }    
+    }
 });
 
 router.post('/contexts', (req, res) => {
-    // Create a new context 
+    // Create a new context
 })
 
 router.get('/contexts/:id', (req, res) => {

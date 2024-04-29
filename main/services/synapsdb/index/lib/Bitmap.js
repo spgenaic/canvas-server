@@ -1,5 +1,5 @@
 const { RoaringBitmap32 } = require("roaring");
-const debug = require('debug')('@canvas:db:index:bitmap');
+const debug = require('debug')('canvas:db:index:bitmap');
 
 class Bitmap extends RoaringBitmap32 {
 

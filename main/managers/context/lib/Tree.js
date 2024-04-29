@@ -3,7 +3,7 @@
 
 // Utils
 const EventEmitter = require('eventemitter2')
-const debug = require('debug')('context-tree')
+const debug = require('debug')('canvas:context:tree')
 const path = require('path')
 const os = require('os')
 

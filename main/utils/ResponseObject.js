@@ -101,14 +101,17 @@ class ResponseObject {
 
     // Method to get the final response object
     getResponse() {
-        let response = {
+        debug('Response:', JSON.stringify({
+            status: this.status,
+            message: this.message,
+            payloadSizeInBytes: Buffer.byteLength(JSON.stringify(this.payload))
+        }, null, 2));
+
+        return {
             status: this.status,
             message: this.message,
             payload: this.payload,
         };
-
-        debug('Response:', response);
-        return response;
     }
 }
 

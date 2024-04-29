@@ -1,7 +1,7 @@
 // Includes
 const express = require('express');
 const router = express.Router();
-const debug = require('debug')('canvas/transports/rest:context');
+const debug = require('debug')('canvas:transports:rest:context');
 
 
 /**
@@ -215,14 +215,28 @@ router.get('/bitmaps/features', (req, res) => {
 router.get('/documents', async (req, res) => {
     const context = req.context;
     const response = new req.ResponseObject();
-    let documents = await context.listDocuments();
-    debug('[GET] Documents route triggered');
-    if (documents) {
-        res.json(response.success(documents).getResponse());
-    } else {
-        res.status(404).send(response.error(`No documents found in context ${context.url}`).getResponse());
+    const includeData = req.query.includeData === 'true'; // Checks if includeData query param is 'true'
+
+    try {
+        let documents;
+        if (includeData) {
+            documents = await context.getDocuments(); // Fetch full documents
+        } else {
+            documents = await context.listDocuments(); // Fetch only metadata
+        }
+        debug('[GET] Documents route triggered with includeData:', includeData);
+
+        if (documents.length > 0) {
+            res.json(response.success(documents).getResponse());
+        } else {
+            res.status(404).send(response.error(`No documents found in context ${context.url}`).getResponse());
+        }
+    } catch (error) {
+        console.error('[ERROR] Fetching documents:', error);
+        res.status(500).send(response.error("Internal server error while retrieving documents").getResponse());
     }
 });
+
 
 router.post('/documents', async (req, res) => {
     const context = req.context;

@@ -2,7 +2,7 @@
 const Service = require('../../managers/service/lib/Service');
 
 // Utils
-const debug = require('debug')('canvas-transport-rest')
+const debug = require('debug')('canvas:transports:rest')
 const bodyParser = require('body-parser');
 const ResponseObject = require('../../utils/ResponseObject');
 
@@ -80,8 +80,6 @@ class RestTransport extends Service {
         // Workaround till I implement proper multi-context routes!
         this.context = this.contextManager.getContext() // Returns the universe by default
         debug(`REST API Transport initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
-
-        console.log(this.#auth)
     }
 
     async start() {
@@ -94,7 +92,7 @@ class RestTransport extends Service {
         // Ping health check
         this.server.get(`${this.#urlBasePath}/ping`, (req, res) => {
             res.status(200).send('pong');
-        });        
+        });
 
         // Toggle API Key validation
         if (!this.#auth.disableApiKeyValidation) {

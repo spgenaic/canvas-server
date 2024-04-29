@@ -2,16 +2,17 @@
 
 const RoaringBitmap32 = require('roaring/RoaringBitmap32')
 const Bitmap = require('./Bitmap');
-const debug = require('debug')('@canvas:db:index:bitmapManager');
+const { uuid12 } = require('../../../../managers/context/lib/utils');
+const debug = require('debug')('canvas:db:index:BitmapCollection');
 
 
-class BitmapManager {
+class BitmapCollection {
 
     #db;
     #cache;
 
     /**
-     * BitmapManager constructor
+     * BitmapCollection constructor
      *
      * @param {*} db
      * @param {*} cache
@@ -20,6 +21,7 @@ class BitmapManager {
     constructor(db = new Map(), cache = new Map(), options = {}) {
 
         const defaultOptions = {
+            tag: uuid12(),
             rangeMin: 0,
             rangeMax: 4294967296 // 2^32
         }
@@ -40,13 +42,24 @@ class BitmapManager {
         this.rangeMin = options.rangeMin
         this.rangeMax = options.rangeMax
 
-        debug(`BitmapManager initialized with rangeMin: ${this.rangeMin}, rangeMax: ${this.rangeMax}`)
+        this.tag = options.tag
+
+        debug(`Collection "${this.tag}" initialized with rangeMin: ${this.rangeMin}, rangeMax: ${this.rangeMax}`)
     }
 
 
     /**
-     * Main BitmapManager interface (sync)
+     * Main BitmapCollection interface (sync)
      */
+
+    tickRow(key, autoCreateBitmap = true, autoSave = true) {
+
+    }
+
+    untickRow(key, autoSave = true) {
+
+    }
+
 
     // TODO: Implement proper async methods
     tick(key, idArray, autoCreateBitmap = true, autoSave = true) {
@@ -54,7 +67,7 @@ class BitmapManager {
     }
 
     tickSync(key, idArray, autoCreateBitmap = true, autoSave = true) {
-        let bitmap = this.getBitmap(key)
+        let bitmap = this.getBitmap(key, false)
         if (!bitmap) {
             debug(`Bitmap with key ID "${key}" not found`)
             if (!autoCreateBitmap) {
@@ -173,22 +186,17 @@ class BitmapManager {
 
 
     /**
-     * Logical operations
+     * Logical (bitwise) bitmap operations
      */
 
     AND(keyArray) {
-        if (keyArray.length === 0) {
-            // TODO: Maybe we should return null here
-            return new RoaringBitmap32();
-        }
+        debug(`${this.tag} -> AND(): keyArray: "${keyArray}"`)
+        if (!Array.isArray(keyArray)) throw new TypeError(`First argument must be an array of bitmap keys, "${typeof keyArray}" given`);
 
         let partial;
         for (const key of keyArray) {
-            const bitmap = this.getBitmap(key);
-            // If bitmap is null or empty, return an empty bitmap immediately
-            if (!bitmap || bitmap.size === 0) {
-                return new RoaringBitmap32();
-            }
+            const bitmap = this.getBitmap(key, true);
+
             // Initialize partial with the first non-empty bitmap
             if (!partial) {
                 partial = bitmap;
@@ -198,41 +206,45 @@ class BitmapManager {
             partial.andInPlace(bitmap);
         }
 
-        // Return partial or an empty bitmap if it was never assigned
+        // Return partial or an empty roaring bitmap
         return partial || new RoaringBitmap32();
     }
 
+    // TODO: Properly test, refactor all bitwise methods to be consistent
     OR(keyArray) {
+        debug(`${this.tag} -> OR(): keyArray: "${keyArray}"`)
+        if (!Array.isArray(keyArray)) throw new TypeError(`First argument must be an array of bitmap keys, "${typeof keyArray}" given`);
+        // Filter out invalid bitmaps, for OR we are pretty tolerant (for now at least)
         const validBitmaps = keyArray.map(key => this.getBitmap(key)).filter(Boolean);
         return validBitmaps.length ? RoaringBitmap32.orMany(validBitmaps) : new RoaringBitmap32();
     }
 
     static AND(roaringBitmapArray) {
-
-        if (roaringBitmapArray.length === 0) { return new RoaringBitmap32(); }
+        debug(`static AND(): roaringBitmapArray(length): "${roaringBitmapArray.length}"`)
+        if (!Array.isArray(roaringBitmapArray)) throw new TypeError(`First argument must be an array of RoaringBitmap32 instances, "${typeof roaringBitmapArray}" given`);
 
         let partial;
         for (const bitmap of roaringBitmapArray) {
-
-            if (!bitmap || bitmap.size === 0) {
-                return new RoaringBitmap32();
-            }
-
-            // Initialize partial with the first non-empty bitmap
+            debug(bitmap.toArray())
+            if (!bitmap instanceof RoaringBitmap32) throw new TypeError(`Bitmap must be an instance of RoaringBitmap32, "${typeof bitmap}" given`);
             if (!partial) {
                 partial = bitmap;
                 continue;
             }
+
             // Perform AND operation
             partial.andInPlace(bitmap);
         }
 
-        // Return partial or an empty bitmap if it was never assigned
+        // Return partial or an empty roaring bitmap
         return partial || new RoaringBitmap32();
 
     }
 
     static OR(roaringBitmapArray) {
+        debug(`static OR(): roaringBitmapArray: "${roaringBitmapArray.length}"`)
+        if (!Array.isArray(roaringBitmapArray)) throw new TypeError(`First argument must be an array of RoaringBitmap32 instances, "${typeof roaringBitmapArray}" given`);
+        if (roaringBitmapArray.length === 0) { return new RoaringBitmap32(); }
         return RoaringBitmap32.orMany(roaringBitmapArray)
     }
 
@@ -253,6 +265,8 @@ class BitmapManager {
     hasBitmap(key) { return this.#db.has(key); }
 
     getBitmap(key, autoCreateBitmap = true) {
+        debug(`${this.tag} -> Getting bitmap with key ID "${key}"`)
+
         // Return from cache if available
         if (this.#cache.has(key)) return this.#cache.get(key)
 
@@ -262,13 +276,14 @@ class BitmapManager {
         debug(`Bitmap with key ID "${key}" not found in the database`)
         if (!autoCreateBitmap) return null
 
-        debug(`Creating a new bitmap with key ID "${key}"`)
         let bitmap = this.createBitmap(key)
+        if (!bitmap) throw new Error(`Unable to create bitmap with key ID "${key}"`)
 
         return bitmap
     }
 
     createBitmap(key, oidArrayOrBitmap = null, autoSave = true) {
+        debug(`${this.tag} -> createBitmap(): Creating bitmap with key ID "${key}", oidArrayOrBitmap: ${oidArrayOrBitmap}`)
         if (this.hasBitmap(key)) {
             debug(`Bitmap with key ID "${key}" already exists`);
             return false;
@@ -281,17 +296,16 @@ class BitmapManager {
             debug(`Creating new empty bitmap with key ID "${key}"`);
             idArray = new RoaringBitmap32();
         } else if (oidArrayOrBitmap instanceof RoaringBitmap32) {
-            debug(`Storing bitmap under new key ID "${key}"`);
+            debug(`RoaringBitmap32 supplied as input: Storing pre-populated bitmap under new key ID "${key}" with ${oidArrayOrBitmap.size} elements`);
             idArray = oidArrayOrBitmap;
         } else if (Array.isArray(oidArrayOrBitmap)) {
-            debug(`Creating new bitmap with key ID "${key}" and ${oidArrayOrBitmap.length} elements`);
+            debug(`OID Array supplied as input: Creating new bitmap with key ID "${key}" and ${oidArrayOrBitmap.length} elements`);
             idArray = new RoaringBitmap32(oidArrayOrBitmap);
         } else {
-            debug(`Invalid input for bitmap with key ID "${key}"`);
-            return false;
+            throw new TypeError(`Invalid input data: ${oidArrayOrBitmap}`);
         }
 
-        // Initialize a new bitmap
+        // Initialize a new bitmap using our beloved Bitmap class
         bitmap = Bitmap.create(idArray, {
             type: 'static',
             key: key,
@@ -301,36 +315,52 @@ class BitmapManager {
 
         // Save bitmap to DB
         if (autoSave) { this.#saveBitmapToDb(key, bitmap); }
-
+        debug(`Bitmap with key ID "${key}" created successfully`)
         return bitmap;
     }
 
     removeBitmap(key) {
+        debug(`removeBitmap(): Removing bitmap with key ID "${key}"`)
         if (!this.#db.has(key)) {
             debug(`Bitmap with key ID "${key}" not found`)
             return false
         }
 
-        debug(`Removing bitmap with key ID "${key}"`)
         // TODO: Add error handling
-        this.#cache.delete(key)
-        this.#db.delete(key);
-
+        this.#cache.delete(key);
+        this.#db.delete(key); // TODO: this is sync, and a Map like wrapper function only, we should also implement proper async methods
         return true
     }
 
     renameBitmap(key, newKey, autoSave = true) {
-        let bitmap = this.getBitmap(key, false)
+        debug(`renameBitmap(): Renaming bitmap with key ID "${key}" to "${newKey}"`)
+        if (!this.#db.has(key)) {
+            debug(`Bitmap with key ID "${key}" not found`)
+            return false
+        }
 
+        let bitmap = this.getBitmap(key, false)
         if (!this.createBitmap(newKey, bitmap, autoSave)) {
             throw new Error(`Unable to create bitmap with key ID "${newKey}"`)
         }
 
-        if (!bitmap) {
-            this.removeBitmap(key) || new Error(`Unable to remove bitmap with key ID "${key}"`)
+        if (!this.removeBitmap(key)) {
+             throw new Error(`Unable to remove bitmap with key ID "${key}"`)
         }
 
+        debug(`Bitmap with key ID "${key}" renamed to "${newKey}"`)
         return true
+    }
+
+    updateBitmap(key, oidArrayOrBitmap, autoSave = true) {
+        debug(`updateBitmap(): Updating bitmap with key ID "${key}"`)
+        if (!this.#db.has(key)) {
+            debug(`Bitmap with key ID "${key}" not found`)
+            return false
+        }
+
+        let bitmap = this.getBitmap(key, false)
+        let newBitmap = this.AND([bitmap, oidArrayOrBitmap])
     }
 
 
@@ -339,6 +369,7 @@ class BitmapManager {
      */
 
     #saveBitmapToDb(key, bitmap/*, overwrite = true */) {
+        debug(`Saving bitmap with key ID "${key}" to the database`)
         if (!(bitmap instanceof RoaringBitmap32)) throw new TypeError(`Input must be an instance of RoaringBitmap32`);
         // TODO: runOptimize()
         // TODO: shrinkToFit()
@@ -353,13 +384,13 @@ class BitmapManager {
     }
 
     #loadBitmapFromDb(key) {
+        debug(`Loading bitmap with key ID "${key}" from the database`)
         let bitmapData = this.#db.get(key);
         if (!bitmapData) {
             debug(`Unable to load bitmap "${key}" from the database`)
             return null;
         }
 
-        // TODO: This should not be needed
         let bitmap = new RoaringBitmap32();
         return Bitmap.create(bitmap.deserialize(bitmapData, true), {
             type: 'static',
@@ -371,5 +402,5 @@ class BitmapManager {
 
 }
 
-module.exports = BitmapManager
+module.exports = BitmapCollection
 

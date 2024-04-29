@@ -7,7 +7,7 @@
 
 // Utils
 const log = console.log
-const debug = require('debug')('canvas-role-stored:cache')
+const debug = require('debug')('canvas:stored:cache')
 
 // Lib
 const cacache = require('cacache')
