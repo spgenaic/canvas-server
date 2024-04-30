@@ -8,6 +8,7 @@ const fs = require('fs')
 const pkg = require('./package.json')
 const device = require('./managers/device').getCurrentDevice()
 
+
 /**
  * System directories
  *
