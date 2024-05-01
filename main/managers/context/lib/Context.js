@@ -58,7 +58,7 @@ class Context extends EE {
 			CONTEXT_AUTOCREATE_LAYERS
 		);
 
-		debug(`Context with url "${this.#url}", runtime id: "${this.#id}" initialized`);
+		debug(`Context with url "${this.#url}", session id: "${this.#id}" initialized`);
 
 		// Maps containing pointers to global in-memory
 		// bitmap cache
@@ -147,7 +147,7 @@ class Context extends EE {
 		let parsed = new Url(url);
 		if (this.#url === parsed.url) return this.#url;
 
-		debug(`Setting context url for context id "${this.#id}" to "${parsed.url}"`);
+		debug(`Setting context url for session ID "${this.#id}" to "${parsed.url}"`);
 		if (!this.#tree.insert(parsed.path, null, autoCreateLayers)) {
 			debug( `Context url "${parsed.url}" not set, path "${parsed.path}" not found`);
 			return false;
@@ -278,7 +278,7 @@ class Context extends EE {
 
 	async listDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Listing documents under context ID "${this.#id}", url "${this.#url}"`)
+		debug(`Listing documents under session ID "${this.#id}", context url "${this.#url}"`)
 		debug(`Context array: "${this.#contextArray}"`)
 		debug(`Feature array: "${featureArray}"`)
 		debug(`Filter array: "${filterArray}"`)
@@ -305,7 +305,7 @@ class Context extends EE {
 
 	getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Getting documents under context ID "${this.#id}, url "${this.#url}"`)
+		debug(`Getting documents under session ID "${this.#id}", context url "${this.#url}"`)
 		debug(`Context array: ${this.#contextArray}`)
 		debug(`Feature array: ${featureArray}`)
 		debug(`Filter array: ${filterArray}`)
@@ -329,7 +329,7 @@ class Context extends EE {
 	}
 
 	async insertDocumentArray(docArray, featureArray = this.#featureArray) {
-		debug(`Inserting document array under context ID "${this.#id}, url "${this.#url}"`);
+		debug(`Inserting document array under session ID "${this.#id}", context url "${this.#url}"`);
 		debug(`Feature array: ${featureArray}`)
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.insertDocumentArray(
@@ -357,10 +357,10 @@ class Context extends EE {
 
 	async removeDocument(id) {
 		if (this.#path === '/') {
-			throw new Error(`Cannot remove document ID ${id} from universe, use deleteDocument() instead`)
+			throw new Error(`Cannot remove document ID "${id}" from universe, use deleteDocument() instead`)
 		}
 
-		debug(`Removing document with id "${id}" from context ID "${this.#id}, url "${this.#url}"`);
+		debug(`Removing document with id "${id}" from session ID "${this.#id}, context url "${this.#url}"`);
 		if (typeof id !== "string" && typeof id !== "number") {
 			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
 		}
@@ -369,7 +369,7 @@ class Context extends EE {
 	}
 
 	async removeDocumentArray(idArray) {
-		debug(`Removing document array from context "${this.#id}, url "${this.#url}"`);
+		debug(`Removing document array from context "${this.#id}, context url "${this.#url}"`);
 		if (!Array.isArray(idArray)) {
 			throw new Error(`Document ID array must be of type array, "${typeof idArray}" given`);
 		}

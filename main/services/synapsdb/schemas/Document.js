@@ -15,8 +15,8 @@ class Document {
 
     constructor(options = {}) {
 
-        if (!options.id) throw new Error('Document ID is not defined')
-        this.id = options.id;
+        //if (!options.id) throw new Error('Document ID is not defined')
+        this.id = null; //options.id;
 
         this.type = options?.type || DOCUMENT_SCHEMA_TYPE;
         this.schemaVersion = options?.schemaVersion || DOCUMENT_SCHEMA_VERSION;

@@ -189,14 +189,14 @@ class Index extends EE {
 
 
     updateContextBitmaps(bitmapArray, oidOrArray) {
-        debug(`updateContextBitmaps(): contextArray: ${contextArray}, oidOrArray: ${oidOrArray}`)
+        debug(`updateContextBitmaps(): contextArray: ${bitmapArray}, oidOrArray: ${oidOrArray}`)
         if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
         if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
         return this.bmContexts.tickMany(bitmapArray, oidOrArray)
     }
 
     updateFeatureBitmaps(bitmapArray, oidOrArray) {
-        debug(`updateFeatureBitmaps(): featureArray: ${featureArray}, oidOrArray: ${oidOrArray}`)
+        debug(`updateFeatureBitmaps(): featureArray: "${bitmapArray}", oidOrArray: "${oidOrArray}"`)
         if (!Array.isArray(bitmapArray)) throw new Error(`bitmapArray must be an array, got: ${typeof bitmapArray}`)
         if (!bitmapArray.length) throw new Error('bitmapArray array is empty')
         return this.bmFeatures.tickMany(bitmapArray, oidOrArray)
