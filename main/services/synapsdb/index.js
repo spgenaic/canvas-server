@@ -143,7 +143,7 @@ class SynapsDB extends EE {
             if (metadataOnly) {
                 debug("Returning metadata only");
                 documents = documents.map(doc => {
-                    doc.data = { metadataOnly: "true" };
+                    doc.data = null; //{ metadataOnly: "true" };
                     return doc;
                 });
             }
@@ -166,7 +166,7 @@ class SynapsDB extends EE {
             let documents = await this.documents.getMany(idArray);
             if (metaOnly) {
                 documents = documents.map(doc => {
-                    doc.data = { metadataOnly: "true" };
+                    doc.data = null; //{ metadataOnly: "true" };
                     return doc;
                 });
             }
@@ -218,7 +218,7 @@ class SynapsDB extends EE {
 
         // Check if document already exists based on its checksum
         if (this.index.hash2oid.has(parsed.meta.checksum)) {
-            let existingDocument = this.getDocumentByHash(parsed.checksum);
+            let existingDocument = this.getDocumentByHash(parsed.meta.checksum);
             debug(`Document hash "${parsed.meta.checksum}" already found in the database, updating exiting record: "${existingDocument.checksum}/${existingDocument.id}"`);
             parsed.id = existingDocument.id;
         }
@@ -259,7 +259,7 @@ class SynapsDB extends EE {
     }
 
     async insertDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
-        debug(`insertDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
+        debug(`insertDocumentArray(): Document count: ${documentArray.length}, ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
             throw new Error("Document array required");
@@ -431,7 +431,7 @@ class SynapsDB extends EE {
      */
 
     async #parseDocument(doc) {
-        debug("Validating document " + JSON.stringify(doc, null, 2));
+        debug("Parsing document from input " + JSON.stringify(doc, null, 2));
 
         if (typeof doc !== "object") {
             debug(`Document has to be an object, got ${typeof doc}`);
@@ -449,6 +449,7 @@ class SynapsDB extends EE {
             throw new Error(`Document schema not found: ${doc.type}`);
         }
 
+        // TODO: Remove and/or refactor, for updates we are unnecessarily generating new IDs
         if (!doc.id) {
             debug('Generating document ID');
             doc.id = await this.#genDocumentID();
@@ -457,7 +458,7 @@ class SynapsDB extends EE {
         // Initialize document object
         const parsed = new Schema(doc);
 
-        debug("Document is valid");
+        debug("Parsed document: " + JSON.stringify(parsed, null, 2));
         return parsed;
     }
 
@@ -471,7 +472,7 @@ class SynapsDB extends EE {
     async #genDocumentID() {
         const keyCount = await this.documents.getKeysCount() || 0;
         const nextDocumentID = INTERNAL_BITMAP_ID_MAX + keyCount + 1;
-        debug(`Generating new document ID, current key count: ${keyCount}, doc ID: ${nextDocumentID}`);
+        debug(`Current key count: ${keyCount}, doc ID: ${nextDocumentID}`);
         return nextDocumentID;
     }
 }
