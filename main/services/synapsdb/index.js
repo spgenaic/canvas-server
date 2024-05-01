@@ -286,6 +286,7 @@ class SynapsDB extends EE {
         const errors = [];
 
         // Process results
+        // TODO: Refactor this crap! troubleshooting this mess is a ** ** **** ******
         results.forEach((result, index) => {
             if (result.status === 'fulfilled') {
                 successResults.push(result.value);
