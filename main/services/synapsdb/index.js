@@ -214,14 +214,46 @@ class SynapsDB extends EE {
 
         // Parse document
         let parsed = await this.#parseDocument(document);
+        if (!parsed) throw new Error('Failed to parse document');
 
+        // Check if document already exists based on its checksum
+        if (this.index.hash2oid.has(parsed.meta.checksum)) {
+            let existingDocument = this.getDocumentByHash(parsed.checksum);
+            debug(`Document hash "${parsed.meta.checksum}" already found in the database, updating exiting record: "${existingDocument.checksum}/${existingDocument.id}"`);
+            parsed.id = existingDocument.id;
+        }
+
+        try {
+            debug(`Inserting new document into the database index: ${parsed.meta.checksum} -> ${parsed.id}`);
+            await this.index.hash2oid.db.put(parsed.meta.checksum, parsed.id);
+            debug(`Inserting document into the database: ${parsed.id}`)
+            await this.documents.put(parsed.id, parsed);
+        } catch (error) {
+            throw new Error(`Error inserting document into the database: ${error.message}`);
+        }
+
+        // Extract document features (to-be-moved to parseDocument() method)
+        const documentFeatures = this.#extractDocumentFeatures(parsed);
+        const combinedFeatureArray = [...featureArray, ...documentFeatures];
+
+        // Update bitmaps
+        // By default we leave the old bitmaps in place, moving documents between contexts
+        // and adding/removing features should be handled via the respective methods
+        // Maybe we should add a flag to remove old bitmaps
+        // TODO: Refactor
+        if (Array.isArray(contextArray) && contextArray.length > 0) {
+            await this.index.updateContextBitmaps(contextArray, parsed.id);
+        }
+
+        // TODO: Refactor
+        if (Array.isArray(combinedFeatureArray) && combinedFeatureArray.length > 0) {
+            await this.index.updateFeatureBitmaps(combinedFeatureArray, parsed.id);
+        }
 
         debug(`Document inserted: ${parsed.id}`)
 
-        // Old return value
-        //return parsed.id;
-
         // New return value
+        parsed.index = null
         parsed.data = null
         return parsed
     }

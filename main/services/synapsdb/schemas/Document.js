@@ -35,7 +35,7 @@ class Document {
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: [],
             embeddingFields: ['data'],
-            ...options?.index
+            ...options?.index // Maybe we should move this to the top to not override the default values
         }
 
         // Metadata
@@ -55,6 +55,8 @@ class Document {
 
         // Calculate document checksum (if not provided; maybe we should move it to the SynapsDB parser)
         this.meta.checksum = options?.checksum || this.calculateChecksum(this.index.primaryChecksumField);
+
+        // TODO: Add support for multiple checksum fields (or re-add, we already had this feature)
 
     }
 
