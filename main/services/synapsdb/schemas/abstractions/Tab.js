@@ -11,12 +11,12 @@ class Tab extends Document {
 
     constructor(params) {
 
-        if (!params.id) throw new Error('Tab ID is not defined')
+        //if (!params.id) throw new Error('Tab ID is not defined')
         if (!params.data) throw new Error('Tab data is not defined')
         if (!params.data.url) throw new Error('Tab data.URL is not defined')
 
         super({
-            id: params.id,
+            id: params.id || null,
             type: DOCUMENT_SCHEMA_TYPE,
             schemaVersion: DOCUMENT_SCHEMA_VERSION,
             versioning: false,
@@ -33,7 +33,7 @@ class Tab extends Document {
             meta: {
                 dataContentType: DOCUMENT_DATA_FORMAT,
                 dataContentEncoding: 'utf8',
-                browser: params.browser || 'unknown'
+                browser: params.meta.browser || 'unknown'
             },
 
             data: params.data

@@ -143,7 +143,8 @@ class SynapsDB extends EE {
             if (metadataOnly) {
                 debug("Returning metadata only");
                 documents = documents.map(doc => {
-                    doc.data = { metadataOnly: "true" };
+                    doc.index = null;
+                    doc.data = null; //{ metadataOnly: "true" };
                     return doc;
                 });
             }
@@ -166,7 +167,7 @@ class SynapsDB extends EE {
             let documents = await this.documents.getMany(idArray);
             if (metaOnly) {
                 documents = documents.map(doc => {
-                    doc.data = { metadataOnly: "true" };
+                    doc.data = null; //{ metadataOnly: "true" };
                     return doc;
                 });
             }
@@ -214,20 +215,60 @@ class SynapsDB extends EE {
 
         // Parse document
         let parsed = await this.#parseDocument(document);
+        if (!parsed) throw new Error('Failed to parse document');
 
+        // Check if document already exists based on its checksum
+        if (this.index.hash2oid.has(parsed.meta.checksum)) {
+            let existingDocument = this.getDocumentByHash(parsed.meta.checksum);
+            debug(`Document hash "${parsed.meta.checksum}" already found in the database, updating exiting record: "${existingDocument.meta.checksum}/${existingDocument.id}"`);
+            parsed.id = existingDocument.id; // TODO: Rework + move to updateDopcument()
+        }
 
-        debug(`Document inserted: ${parsed.id}`)
+        if (!parsed.id) {
+            debug('Generating document ID');
+            parsed.id = await this.#genDocumentID();
+        }
 
-        // Old return value
-        //return parsed.id;
+        // TODO: Move updates to updateDocument()
+        try {
+            debug(`Inserting document into the database index: ${parsed.meta.checksum} -> ${parsed.id}`);
+            await this.index.hash2oid.db.put(parsed.meta.checksum, parsed.id);
+            debug(`Inserting document into the database: ${JSON.stringify(parsed, null, 2)}`)
+            await this.documents.put(parsed.id, parsed);
+        } catch (error) {
+            console.error(`Error inserting document into the database: ${error.message}`);
+            throw new Error(`Error inserting document into the database: ${error.message}`);
+        }
+
+        // Extract document features (to-be-moved to parseDocument() method)
+        const documentFeatures = this.#extractDocumentFeatures(parsed);
+        const combinedFeatureArray = [...featureArray, ...documentFeatures];
+        debug(`Document features: ${combinedFeatureArray.join(', ')}`);
+
+        // Update bitmaps
+        // By default we leave the old bitmaps in place, moving documents between contexts
+        // and adding/removing features should be handled via the respective methods
+        // Maybe we should add a flag to remove old bitmaps
+        // TODO: Refactor
+        if (Array.isArray(contextArray) && contextArray.length > 0) {
+            await this.index.updateContextBitmaps(contextArray, parsed.id);
+        }
+
+        // TODO: Refactor
+        if (Array.isArray(combinedFeatureArray) && combinedFeatureArray.length > 0) {
+            await this.index.updateFeatureBitmaps(combinedFeatureArray, parsed.id);
+        }
+
+        debug(`Document inserted under ID: ${parsed.id}`)
 
         // New return value
+        parsed.index = null
         parsed.data = null
         return parsed
     }
 
     async insertDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
-        debug(`insertDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
+        debug(`insertDocumentArray(): Document count: ${documentArray.length}, ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
             throw new Error("Document array required");
@@ -239,11 +280,13 @@ class SynapsDB extends EE {
 
         // Await all promises to settle
         const results = await Promise.allSettled(promises);
+        debug(`Promise results: ${results.length}`)
 
         const successResults = [];
         const errors = [];
 
         // Process results
+        // TODO: Refactor this crap! troubleshooting this mess is a ** ** **** ******
         results.forEach((result, index) => {
             if (result.status === 'fulfilled') {
                 successResults.push(result.value);
@@ -399,7 +442,7 @@ class SynapsDB extends EE {
      */
 
     async #parseDocument(doc) {
-        debug("Validating document " + JSON.stringify(doc, null, 2));
+        debug("Input document " + JSON.stringify(doc, null, 2));
 
         if (typeof doc !== "object") {
             debug(`Document has to be an object, got ${typeof doc}`);
@@ -417,15 +460,10 @@ class SynapsDB extends EE {
             throw new Error(`Document schema not found: ${doc.type}`);
         }
 
-        if (!doc.id) {
-            debug('Generating document ID');
-            doc.id = await this.#genDocumentID();
-        }
-
         // Initialize document object
         const parsed = new Schema(doc);
 
-        debug("Document is valid");
+        debug("Parsed document: " + JSON.stringify(parsed, null, 2));
         return parsed;
     }
 
@@ -439,7 +477,7 @@ class SynapsDB extends EE {
     async #genDocumentID() {
         const keyCount = await this.documents.getKeysCount() || 0;
         const nextDocumentID = INTERNAL_BITMAP_ID_MAX + keyCount + 1;
-        debug(`Generating new document ID, current key count: ${keyCount}, doc ID: ${nextDocumentID}`);
+        debug(`Current key count: ${keyCount}, doc ID: ${nextDocumentID}`);
         return nextDocumentID;
     }
 }

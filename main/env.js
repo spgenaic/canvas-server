@@ -8,6 +8,7 @@ const fs = require('fs')
 const pkg = require('./package.json')
 const device = require('./managers/device').getCurrentDevice()
 
+
 /**
  * System directories
  *
@@ -39,7 +40,7 @@ const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'v
  */
 
 // User env
-const USER_HOME = process.env['CANVAS_USER_HOME'] || path.join(SERVER_ROOT, 'user')
+const USER_HOME = process.env['CANVAS_USER_HOME'] || path.join(device.os.homedir, '.canvas') //path.join(SERVER_ROOT, 'user')
 const USER_CONFIG = process.env['CANVAS_USER_CONFIG'] || path.join(USER_HOME, 'config')
 const USER_DATA = process.env['CANVAS_USER_DATA'] || path.join(USER_HOME, 'data')
 const USER_DB = process.env['CANVAS_USER_DB'] || path.join(USER_HOME, 'db')
