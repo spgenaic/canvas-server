@@ -113,13 +113,16 @@ class Document {
     }
 
     calculateChecksum(fields, data = this.data) {
-        if (!fields) throw new Error('Checksum fields are not defined')
-        if (fields.length && fields[0] === 'data') return this.createHash(data);
+        if (!fields) throw new Error('Checksum fields are not defined');
+        const resolveField = (fieldPath, obj) => fieldPath.split('.').reduce((acc, part) => acc && acc[part], obj);
 
-        const checksumData = fields.length ? fields.reduce((acc, field) => {
-            acc[field] = data[field];
+        const checksumData = fields.reduce((acc, field) => {
+            const value = resolveField(field, data);
+            if (value !== undefined) {
+                acc[field] = value;
+            }
             return acc;
-        }, {}) : data;
+        }, {});
 
         return this.createHash(checksumData);
     }
