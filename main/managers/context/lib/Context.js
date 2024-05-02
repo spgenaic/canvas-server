@@ -278,7 +278,7 @@ class Context extends EE {
 
 	async listDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Listing documents under session ID "${this.#id}", context url "${this.#url}"`)
+		debug(`Listing documents linked to context "${this.#url}"`)
 		debug(`Context array: "${this.#contextArray}"`)
 		debug(`Feature array: "${featureArray}"`)
 		debug(`Filter array: "${filterArray}"`)
@@ -305,10 +305,10 @@ class Context extends EE {
 
 	getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Getting documents under session ID "${this.#id}", context url "${this.#url}"`)
-		debug(`Context array: ${this.#contextArray}`)
-		debug(`Feature array: ${featureArray}`)
-		debug(`Filter array: ${filterArray}`)
+		debug(`Getting documents linked to context "${this.#url}"`)
+		debug(`Context array: "${this.#contextArray}"`)
+		debug(`Feature array: "${featureArray}"`)
+		debug(`Filter array: "${filterArray}"`)
 		const result = this.documents.getDocuments(
 			this.#contextArray,
 			featureArray,
@@ -329,7 +329,7 @@ class Context extends EE {
 	}
 
 	async insertDocumentArray(docArray, featureArray = this.#featureArray) {
-		debug(`Inserting document array under session ID "${this.#id}", context url "${this.#url}"`);
+		debug(`Inserting document array to context "${this.#url}"`);
 		debug(`Feature array: ${featureArray}`)
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.insertDocumentArray(
@@ -360,16 +360,17 @@ class Context extends EE {
 			throw new Error(`Cannot remove document ID "${id}" from universe, use deleteDocument() instead`)
 		}
 
-		debug(`Removing document with id "${id}" from session ID "${this.#id}, context url "${this.#url}"`);
+		debug(`Removing document with id "${id}" from context "${this.#url}"`);
 		if (typeof id !== "string" && typeof id !== "number") {
 			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
 		}
+
 		const result = await this.documents.removeDocument(id, this.#contextArray);
 		return result;
 	}
 
 	async removeDocumentArray(idArray) {
-		debug(`Removing document array from context "${this.#id}, context url "${this.#url}"`);
+		debug(`Removing document array from context "${this.#url}"`);
 		if (!Array.isArray(idArray)) {
 			throw new Error(`Document ID array must be of type array, "${typeof idArray}" given`);
 		}

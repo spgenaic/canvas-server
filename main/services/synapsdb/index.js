@@ -10,7 +10,6 @@ const Index = require('./index/index.js')
 
 // Schemas
 const documentSchemas = require('./schemas/registry.js')
-const { de } = require('date-fns/locale')
 
 // Constants
 const INTERNAL_BITMAP_ID_MIN = 1000
@@ -293,7 +292,7 @@ class SynapsDB extends EE {
     }
 
     async updateDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
-        debug(`updateDocumentArray(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`updateDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
             throw new Error("Document array required");
@@ -362,12 +361,16 @@ class SynapsDB extends EE {
 
 
     async removeDocument(id, contextArray, featureArray, filterArray) {
-        debug(`removeDocument(): ID: ${id}; ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`removeDocument(): ID: ${id}; ContextArray: "${contextArray}"; FeatureArray: ${featureArray}`);
         if (!id) throw new Error("Document ID required");
-        if (!contextArray || !Array.isArray(contextArray) || contextArray.length < 1 ) throw new Error("Context array required");
+        if (!Array.isArray(contextArray) || contextArray.length < 1) {
+            throw new Error("Context array required, got " + JSON.stringify(contextArray));
+        }
 
         let document = this.documents.get(id);
-        if (!document) throw new Error("Document not found"); //return false;
+        if (!document) {
+            throw new Error(`Document ID "${id}" not found`); //return false;
+        }
 
         // Remove document from Context bitmaps
         await this.index.untickContextArray(contextArray, document.id);
@@ -381,7 +384,7 @@ class SynapsDB extends EE {
     }
 
     async removeDocumentArray(idArray, contextArray, featureArray, filterArray) {
-        debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
         if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
 
         let tasks = [];

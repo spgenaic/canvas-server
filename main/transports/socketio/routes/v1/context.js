@@ -94,6 +94,7 @@ module.exports = function(socket, context) {
                 callback(response.success(result).getResponse()) :
                 socket.emit(ROUTES.EVENT_CONTEXT_URL, response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -107,6 +108,7 @@ module.exports = function(socket, context) {
             // TODO: Implement additional return statuses
             callback(response.created(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -119,6 +121,7 @@ module.exports = function(socket, context) {
             const result = context.removePath(path, recursive);
             callback(response.deleted(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -131,6 +134,7 @@ module.exports = function(socket, context) {
             const result = await context.movePath(pathFrom, pathTo, recursive);
             callback(response.updated(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -148,6 +152,7 @@ module.exports = function(socket, context) {
             const result = await context.listDocuments(featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.error(err).getResponse());
         }
     });
@@ -159,6 +164,7 @@ module.exports = function(socket, context) {
             const result = context.getDocument(id);
             callback(response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.error(err).getResponse());
         }
     });
@@ -170,6 +176,7 @@ module.exports = function(socket, context) {
             const result = context.getDocumentByHash(hash);
             callback(response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.error(err).getResponse());
         }
     });
@@ -182,6 +189,7 @@ module.exports = function(socket, context) {
             const result = await context.getDocuments(featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.error(err).getResponse());
         }
     });
@@ -205,6 +213,7 @@ module.exports = function(socket, context) {
             const result = await context.insertDocument(document, featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.error(err).getResponse());
         }
     });
@@ -222,6 +231,7 @@ module.exports = function(socket, context) {
             const result = await context.insertDocumentArray(documents);
             callback(response.success(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.error(err).getResponse());
         }
     });
@@ -234,6 +244,7 @@ module.exports = function(socket, context) {
             const result = await context.removeDocument(id);
             callback(response.deleted(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -246,6 +257,7 @@ module.exports = function(socket, context) {
             const result = await context.removeDocumentArray(docArray);
             callback(response.deleted(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -258,6 +270,7 @@ module.exports = function(socket, context) {
             const result = await context.deleteDocument(id);
             callback(response.deleted(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
@@ -270,6 +283,7 @@ module.exports = function(socket, context) {
             const result = await context.deleteDocumentArray(docArray);
             callback(response.deleted(result).getResponse());
         } catch (err) {
+            console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
         }
     });
