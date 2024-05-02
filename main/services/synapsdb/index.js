@@ -221,7 +221,7 @@ class SynapsDB extends EE {
         if (this.index.hash2oid.has(parsed.meta.checksum)) {
             let existingDocument = this.getDocumentByHash(parsed.meta.checksum);
             debug(`Document hash "${parsed.meta.checksum}" already found in the database, updating exiting record: "${existingDocument.meta.checksum}/${existingDocument.id}"`);
-            parsed.id = existingDocument.id; // TODO: Rework + move to updateDopcument()
+            parsed.id = existingDocument.id; // TODO: Rework + move to updateDocument()
         }
 
         if (!parsed.id) {
@@ -274,36 +274,19 @@ class SynapsDB extends EE {
             throw new Error("Document array required");
         }
 
-        const promises = documentArray.map(doc =>
-            this.insertDocument(doc, contextArray, featureArray, filterArray)
-        );
-
-        // Await all promises to settle
-        const results = await Promise.allSettled(promises);
-        debug(`Promise results: ${results.length}`)
-
-        const successResults = [];
-        const errors = [];
-
-        // Process results
-        // TODO: Refactor this crap! troubleshooting this mess is a ** ** **** ******
-        results.forEach((result, index) => {
-            if (result.status === 'fulfilled') {
-                successResults.push(result.value);
-            } else {
-                errors.push(`Document ${index} failed: ${result.reason}`);
+        const insertResults = [];
+        for (const [index, doc] of documentArray.entries()) {
+            try {
+                const result = await this.insertDocument(doc, contextArray, featureArray, filterArray);
+                insertResults.push(result);
+            } catch (error) {
+                throw new Error(`Document ${index} failed: ${error.message}`);
             }
-        });
-
-        if (errors.length > 0) {
-            throw new Error(`Errors inserting documents: ${errors.join("; ")}`);
         }
 
-        debug(`Inserted documents: ${successResults.join(', ')} (${successResults.length})`);
-        return successResults;
+        debug(`Inserted documents: ${insertResults.join(', ')} (${insertResults.length})`);
+        return insertResults;
     }
-
-
 
     async updateDocument(document, contextArray = [], featureArray = [], filterArray = []) {
         return this.insertDocument(document, contextArray, featureArray, filterArray);
