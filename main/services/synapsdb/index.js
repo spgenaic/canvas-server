@@ -351,8 +351,9 @@ class SynapsDB extends EE {
             // Remove document from DB
             await this.documents.remove(id)
             // Clear indexes
-            await this.index.clear(id, document.checksum)
-        } catch(error) {
+            await this.index.clear(id, document.meta.checksum)
+        } catch (error) {
+            console.error(`Error deleting document with ID ${id}, ${error}`)
             throw new Error(`Error deleting document with ID ${id}, ${error}`)
         }
 
