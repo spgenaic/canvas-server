@@ -2,6 +2,7 @@
 
 // Import necessary libraries
 const crypto = require('crypto');
+const { getProperty } = require('dot-prop');
 
 // Define constants
 const DOCUMENT_SCHEMA_VERSION = '1.0';
@@ -30,7 +31,7 @@ class Document {
 
         this.index = {
             primaryChecksumAlgorithm: DOCUMENT_DATA_CHECKSUM_ALGO,
-            primaryChecksumField: ['data'],
+            primaryChecksumFields: ['data'],
             staticFeatureBitmapFields: ['type'],
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: [],
@@ -46,15 +47,15 @@ class Document {
         };
 
         // Document data
-        this.data = options?.data || {};
+        this.data = options.data;
 
         // References for previous document versions
         // TODO: This feature depends on the underlying storage mechanism, we should implement
         // a universal versioning mechanism
-        this.versions = [];
+        this.versions = options.versions || [];
 
         // Calculate document checksum (if not provided; maybe we should move it to the SynapsDB parser)
-        this.meta.checksum = options?.checksum || this.calculateChecksum(this.index.primaryChecksumField);
+        this.meta.checksum = options?.checksum || this.calculateChecksum(this.index.primaryChecksumFields, this.data);
 
         // TODO: Add support for multiple checksum fields (or re-add, we already had this feature)
 
@@ -88,7 +89,7 @@ class Document {
 
             index: {
                 primaryChecksumAlgorithm: DOCUMENT_DATA_CHECKSUM_ALGO,
-                primaryChecksumField: ['data'],
+                primaryChecksumFields: ['data'],
                 staticFeatureBitmapFields: ['type'],
                 dynamicFeatureBitmapFields: [],
                 fullTextIndexFields: [],
@@ -112,10 +113,9 @@ class Document {
         return document;
     }
 
-    calculateChecksum(fields, data = this.data) {
+    calculateChecksum(fields, data = this) { // TODO: Refactor,"this" is a mess!
         if (!fields) throw new Error('Checksum fields are not defined');
         const resolveField = (fieldPath, obj) => fieldPath.split('.').reduce((acc, part) => acc && acc[part], obj);
-
         const checksumData = fields.reduce((acc, field) => {
             const value = resolveField(field, data);
             if (value !== undefined) {
