@@ -40,7 +40,7 @@ class Tab extends Document {
             data: params.data
         })
 
-        this.meta.checksum = this.calculateChecksum(this.index.primaryChecksumField);
+        this.meta.checksum = this.calculateChecksum(this.index.primaryChecksumField, this.data);
 
     }
 
