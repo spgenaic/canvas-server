@@ -86,11 +86,13 @@ module.exports = function(socket, context) {
 
     socket.on(ROUTES.CONTEXT_SET_URL, (url, /* autocreateLayers, */ callback) => {
         debug(`${ROUTES.CONTEXT_SET_URL} event with url "${url}"`);
-        const response = new ResponseObject();
 
+        const response = new ResponseObject();
         try {
             const result = context.setUrl(url, true);
-            callback(response.success(result).getResponse());
+            (typeof callback === 'function') ?
+                callback(response.success(result).getResponse()) :
+                socket.emit(ROUTES.EVENT_CONTEXT_URL, response.success(result).getResponse());
         } catch (err) {
             callback(response.serverError(err).getResponse());
         }
@@ -98,8 +100,8 @@ module.exports = function(socket, context) {
 
     socket.on(ROUTES.CONTEXT_PATH_INSERT, (path, /* autocreateLayers, */ callback) => {
         debug(`${ROUTES.CONTEXT_PATH_INSERT} event with path "${path}"`)
-        const response = new ResponseObject();
 
+        const response = new ResponseObject();
         try {
             const result = context.insertPath(path, true);
             // TODO: Implement additional return statuses
@@ -184,10 +186,11 @@ module.exports = function(socket, context) {
         }
     });
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray = [], callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT} event`);
         const response = new ResponseObject();
         const document = data; // TODO: Validate
+        if (typeof featureArray === 'function') { callback = featureArray; }
 
         try {
             const result = await context.insertDocument(document, featureArray);

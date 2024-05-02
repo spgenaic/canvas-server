@@ -31,9 +31,10 @@ class Tab extends Document {
             },
 
             meta: {
+                browser: 'unknown',
+                ...params.meta,
                 dataContentType: DOCUMENT_DATA_FORMAT,
-                dataContentEncoding: 'utf8',
-                browser: params.meta.browser || 'unknown'
+                dataContentEncoding: 'utf8'
             },
 
             data: params.data
