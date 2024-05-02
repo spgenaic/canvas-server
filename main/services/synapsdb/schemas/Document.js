@@ -2,7 +2,6 @@
 
 // Import necessary libraries
 const crypto = require('crypto');
-const { getProperty } = require('dot-prop');
 
 // Define constants
 const DOCUMENT_SCHEMA_VERSION = '1.0';
