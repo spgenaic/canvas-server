@@ -284,7 +284,7 @@ class SynapsDB extends EE {
             }
         }
 
-        debug(`Inserted documents: ${insertResults.join(', ')} (${insertResults.length})`);
+        debug(`Inserted documents: (${insertResults.length})`);
         return insertResults;
     }
 
