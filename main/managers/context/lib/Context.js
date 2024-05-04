@@ -6,10 +6,11 @@ const { uuid12 } = require("./utils");
 // App includes
 const Url = require("./Url");
 
-// Constants
+// Module defaults
 const CONTEXT_AUTOCREATE_LAYERS = true;
 const CONTEXT_URL_PROTO = "universe";
 const CONTEXT_URL_BASE = "/";
+const CONTEXT_URL_BASE_ID = "universe";
 
 
 /**
@@ -19,6 +20,8 @@ const CONTEXT_URL_BASE = "/";
 class Context extends EE {
 
 	#id;
+	#sessionId;
+	#baseUrl;
 	#url;
 	#path;
 	#array;
@@ -47,10 +50,15 @@ class Context extends EE {
 
 		// Generate a runtime uuid
 		this.#id = options?.id || uuid12();
+		this.#sessionId = options?.sessionId || null; // Throw?
 		this.documents = db;
 
 		this.#tree = tree
 		this.#layerIndex = this.#tree.layers; // TODO: Refactor
+
+		// Set the base url
+		let baseUrl = options.baseUrl || CONTEXT_URL_BASE; // Throw?
+		this.#baseUrl = baseUrl.startsWith('/') ? baseUrl : '/' + baseUrl;
 
 		// Set the context url
 		this.setUrl(
@@ -58,10 +66,9 @@ class Context extends EE {
 			CONTEXT_AUTOCREATE_LAYERS
 		);
 
-		debug(`Context with url "${this.#url}", session id: "${this.#id}" initialized`);
+		debug(`Context with url "${this.#url}", session id: "${this.#sessionId}", baseUrl: "${this.#baseUrl}" initialized`);
 
-		// Maps containing pointers to global in-memory
-		// bitmap cache
+		// Maps containing references to global in-memory bitmap cache
 		this.contextBitmaps = new Map();
 		this.featureBitmaps = new Map();
 	}
@@ -73,12 +80,19 @@ class Context extends EE {
 	get id() {
 		return this.#id;
 	}
+
+	get sessionId() {
+		return this.#sessionId;
+	}
+
 	get url() {
 		return this.#url;
 	}
+
 	get path() {
 		return this.#path;
 	}
+
 	get pathArray() {
 		return this.#array;
 	}
@@ -140,14 +154,15 @@ class Context extends EE {
 		return this.setUrl(url, autoCreateLayers);
 	}
 
-	setUrl(url = CONTEXT_URL_BASE, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
-		if (!url || typeof url !== "string")
-		throw new Error(`Context url must be of type string, "${typeof url}" given`);
+	setUrl(url, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
+		if (!this.validateContextUrl(url)) {
+			throw new Error(`Invalid context url "${url}", base url "${this.#baseUrl}"`);
+		}
 
-		let parsed = new Url(url);
+		let parsed = new Url(url, this.#baseUrl);
 		if (this.#url === parsed.url) return this.#url;
 
-		debug(`Setting context url for session ID "${this.#id}" to "${parsed.url}"`);
+		debug(`Setting context url for context "${this.#id}", session ID "${this.#sessionId}" to "${parsed.url}"`);
 		if (!this.#tree.insert(parsed.path, null, autoCreateLayers)) {
 			debug( `Context url "${parsed.url}" not set, path "${parsed.path}" not found`);
 			return false;
@@ -158,6 +173,7 @@ class Context extends EE {
 		this.#path = parsed.path;
 		this.#array = parsed.array;
 
+		// TODO: Move to the tree class
 		this.#initializeLayers(parsed.array);
 
 		this.emit("url", this.#url);
@@ -408,7 +424,45 @@ class Context extends EE {
 	 * Misc
 	 */
 
-	static validateContextUrl(url) {}
+    /**
+     * Validates a given URL against the base URL.
+     * @param {string} url - The URL to validate.
+     * @returns {boolean} True if valid, false otherwise.
+     */
+	validateContextUrl(url) {
+		// TODO: Refactor, could be done in 2 lines of nicely formatted code
+		if (!url || typeof url !== "string") {
+			console.error(`Context url must be of type string, "${typeof url}" given`);
+			return false;
+		}
+
+		if (!url.startsWith(this.#baseUrl)) {
+			console.error(`Context url "${url}" must start with base url "${this.#baseUrl}"`);
+			return false;
+		};
+
+		return true;
+	}
+
+    /**
+     * Validates a given URL against the base URL.
+     * @param {string} url - The URL to validate.
+     * @returns {boolean} True if valid, false otherwise.
+     */
+	static validateContextUrl(url, baseUrl = CONTEXT_URL_BASE) {
+		// TODO: Refactor, could be done in 2 lines of nicely formatted code
+		if (!url || typeof url !== "string") {
+			console.error(`Context url must be of type string, "${typeof url}" given`);
+			return false;
+		}
+
+		if (!url.startsWith(baseUrl)) {
+			console.error(`Context url "${url}" must start with base url "${baseUrl}"`);
+			return false;
+		};
+
+		return true;
+	}
 
 	getEventListeners() {
 		return this.eventNames();
@@ -417,6 +471,8 @@ class Context extends EE {
 	stats() {
 		return {
 			id: this.#id,
+			sessionId: this.#sessionId,
+			baseUrl: this.#baseUrl,
 			url: this.#url,
 			path: this.#path,
 			array: this.#array,
@@ -428,6 +484,8 @@ class Context extends EE {
 
 	// Clean up resources associated with this context
 	destroy() {
+		debug(`Destroying context "${this.#id}"`)
+
 		// Emit a "destroy" event
 		this.emit("destroy");
 
@@ -436,7 +494,9 @@ class Context extends EE {
 
 		// Set private fields to null to release memory
 		this.#id = null;
+		this.#sessionId = null;
 		this.#url = null;
+		this.#baseUrl = null;
 		this.#path = null;
 		this.#array = null;
 		this.#contextArray = null;
@@ -447,9 +507,6 @@ class Context extends EE {
 	/**
 	 * Internal methods
 	 */
-
-
-
 
 	#initializeTreeEventListeners() {
 		this.#tree.on("update", (tree) => {

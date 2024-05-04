@@ -6,14 +6,19 @@ const { log } = require('console'); // TODO: Replace with logger
 const Context = require('./lib/Context')
 const Tree = require('./lib/Tree')
 
-// Constants
+// Module defaults // TODO: Cetralize these
 const MAX_CONTEXTS = 1024 // 2^10
+const CONTEXT_AUTOCREATE_LAYERS = true;
+const CONTEXT_URL_PROTO = "universe";
+const CONTEXT_URL_BASE = "/";
+const CONTEXT_URL_BASE_ID = "universe";
 
 class ContextManager extends EventEmitter {
 
     #db;
     #tree;
     #layers;
+    //#baseUrl; // Might be useful for future use cases
 
     constructor(options = {}) {
         super()
@@ -30,11 +35,8 @@ class ContextManager extends EventEmitter {
     createContext(url = '/', options = {}) {
         if (this.activeContexts.size >= MAX_CONTEXTS) throw new Error('Maximum number of contexts reached')
 
-        // TODO: Tidy up
-        if (options.type === 'universe') options.id = 'universe'
-
         // If a context with the same id already exists, return it instead of creating a new one
-        if (this.activeContexts.has(options.id)) return this.activeContexts.get(options.id)
+        if (options.id && this.activeContexts.has(options.id)) return this.activeContexts.get(options.id)
 
         // Create a new context
         let context = new Context(url, this.#db, this.#tree, options)
@@ -43,9 +45,16 @@ class ContextManager extends EventEmitter {
         return context
     }
 
-    getContext(id = 'universe') {
-        let context = this.activeContexts.get(id);
-        if (!context) return null;
+    getContext(id) {
+        let context;
+
+        if (!id) {
+            context = (this.activeContexts.size > 0) ? this.activeContexts.values().next().value : this.createContext()
+        } else {
+            context = this.activeContexts.get(id);
+            if (!context) throw new Error(`Context with id ${id} not found`)
+        }
+
         return context;
     }
 
