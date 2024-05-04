@@ -11,14 +11,14 @@ const DEFAULT_URL_PATH = '/'
 
 class Url {
 
-    constructor(url, protocol = DEFAULT_URL_PROTOCOL) {
+    constructor(url, baseUrl = null, protocol = DEFAULT_URL_PROTOCOL) {
+        this._baseUrl = baseUrl;
         this._protocol = protocol;
         this.setUrl(url)
     }
 
     set url(url) { this.setUrl(url); }
     setUrl(url = DEFAULT_URL_PATH) {
-
         if (typeof url !== 'string') throw new Error('Context path needs to be of type string')
 
         // Get the URL path
@@ -80,23 +80,25 @@ class Url {
 
     getPath(url) {
         let sanitized = url.toLowerCase();
+
+        // Ensure the URL starts correctly with base URL if needed
+        if (!url.startsWith(DEFAULT_URL_PROTOCOL) && !url.startsWith('/') && this._baseUrl) {
+            sanitized = this._baseUrl + '/' + sanitized;
+        }
+
         sanitized = sanitized
-            .replace(/\\/g, '/') // replace backslash with slash
-            .replace(/^[^:]+:/, '') // remove the protocol
-            .replace(/\/{3,}/g, '//') // replace three or more consecutive slashes with two slashes
-            .replace(/([^:])\/{2,}/g, "$1/") // replace two or more slashes with one, but not following a colon
-            .replace(/ +/g, '_') // replace spaces with underscore
-            .replace(/[`$:%^*;'",<>{}[\]\\]/gi, ''); // replace special characters
+            .replace(/\\/g, '/') // Standardize on forward slashes
+            .replace(/^[^:]+:/, '') // Remove the protocol
+            .replace(/\/+/g, '/') // Reduce multiple slashes to a single slash
+            .replace(/ +/g, '_') // Replace spaces with underscores
+            .replace(/[`$:%^*;'",<>{}[\]\\]/gi, ''); // Remove special characters
 
         sanitized = sanitized.split('/')
             .map(part => part.trim())
-            .filter(part => part !== '_')
+            .filter(part => part.length > 0) //&& part !== '_')
             .join("/");
 
-        // Remove leading slash
-        //sanitized = sanitized.startsWith('/') ? sanitized.slice(1) : sanitized;
-
-        // Fallback to DEFAULT_URL_PATH
+        if (!sanitized.startsWith("/")) sanitized = "/" + sanitized
         return sanitized || DEFAULT_URL_PATH;
     }
 

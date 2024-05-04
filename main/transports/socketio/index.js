@@ -11,6 +11,7 @@ const io = require('socket.io')
 
 // Routes
 // TODO: Rework, this does not make logical sense as versioning can be defined in the routes.js file
+//const sessionRoutes = require('./routes/v1/session');
 const contextRoutes = require('./routes/v1/context');
 const documentsRoutes = require('./routes/v1/documents');
 
@@ -19,6 +20,9 @@ const DEFAULT_PROTOCOL = 'http'
 const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 8002
 const DEFAULT_API_TOKEN = 'canvas-socketio-api'
+
+// Constants
+const ROUTES = require('./routes.js');
 
 // Middleware functions
 function validateApiKey(key) {
@@ -60,9 +64,8 @@ class SocketIoTransport extends Service {
 
         if (!options.contextManager) throw new Error('contextManager not defined');
         this.contextManager = options.contextManager;
-
-        // Workaround till I implement proper multi-context routes!
-        this.context = this.contextManager.getContext() // Returns the universe by default
+        if (!options.sessionManager) throw new Error('sessionManager not defined');
+        this.sessionManager = options.sessionManager;
 
         debug(`Socket.io Transport initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
     }
@@ -86,14 +89,50 @@ class SocketIoTransport extends Service {
 
         this.server.on('connection', (socket) => {
             debug(`Client connected: ${socket.id}`);
+            socket.sessionManager = this.sessionManager;
+            socket.session = socket.sessionManager.getSession(); // Default session
+            socket.context = socket.session.getContext(); // Default context
 
-            // Setup routes && event handlers
-            contextRoutes(socket, this.context);
+            contextRoutes(socket);
             documentsRoutes(socket, this.canvas.documents);
+
+            socket.on(ROUTES.SESSION_LIST, (data, callback) => {
+                debug(`${ROUTES.SESSION_LIST} event`);
+                if (typeof data === 'function') { callback = data; }
+                const sessions = socket.sessionManager.listSessions();
+                const response = new ResponseObject();
+                callback(response.success(sessions).getResponse());
+            });
+
+            socket.on(ROUTES.SESSION_CREATE, (sessionId, sessionOptions, callback) => {
+                debug(`${ROUTES.SESSION_CREATE} event`);
+                socket.session = socket.sessionManager.createSession(sessionId, sessionOptions);
+                socket.context = socket.session.getContext(); // Returns default session context
+                contextRoutes(socket)
+                const response = new ResponseObject();
+                callback(response.success(socket.session.id).getResponse());
+            });
+
+            socket.on(ROUTES.SESSION_CONTEXT_GET, (contextId, callback) => {
+                socket.context = socket.session.getContext(contextId);
+                // Rebind routes to new context
+                contextRoutes(socket);
+                const response = new ResponseObject();
+                callback(response.success(socket.context.id).getResponse());
+            });
+
+            socket.on(ROUTES.SESSION_CONTEXT_CREATE, (contextUrl, contextOptions, callback) => {
+                socket.context = socket.session.createContext(contextUrl, contextOptions);
+                // Rebind routes to new context
+                contextRoutes(socket);
+                const response = new ResponseObject();
+                callback(response.success(socket.context.id).getResponse());
+            });
 
             socket.on('disconnect', () => {
                 console.log(`Client disconnected: ${socket.id}`);
             });
+
         });
     }
 

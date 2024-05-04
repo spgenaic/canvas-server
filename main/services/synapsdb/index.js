@@ -10,7 +10,6 @@ const Index = require('./index/index.js')
 
 // Schemas
 const documentSchemas = require('./schemas/registry.js')
-const { de } = require('date-fns/locale')
 
 // Constants
 const INTERNAL_BITMAP_ID_MIN = 1000
@@ -221,7 +220,7 @@ class SynapsDB extends EE {
         if (this.index.hash2oid.has(parsed.meta.checksum)) {
             let existingDocument = this.getDocumentByHash(parsed.meta.checksum);
             debug(`Document hash "${parsed.meta.checksum}" already found in the database, updating exiting record: "${existingDocument.meta.checksum}/${existingDocument.id}"`);
-            parsed.id = existingDocument.id; // TODO: Rework + move to updateDopcument()
+            parsed.id = existingDocument.id; // TODO: Rework + move to updateDocument()
         }
 
         if (!parsed.id) {
@@ -274,43 +273,26 @@ class SynapsDB extends EE {
             throw new Error("Document array required");
         }
 
-        const promises = documentArray.map(doc =>
-            this.insertDocument(doc, contextArray, featureArray, filterArray)
-        );
-
-        // Await all promises to settle
-        const results = await Promise.allSettled(promises);
-        debug(`Promise results: ${results.length}`)
-
-        const successResults = [];
-        const errors = [];
-
-        // Process results
-        // TODO: Refactor this crap! troubleshooting this mess is a ** ** **** ******
-        results.forEach((result, index) => {
-            if (result.status === 'fulfilled') {
-                successResults.push(result.value);
-            } else {
-                errors.push(`Document ${index} failed: ${result.reason}`);
+        const insertResults = [];
+        for (const [index, doc] of documentArray.entries()) {
+            try {
+                const result = await this.insertDocument(doc, contextArray, featureArray, filterArray);
+                insertResults.push(result);
+            } catch (error) {
+                throw new Error(`Document ${index} failed: ${error.message}`);
             }
-        });
-
-        if (errors.length > 0) {
-            throw new Error(`Errors inserting documents: ${errors.join("; ")}`);
         }
 
-        debug(`Inserted documents: ${successResults.join(', ')} (${successResults.length})`);
-        return successResults;
+        debug(`Inserted documents: (${insertResults.length})`);
+        return insertResults;
     }
-
-
 
     async updateDocument(document, contextArray = [], featureArray = [], filterArray = []) {
         return this.insertDocument(document, contextArray, featureArray, filterArray);
     }
 
     async updateDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
-        debug(`updateDocumentArray(): ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`updateDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
             throw new Error("Document array required");
@@ -351,8 +333,9 @@ class SynapsDB extends EE {
             // Remove document from DB
             await this.documents.remove(id)
             // Clear indexes
-            await this.index.clear(id, document.checksum)
-        } catch(error) {
+            await this.index.clear(id, document.meta.checksum)
+        } catch (error) {
+            console.error(`Error deleting document with ID ${id}, ${error}`)
             throw new Error(`Error deleting document with ID ${id}, ${error}`)
         }
 
@@ -378,12 +361,16 @@ class SynapsDB extends EE {
 
 
     async removeDocument(id, contextArray, featureArray, filterArray) {
-        debug(`removeDocument(): ID: ${id}; ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`removeDocument(): ID: ${id}; ContextArray: "${contextArray}"; FeatureArray: ${featureArray}`);
         if (!id) throw new Error("Document ID required");
-        if (!contextArray || !Array.isArray(contextArray) || contextArray.length < 1 ) throw new Error("Context array required");
+        if (!Array.isArray(contextArray) || contextArray.length < 1) {
+            throw new Error("Context array required, got " + JSON.stringify(contextArray));
+        }
 
         let document = this.documents.get(id);
-        if (!document) throw new Error("Document not found"); //return false;
+        if (!document) {
+            throw new Error(`Document ID "${id}" not found`); //return false;
+        }
 
         // Remove document from Context bitmaps
         await this.index.untickContextArray(contextArray, document.id);
@@ -397,7 +384,7 @@ class SynapsDB extends EE {
     }
 
     async removeDocumentArray(idArray, contextArray, featureArray, filterArray) {
-        debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: ${contextArray}; FeatureArray: ${featureArray}`);
+        debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
         if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
 
         let tasks = [];

@@ -51,7 +51,7 @@ const env = {
     DOTENV: path.join(SERVER_VAR, '.env'),
 
     SERVER: {
-        name: (pkg.productName) ? pkg.productName : pkg.name,
+        appName: (pkg.productName) ? pkg.productName : pkg.name,
         version: pkg.version,
         description: pkg.description,
         license: pkg.license,

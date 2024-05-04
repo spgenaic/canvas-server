@@ -6,10 +6,11 @@ const { uuid12 } = require("./utils");
 // App includes
 const Url = require("./Url");
 
-// Constants
+// Module defaults
 const CONTEXT_AUTOCREATE_LAYERS = true;
 const CONTEXT_URL_PROTO = "universe";
 const CONTEXT_URL_BASE = "/";
+const CONTEXT_URL_BASE_ID = "universe";
 
 
 /**
@@ -19,6 +20,8 @@ const CONTEXT_URL_BASE = "/";
 class Context extends EE {
 
 	#id;
+	#sessionId;
+	#baseUrl;
 	#url;
 	#path;
 	#array;
@@ -47,10 +50,15 @@ class Context extends EE {
 
 		// Generate a runtime uuid
 		this.#id = options?.id || uuid12();
+		this.#sessionId = options?.sessionId || null; // Throw?
 		this.documents = db;
 
 		this.#tree = tree
 		this.#layerIndex = this.#tree.layers; // TODO: Refactor
+
+		// Set the base url
+		let baseUrl = options.baseUrl || CONTEXT_URL_BASE; // Throw?
+		this.#baseUrl = baseUrl.startsWith('/') ? baseUrl : '/' + baseUrl;
 
 		// Set the context url
 		this.setUrl(
@@ -58,12 +66,13 @@ class Context extends EE {
 			CONTEXT_AUTOCREATE_LAYERS
 		);
 
-		debug(`Context with url "${this.#url}", session id: "${this.#id}" initialized`);
+		debug(`Context with url "${this.#url}", session id: "${this.#sessionId}", baseUrl: "${this.#baseUrl}" initialized`);
 
-		// Maps containing pointers to global in-memory
-		// bitmap cache
+		// Maps containing references to global in-memory bitmap cache
 		this.contextBitmaps = new Map();
 		this.featureBitmaps = new Map();
+
+		// TODO: Pre-heat bitmaps into memory for session-restore on context creation?
 	}
 
 	/**
@@ -73,12 +82,23 @@ class Context extends EE {
 	get id() {
 		return this.#id;
 	}
+
+	get sessionId() {
+		return this.#sessionId;
+	}
+
+	get baseUrl() {
+		return this.#baseUrl;
+	}
+
 	get url() {
 		return this.#url;
 	}
+
 	get path() {
 		return this.#path;
 	}
+
 	get pathArray() {
 		return this.#array;
 	}
@@ -140,14 +160,19 @@ class Context extends EE {
 		return this.setUrl(url, autoCreateLayers);
 	}
 
-	setUrl(url = CONTEXT_URL_BASE, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
-		if (!url || typeof url !== "string")
-		throw new Error(`Context url must be of type string, "${typeof url}" given`);
+	setUrl(url, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
+		if (!url || typeof url !== "string") {
+			throw new Error(`Context url must be of type string, "${typeof url}" given`);
+		}
 
-		let parsed = new Url(url);
+		let parsed = new Url(url, this.#baseUrl);
 		if (this.#url === parsed.url) return this.#url;
 
-		debug(`Setting context url for session ID "${this.#id}" to "${parsed.url}"`);
+		if (!parsed.path.startsWith(this.#baseUrl)) {
+			throw new Error(`Context path "${parsed.path}" must start with base url "${this.#baseUrl}"`);
+		};
+
+		debug(`Setting context url for context "${this.#id}", session ID "${this.#sessionId}" to "${parsed.url}"`);
 		if (!this.#tree.insert(parsed.path, null, autoCreateLayers)) {
 			debug( `Context url "${parsed.url}" not set, path "${parsed.path}" not found`);
 			return false;
@@ -158,6 +183,7 @@ class Context extends EE {
 		this.#path = parsed.path;
 		this.#array = parsed.array;
 
+		// TODO: Move to the tree class
 		this.#initializeLayers(parsed.array);
 
 		this.emit("url", this.#url);
@@ -278,7 +304,7 @@ class Context extends EE {
 
 	async listDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Listing documents under session ID "${this.#id}", context url "${this.#url}"`)
+		debug(`Listing documents linked to context "${this.#url}"`)
 		debug(`Context array: "${this.#contextArray}"`)
 		debug(`Feature array: "${featureArray}"`)
 		debug(`Filter array: "${filterArray}"`)
@@ -305,10 +331,10 @@ class Context extends EE {
 
 	getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
-		debug(`Getting documents under session ID "${this.#id}", context url "${this.#url}"`)
-		debug(`Context array: ${this.#contextArray}`)
-		debug(`Feature array: ${featureArray}`)
-		debug(`Filter array: ${filterArray}`)
+		debug(`Getting documents linked to context "${this.#url}"`)
+		debug(`Context array: "${this.#contextArray}"`)
+		debug(`Feature array: "${featureArray}"`)
+		debug(`Filter array: "${filterArray}"`)
 		const result = this.documents.getDocuments(
 			this.#contextArray,
 			featureArray,
@@ -329,7 +355,7 @@ class Context extends EE {
 	}
 
 	async insertDocumentArray(docArray, featureArray = this.#featureArray) {
-		debug(`Inserting document array under session ID "${this.#id}", context url "${this.#url}"`);
+		debug(`Inserting document array to context "${this.#url}"`);
 		debug(`Feature array: ${featureArray}`)
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.insertDocumentArray(
@@ -360,16 +386,17 @@ class Context extends EE {
 			throw new Error(`Cannot remove document ID "${id}" from universe, use deleteDocument() instead`)
 		}
 
-		debug(`Removing document with id "${id}" from session ID "${this.#id}, context url "${this.#url}"`);
+		debug(`Removing document with id "${id}" from context "${this.#url}"`);
 		if (typeof id !== "string" && typeof id !== "number") {
 			throw new Error(`Document ID must be of type string or number, "${typeof id}" given`);
 		}
+
 		const result = await this.documents.removeDocument(id, this.#contextArray);
 		return result;
 	}
 
 	async removeDocumentArray(idArray) {
-		debug(`Removing document array from context "${this.#id}, context url "${this.#url}"`);
+		debug(`Removing document array from context "${this.#url}"`);
 		if (!Array.isArray(idArray)) {
 			throw new Error(`Document ID array must be of type array, "${typeof idArray}" given`);
 		}
@@ -407,8 +434,6 @@ class Context extends EE {
 	 * Misc
 	 */
 
-	static validateContextUrl(url) {}
-
 	getEventListeners() {
 		return this.eventNames();
 	}
@@ -416,6 +441,8 @@ class Context extends EE {
 	stats() {
 		return {
 			id: this.#id,
+			sessionId: this.#sessionId,
+			baseUrl: this.#baseUrl,
 			url: this.#url,
 			path: this.#path,
 			array: this.#array,
@@ -427,6 +454,8 @@ class Context extends EE {
 
 	// Clean up resources associated with this context
 	destroy() {
+		debug(`Destroying context "${this.#id}"`)
+
 		// Emit a "destroy" event
 		this.emit("destroy");
 
@@ -435,7 +464,9 @@ class Context extends EE {
 
 		// Set private fields to null to release memory
 		this.#id = null;
+		this.#sessionId = null;
 		this.#url = null;
+		this.#baseUrl = null;
 		this.#path = null;
 		this.#array = null;
 		this.#contextArray = null;
@@ -446,9 +477,6 @@ class Context extends EE {
 	/**
 	 * Internal methods
 	 */
-
-
-
 
 	#initializeTreeEventListeners() {
 		this.#tree.on("update", (tree) => {
@@ -530,6 +558,6 @@ class Context extends EE {
 		return parsed.filter((x, i, a) => a.indexOf(x) === i);
 		// return [... new Set(parsed)]
 	}
-	}
+}
 
-	module.exports = Context;
+module.exports = Context;

@@ -156,7 +156,9 @@ class Index extends EE {
 
     async untickContextArray(idOrArray, contextArray) {
         if (!idOrArray) throw new Error('Document ID required')
-        if (!contextArray || !contextArray.length) throw new Error('Context array required')
+        if (contextArray.length < 1) {
+            throw new Error('Context array required')
+        }
 
         if (typeof idOrArray === 'number') {
             await this.bmContexts.untick(idOrArray, contextArray)

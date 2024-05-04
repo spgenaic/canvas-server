@@ -34,7 +34,7 @@ class JsonMap extends Map {
 
     async set(key, value) {
         super.set(key, value);
-        await this.saveSync();
+        await this.save();
     }
 
     setSync(key, value) {
@@ -44,7 +44,7 @@ class JsonMap extends Map {
 
     async delete(key) {
         super.delete(key);
-        await this.saveSync();
+        await this.save();
     }
 
     deleteSync(key) {
@@ -86,7 +86,6 @@ class JsonMap extends Map {
             const jsonData = JSON.parse(data)
             for (const [key, value] of jsonData) { super.set(key, value); }
             this.#initialized = true
-
         } catch (err) {
             if (err.code === 'ENOENT') {
                 console.info(`The file ${this.filePath} does not exist, file will be created on first update`);
@@ -97,15 +96,11 @@ class JsonMap extends Map {
         }
     }
 
-    // TODO: Rewrite, inefficient to always rewrite the whole file
-    // We don't need to use json here
     async save() {
         const mapAsJson = JSON.stringify([...this], null, 2);
         await writeFile(this.filePath, mapAsJson, { flag: 'w' });
     }
 
-    // TODO: Rewrite, inefficient to always rewrite the whole file
-    // We don't need to use json here
     saveSync() {
         const mapAsJson = JSON.stringify([...this], null, 2);
         writeFileSync(this.filePath, mapAsJson, { flag: 'w' });

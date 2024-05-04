@@ -23,7 +23,7 @@ class Tab extends Document {
 
             index: {
                 primaryChecksumAlgorithm: 'sha1',
-                primaryChecksumField: ['data.url'],
+                primaryChecksumFields: ['data.url'],
                 staticFeatureBitmapFields: ['type', 'meta.browser'],
                 dynamicFeatureBitmapFields: [],
                 fullTextIndexFields: ['data.title'],
@@ -31,13 +31,16 @@ class Tab extends Document {
             },
 
             meta: {
+                browser: 'unknown',
+                ...params.meta,
                 dataContentType: DOCUMENT_DATA_FORMAT,
-                dataContentEncoding: 'utf8',
-                browser: params.meta.browser || 'unknown'
+                dataContentEncoding: 'utf8'
             },
 
             data: params.data
         })
+
+        this.meta.checksum = this.calculateChecksum(this.index.primaryChecksumFields);
 
     }
 
@@ -60,7 +63,7 @@ class Tab extends Document {
 
         base.index = {
             primaryChecksumAlgorithm: 'sha1',
-            primaryChecksumField: ['data.url'],
+            primaryChecksumFields: ['data.url'],
             staticFeatureBitmapFields: ['type', 'meta.browser'],
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: ['data.title'],

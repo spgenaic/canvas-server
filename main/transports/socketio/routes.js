@@ -2,6 +2,23 @@ module.exports = {
     // Context events
     EVENT_CONTEXT_URL: 'context:url',
 
+    // Session routes
+    SESSION_LIST: 'session:list',
+    SESSION_LIST_ACTIVE: 'session:list:active', // TODO: Will be merged to SESSION_LIST
+    SESSION_GET: 'session:get',
+    SESSION_GET_ID: 'session:get:id',
+    SESSION_CREATE: 'session:create',
+    SESSION_REMOVE: 'session:remove',
+    SESSION_OPEN: 'session:open',
+    SESSION_CLOSE: 'session:close',
+    SESSION_DELETE: 'session:delete',
+    // Session context routes
+    SESSION_CONTEXT_LIST: 'session:context:list',
+    SESSION_CONTEXT_GET: 'session:context:get',
+    SESSION_CONTEXT_GET_ID: 'session:context:get:id',
+    SESSION_CONTEXT_CREATE: 'session:context:create',
+    SESSION_CONTEXT_REMOVE: 'session:context:remove',
+
     // Context routes
     CONTEXT_GET_ID: 'context:get:id',
 

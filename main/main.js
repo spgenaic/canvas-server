@@ -33,6 +33,15 @@ const RoleManager = require('./managers/role');
 // Transports
 const TransportRest = require('./transports/rest');
 const TransportSocketIO = require('./transports/socketio');
+const { max } = require('date-fns');
+
+// App constants
+const MAX_SESSIONS = 32 // 2^5
+const MAX_CONTEXTS_PER_SESSION = 32 // 2^5
+const CONTEXT_AUTOCREATE_LAYERS = true;
+const CONTEXT_URL_PROTO = "universe";
+const CONTEXT_URL_BASE = "/";
+const CONTEXT_URL_BASE_ID = "universe";
 
 
 /**
@@ -43,7 +52,6 @@ class Canvas extends EventEmitter {
 
     constructor(options = {
         sessionEnabled: true,
-        initGlobalContext: true,
         enableUserRoles: true
     }) {
 
@@ -74,8 +82,7 @@ class Canvas extends EventEmitter {
          * Runtime
          */
 
-        this.sessionEnabled = options.sessionEnabled; // read values from config
-        this.initGlobalContext = options.initGlobalContext;
+        this.sessionEnabled = options.sessionEnabled;
         this.enableUserRoles = options.enableUserRoles;
 
 
@@ -118,16 +125,18 @@ class Canvas extends EventEmitter {
             ]
         });
 
-        this.sessionManager = new SessionManager({
-            db: this.db.createDataset('session')
-
-        });
+        this.roleManager = new RoleManager();
 
         this.contextManager = new ContextManager({
             db: this.db
         })
 
-        this.roleManager = new RoleManager()
+        this.sessionManager = new SessionManager({
+            sessionStore: (this.sessionEnabled) ? this.db.createDataset('session') : new Map(),
+            contextManager: this.contextManager, // TODO: Refactor/review
+            maxSessions: MAX_SESSIONS,
+            maxContextsPerSession: MAX_CONTEXTS_PER_SESSION,
+        });
 
 
         /**
@@ -146,11 +155,12 @@ class Canvas extends EventEmitter {
     }
 
     // Getters
-    static get name() { return SERVER.name; }
+    static get appName() { return SERVER.appName; }
     static get version() { return SERVER.version; }
     static get description() { return SERVER.description; }
     static get license() { return SERVER.license; }
-    static get paths() { return SERVER.paths; }
+    static get serverPaths() { return SERVER.paths; }
+    static get userPaths() { return USER.paths; }
     get pid() { return this.PID; }
     get ipc() { return this.IPC; }
     get status() { return this.status; }
@@ -160,23 +170,20 @@ class Canvas extends EventEmitter {
      * Canvas service controls
      */
 
-    async start(url, options = {}) {
-        if (this.status == 'running' && this.isMaster) throw new Error('Canvas Server already running')
 
+    async start(url, options = {
+        // Maybe we should support starting the whole canvas-server with a locked context path
+        // but lets be KISS-y for now
+    }) {
+        if (this.status == 'running' && this.isMaster) throw new Error('Canvas Server already running')
         this.status = 'starting'
         this.emit('starting')
-
-        this.setupProcessEventListeners()
-
-        // Creates the default "universe" context
-        if (this.initGlobalContext) {
-            this.contextManager.createContext('/', {
-                type: 'universe'
-            })
-        }
-
         try {
-            if (this.sessionEnabled) await this.sessionManager.loadSession()
+            this.setupProcessEventListeners()
+
+            // Start the default session (if enabled, maybe we'll remove this)
+            if (this.sessionEnabled) { this.sessionManager.createSession('default'); }
+
             await this.initializeServices()
             await this.initializeTransports()
             await this.initializeRoles()
@@ -185,8 +192,9 @@ class Canvas extends EventEmitter {
             process.exit(1);
         }
 
-        this.status = 'running'
-        this.emit('running')
+        this.status = 'running';
+        this.emit('running');
+        return true;
     }
 
     async shutdown(exit = true) {
@@ -194,7 +202,7 @@ class Canvas extends EventEmitter {
         this.emit('before-shutdown')
         this.status = 'stopping'
         try {
-            if (this.sessionEnabled) { await this.sessionManager.saveSession(); }
+            if (this.sessionEnabled) { await this.sessionManager.saveSessions(); }
             await this.shutdownRoles();
             await this.shutdownTransports();
             await this.shutdownServices();
@@ -221,12 +229,15 @@ class Canvas extends EventEmitter {
      * Session
      */
 
-    listSessions() {
-        return this.sessionManager.listSessions()
+    listActiveSessions() { return this.sessionManager.listActiveSessions(); }
+
+    async listSessions() {
+        let sessions = await this.sessionManager.listSessions();
+        return sessions;
     }
 
-    createSession(id, options = {}) {
-        return this.sessionManager.createSession(id, options)
+    createSession(id, sessionOptions = {}) {
+        return this.sessionManager.createSession(id, sessionOptions)
     }
 
     openSession(id) {
@@ -237,29 +248,12 @@ class Canvas extends EventEmitter {
         return this.sessionManager.closeSession(id)
     }
 
-    removeSession(id) {
-        return this.sessionManager.removeSession(id)
+    deleteSession(id) {
+        return this.sessionManager.deleteSession(id)
     }
 
-
-    /**
-     * Contexts
-     */
-
-    createContext(url = '/', options = {}) {
-        let context = this.contextManager.createContext(url, options)
-        return context
-    }
-
-    getContext(id) { return this.contextManager.getContext(id); }
-
-    removeContext(id) { return this.contextManager.removeContext(id); }
-
-    listContexts() { return this.contextManager.listContexts(); }
-
-    lockContext(id, url) { return this.contextManager.lockContext(id, url); }
-
-    unlockContext(id) { return this.contextManager.unlockContext(id); }
+    // saveSession(id) { return this.sessionManager.saveSession(id) }
+    // saveSessions() { return this.sessionManager.saveSessions() }
 
 
     /**
@@ -288,13 +282,15 @@ class Canvas extends EventEmitter {
             { name: 'socketio', class: TransportSocketIO }
         ];
 
+        // TODO: The whole thing has to be refactored
         for (let transport of transports) {
             this.transports[transport.name] = new transport.class({
                 host: config.get(`${transport.name}.host`),
                 port: config.get(`${transport.name}.port`),
                 canvas: this,
                 db: this.db,
-                contextManager: this.contextManager
+                contextManager: this.contextManager,
+                sessionManager: this.sessionManager,
             });
 
             try {
