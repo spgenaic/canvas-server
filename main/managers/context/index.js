@@ -54,6 +54,7 @@ class ContextManager extends EventEmitter {
         return context
     }
 
+    // TODO: Temporary method to return a default context
     getContext(id) {
         let context;
 
@@ -62,7 +63,7 @@ class ContextManager extends EventEmitter {
             context = (this.activeContexts.size > 0) ? this.activeContexts.values().next().value : this.createContext()
         } else {
             context = this.activeContexts.get(id);
-            if (!context) throw new Error(`Context with id ${id} not found`)
+            if (!context) throw new Error(`Context with id "${id}" not found`)
         }
 
         return context;

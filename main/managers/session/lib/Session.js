@@ -41,14 +41,23 @@ class Session {
         }
     }
 
+    // TODO: Temporary method to return a default session context
     getContext(id) {
-        // this.contexts.values().next().value
+        let context;
 
+        if (!id) {
+            context = (this.contexts.size > 0) ? this.contexts.values().next().value : this.createContext()
+        } else {
+            context = this.contexts.get(id);
+            if (!context) throw new Error(`Context with id ${id} not found`)
+        }
+
+        return context;
     }
 
     listContexts() {
         return Array.from(this.contexts.values()).reduce((obj, context) => {
-            obj[context.id] = context;
+            obj[context.id] = context.stats(); // Testing
             return obj;
         }, {});
     }
@@ -65,12 +74,6 @@ class Session {
         this.contextManager.removeContext(id);
         this.contexts.delete(id);
         return true;
-    }
-
-    close() {
-        this.contexts.forEach(context => {
-            context.destroy();
-        });
     }
 
     toJSON() {

@@ -282,13 +282,15 @@ class Canvas extends EventEmitter {
             { name: 'socketio', class: TransportSocketIO }
         ];
 
+        // TODO: The whole thing has to be refactored
         for (let transport of transports) {
             this.transports[transport.name] = new transport.class({
                 host: config.get(`${transport.name}.host`),
                 port: config.get(`${transport.name}.port`),
                 canvas: this,
                 db: this.db,
-                contextManager: this.contextManager
+                contextManager: this.contextManager,
+                sessionManager: this.sessionManager,
             });
 
             try {

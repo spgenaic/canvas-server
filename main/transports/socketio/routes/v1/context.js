@@ -16,8 +16,10 @@ const ROUTES = require('../../routes.js')
  * @param {*} context
  */
 
-module.exports = function(socket, context) {
+module.exports = function(socket) {
 
+
+    const context = socket.context;
 
     /**
      * Getters

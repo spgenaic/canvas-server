@@ -71,6 +71,8 @@ class Context extends EE {
 		// Maps containing references to global in-memory bitmap cache
 		this.contextBitmaps = new Map();
 		this.featureBitmaps = new Map();
+
+		// TODO: Pre-heat bitmaps into memory for session-restore on context creation?
 	}
 
 	/**
@@ -83,6 +85,10 @@ class Context extends EE {
 
 	get sessionId() {
 		return this.#sessionId;
+	}
+
+	get baseUrl() {
+		return this.#baseUrl;
 	}
 
 	get url() {
@@ -552,6 +558,6 @@ class Context extends EE {
 		return parsed.filter((x, i, a) => a.indexOf(x) === i);
 		// return [... new Set(parsed)]
 	}
-	}
+}
 
-	module.exports = Context;
+module.exports = Context;

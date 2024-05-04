@@ -8,6 +8,7 @@ const Session = require("./lib/Session");
 // Defaults
 const MAX_SESSIONS = 32 // 2^5
 const MAX_CONTEXTS_PER_SESSION = 32 // 2^5
+const SESSION_DEFAULT_ID = "default";
 const CONTEXT_AUTOCREATE_LAYERS = true;
 const CONTEXT_URL_PROTO = "universe";
 const CONTEXT_URL_BASE = "/";
@@ -55,6 +56,20 @@ class SessionManager extends EventEmitter {
         this.sessions = new Map();
     }
 
+    // TODO: Temporary method to return a default session
+    getSession(id) {
+        let session;
+
+        if (!id) {
+            session = (this.sessions.size > 0) ? this.sessions.values().next().value : this.createSession()
+        } else {
+            session = this.sessions.get(id);
+            if (!session) throw new Error(`Session with id "${id}" not found`)
+        }
+
+        return session;
+    }
+
     createSession(id = 'default', sessionOptions = {}) {
         if (this.sessions.size >= this.#maxSessions) { throw new Error('Maximum number of sessions reached'); }
         if (sessionOptions.baseUrl === undefined) { sessionOptions.baseUrl = CONTEXT_URL_BASE; }
@@ -81,13 +96,22 @@ class SessionManager extends EventEmitter {
         return session;
     }
 
+    listActiveSessions() {
+        return this.sessions.values();
+    }
+
+    async listSessions() {
+        // TODO: Implement a combined list of active and stored sessions
+        return this.sessionStore.keys(); // this is an async method
+    }
+
     openSession(id) {
         if (!id) {
-            debug('No session ID provided, returning the universe')
-            return this.openSession(CONTEXT_URL_BASE_ID);
+            debug('No session ID provided, returning the default session')
+            return this.openSession(SESSION_DEFAULT_ID);
         }
 
-        debug(`Trying to open session ID "${id}"`);
+        debug(`Trying to open session "${id}"`);
         if (this.#isSessionOpen(id)) {
             debug(`Session ID "${id}" found and is active`);
             return this.sessions.get(id);
@@ -157,14 +181,6 @@ class SessionManager extends EventEmitter {
         for (let session of this.sessions.values()) {
             this.#saveSessionToDb(session);
         }
-    }
-
-    listActiveSessions() {
-        return this.sessions.values();
-    }
-
-    async listSessions() {
-        return this.sessionStore.keys(); // this is an async method
     }
 
 
