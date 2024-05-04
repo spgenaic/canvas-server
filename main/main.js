@@ -176,11 +176,14 @@ class Canvas extends EventEmitter {
         // but lets be KISS-y for now
     }) {
         if (this.status == 'running' && this.isMaster) throw new Error('Canvas Server already running')
-
         this.status = 'starting'
         this.emit('starting')
         try {
             this.setupProcessEventListeners()
+
+            // Start the default session (if enabled, maybe we'll remove this)
+            if (this.sessionEnabled) { this.sessionManager.createSession('default'); }
+
             await this.initializeServices()
             await this.initializeTransports()
             await this.initializeRoles()

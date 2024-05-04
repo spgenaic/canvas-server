@@ -98,6 +98,7 @@ class Url {
             .filter(part => part.length > 0) //&& part !== '_')
             .join("/");
 
+        if (!sanitized.startsWith("/")) sanitized = "/" + sanitized
         return sanitized || DEFAULT_URL_PATH;
     }
 

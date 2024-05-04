@@ -155,12 +155,16 @@ class Context extends EE {
 	}
 
 	setUrl(url, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
-		if (!this.validateContextUrl(url)) {
-			throw new Error(`Invalid context url "${url}", base url "${this.#baseUrl}"`);
+		if (!url || typeof url !== "string") {
+			throw new Error(`Context url must be of type string, "${typeof url}" given`);
 		}
 
 		let parsed = new Url(url, this.#baseUrl);
 		if (this.#url === parsed.url) return this.#url;
+
+		if (!parsed.path.startsWith(this.#baseUrl)) {
+			throw new Error(`Context path "${parsed.path}" must start with base url "${this.#baseUrl}"`);
+		};
 
 		debug(`Setting context url for context "${this.#id}", session ID "${this.#sessionId}" to "${parsed.url}"`);
 		if (!this.#tree.insert(parsed.path, null, autoCreateLayers)) {
@@ -423,46 +427,6 @@ class Context extends EE {
 	/**
 	 * Misc
 	 */
-
-    /**
-     * Validates a given URL against the base URL.
-     * @param {string} url - The URL to validate.
-     * @returns {boolean} True if valid, false otherwise.
-     */
-	validateContextUrl(url) {
-		// TODO: Refactor, could be done in 2 lines of nicely formatted code
-		if (!url || typeof url !== "string") {
-			console.error(`Context url must be of type string, "${typeof url}" given`);
-			return false;
-		}
-
-		if (!url.startsWith(this.#baseUrl)) {
-			console.error(`Context url "${url}" must start with base url "${this.#baseUrl}"`);
-			return false;
-		};
-
-		return true;
-	}
-
-    /**
-     * Validates a given URL against the base URL.
-     * @param {string} url - The URL to validate.
-     * @returns {boolean} True if valid, false otherwise.
-     */
-	static validateContextUrl(url, baseUrl = CONTEXT_URL_BASE) {
-		// TODO: Refactor, could be done in 2 lines of nicely formatted code
-		if (!url || typeof url !== "string") {
-			console.error(`Context url must be of type string, "${typeof url}" given`);
-			return false;
-		}
-
-		if (!url.startsWith(baseUrl)) {
-			console.error(`Context url "${url}" must start with base url "${baseUrl}"`);
-			return false;
-		};
-
-		return true;
-	}
 
 	getEventListeners() {
 		return this.eventNames();
