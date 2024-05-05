@@ -221,16 +221,18 @@ module.exports = function(socket) {
     });
 
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);
         const response = new ResponseObject();
-        // TODO: Input validation
-        // TODO: Add featureArray, filterArray, use data.documentArray
-        // to be compliant with the REST API
         let documents = data;
 
+        if (typeof featureArray === 'function') {
+            callback = featureArray;
+            featureArray = [];
+        }
+
         try {
-            const result = await context.insertDocumentArray(documents);
+            const result = await context.insertDocumentArray(documents, featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
             console.error('Internal server error:', err);

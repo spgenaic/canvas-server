@@ -329,7 +329,7 @@ class Context extends EE {
 		return this.documents.getDocumentByHash(hash);
 	}
 
-	getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
+	async getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		debug(`Getting documents linked to context "${this.#url}"`)
 		debug(`Context array: "${this.#contextArray}"`)
