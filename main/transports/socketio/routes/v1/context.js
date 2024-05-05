@@ -199,7 +199,7 @@ module.exports = function(socket) {
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT} event`);
         const response = new ResponseObject();
-        const document = data; // Ensure validation here
+        const document = data; // TODO: Basic validation
 
         if (typeof featureArray === 'function') {
             callback = featureArray;
