@@ -20,7 +20,7 @@ router.get('/url', (req, res) => {
 
     // Check if session is available
     if (sessionId) {
-        session = req.sessionManager.getSession(sessionId);
+        session = req.sessionManager.createSession(sessionId);
         context = session.getContext();
     } else {
         context = req.context;

@@ -56,12 +56,12 @@ class SessionManager extends EventEmitter {
         this.sessions = new Map();
     }
 
-    // TODO: Temporary method to return a default session
     getSession(id) {
         let session;
 
         if (!id) {
-            session = (this.sessions.size > 0) ? this.sessions.values().next().value : this.createSession()
+            debug('No session ID provided, initializing a default session')
+            session = this.createSession(SESSION_DEFAULT_ID);
         } else {
             session = this.openSession(id);
             if (!session) throw new Error(`Session with id "${id}" not found`)

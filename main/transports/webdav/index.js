@@ -36,7 +36,7 @@ exports.start = (ctx) => {
         }
     });
 
-    server.listen(process.env.PORT || 1090, function () {
+    server.listen(8003, function () {
         console.log("Listening on http://localhost:" + server.server.address().port);
     });
 

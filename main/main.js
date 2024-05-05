@@ -236,6 +236,10 @@ class Canvas extends EventEmitter {
         return sessions;
     }
 
+    getSession(id) {
+        return this.sessionManager.getSession(id);
+    }
+
     createSession(id, sessionOptions = {}) {
         return this.sessionManager.createSession(id, sessionOptions)
     }

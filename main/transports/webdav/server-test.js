@@ -1,4 +1,5 @@
 const webdav = require('webdav-server').v2;
+const debug = require('debug')('canvas:transport:webdavd')
 
 /**
  * Canvas server
@@ -8,9 +9,8 @@ const Canvas = require("../../main");
 const canvas = new Canvas();
 canvas.start();
 
-const context = canvas.context;
-const index = canvas.index;
-
+const session = canvas.createSession();
+const context = session.getContext();
 
 const server = new webdav.WebDAVServer({
     port: 8443,
@@ -47,20 +47,24 @@ server.autoLoad((e) => {
         })
     }
 
-    server.start(async () => {
-        await updateWebdavFilesystem();
+    server.start(() => {
+        updateWebdavFilesystem();
         console.log('READY')
     });
 })
 
 context.on('url', async (url) => {
+    debug('URL changed:', url)
     await updateWebdavFilesystem();
 })
 
-
+context.on('change', async (op, result = null) => {
+    debug('Context changed:', op, result)
+    await updateWebdavFilesystem();
+})
 
 async function updateWebdavFilesystem() {
-    let documents = await index.listDocuments(context.contextArray);
+    let documents = await context.getDocuments();
     console.log(documents.length);
 
     // Clear the current folder
@@ -75,11 +79,12 @@ async function updateWebdavFilesystem() {
     // Generate file-representations for each tab
     documents.forEach((document) => {
 
+        console.log(document)
+
         // Generate the file content
         let content = `[Desktop Entry]
-Version=1.0
-Name=${document.data.title}
-Comment=${document.data.title}
+Name="${document.data.title}"
+Comment="${document.data.title}"
 Exec=xdg-open ${document.data.url}
 Terminal=false
 Type=Application

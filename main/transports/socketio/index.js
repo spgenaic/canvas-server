@@ -90,7 +90,7 @@ class SocketIoTransport extends Service {
         this.server.on('connection', (socket) => {
             debug(`Client connected: ${socket.id}`);
             socket.sessionManager = this.sessionManager;
-            socket.session = socket.sessionManager.getSession(); // Default session
+            socket.session = socket.sessionManager.createSession(); // Default session
             socket.context = socket.session.getContext(); // Default context
 
             contextRoutes(socket);
