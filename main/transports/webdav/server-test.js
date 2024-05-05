@@ -85,6 +85,7 @@ async function updateWebdavFilesystem() {
         let content = `[Desktop Entry]
 Name="${document.data.title}"
 Comment="${document.data.title}"
+Icon=google-chrome
 Exec=xdg-open ${document.data.url}
 Terminal=false
 Type=Application
@@ -112,6 +113,15 @@ Type=Application
                     });
                 }
             });
+
+            fs.chmod(filePath, 0o755, (error) => {
+                if (error) {
+                    console.error('Error while changing file permissions:', error);
+                } else {
+                    console.log(`File permissions changed successfully`);
+                }
+            });
+
         });
     });
 }
