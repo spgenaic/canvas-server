@@ -63,7 +63,7 @@ class SessionManager extends EventEmitter {
         if (!id) {
             session = (this.sessions.size > 0) ? this.sessions.values().next().value : this.createSession()
         } else {
-            session = this.sessions.get(id);
+            session = this.openSession(id);
             if (!session) throw new Error(`Session with id "${id}" not found`)
         }
 
@@ -90,7 +90,7 @@ class SessionManager extends EventEmitter {
         this.sessions.set(id, session);
         this.#saveSessionToDb(session);
 
-        debug(`Session id "${id}" created, sessionOptions: ${sessionOptions}`);
+        debug(`Session id "${id}" created, sessionOptions: ${JSON.stringify(sessionOptions)}`);
         this.emit('session-created', id); // Maybe I should return session instead, we'll see
 
         return session;

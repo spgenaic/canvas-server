@@ -11,7 +11,21 @@ const debug = require('debug')('canvas:transports:rest:context');
  */
 
 router.get('/url', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const url = context.url;
     debug(`[GET] URL route triggered with url: ${url}`);
@@ -19,7 +33,21 @@ router.get('/url', (req, res) => {
 });
 
 router.put('/url', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const url = req.body.url;
     const autoCreateLayers = req.body.autoCreateLayers || true;
@@ -34,7 +62,21 @@ router.put('/url', (req, res) => {
 });
 
 router.post('/url', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const url = req.body.url;
     const autoCreateLayers = req.body.autoCreateLayers || true;
@@ -49,7 +91,21 @@ router.post('/url', (req, res) => {
 });
 
 router.get('/array', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const pathArray = context.pathArray;
     debug(`[GET] Array route triggered`);
@@ -70,7 +126,21 @@ router.get('/tree', (req, res) => {
 });
 
 router.get('/path', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const path = context.path;
     debug(`[GET] Path route triggered`);
@@ -78,7 +148,7 @@ router.get('/path', (req, res) => {
 });
 
 router.get('/paths', (req, res) => {
-    const context = req.context;
+    context = req.context;
     const response = new req.ResponseObject();
     const paths = context.paths;
     debug(`[GET] Paths route triggered`);
@@ -86,7 +156,21 @@ router.get('/paths', (req, res) => {
 });
 
 router.put('/path', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const path = req.body.path;
     const autoCreateLayers = req.body.autoCreateLayers;
@@ -99,7 +183,21 @@ router.put('/path', (req, res) => {
 });
 
 router.delete('/path', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const path = req.body.path;
     const recursive = req.body.recursive;
@@ -138,7 +236,21 @@ router.delete('/path', (req, res) => {
  */
 
 router.get('/layers', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const layers = context.listLayers();
     debug('[GET] Layers route triggered');
@@ -146,7 +258,21 @@ router.get('/layers', (req, res) => {
 });
 
 router.get('/layers/:name', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const name = req.params.name;
     const layer = context.getLayer(name);
@@ -159,7 +285,21 @@ router.get('/layers/:name', (req, res) => {
 });
 
 router.patch('/layers/:name', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const name = req.params.name;
     const options = req.params.options;
@@ -184,7 +324,21 @@ router.patch('/layers/:name', (req, res) => {
  */
 
 router.get('/bitmaps', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const bitmaps = context.bitmaps;
     debug('[GET] Bitmaps route triggered');
@@ -192,7 +346,21 @@ router.get('/bitmaps', (req, res) => {
 });
 
 router.get('/bitmaps/context', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const contextArray = context.contextArray;
     debug('[GET] Bitmaps context route triggered');
@@ -200,7 +368,21 @@ router.get('/bitmaps/context', (req, res) => {
 });
 
 router.get('/bitmaps/features', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const featureArray = context.featureArray;
     debug('[GET] Bitmaps features route triggered');
@@ -213,7 +395,21 @@ router.get('/bitmaps/features', (req, res) => {
  */
 
 router.get('/documents', async (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const includeData = req.query.includeData === 'true'; // Checks if includeData query param is 'true'
 
@@ -239,7 +435,21 @@ router.get('/documents', async (req, res) => {
 
 
 router.post('/documents', async (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const documentArray = req.body.documentArray;
     const featureArray = req.body.featureArray;
@@ -265,7 +475,21 @@ router.post('/documents', async (req, res) => {
 
 //router.get('/user', (req, res) => {  });
 router.get('/stats', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const stats = context.stats();
     debug('[GET] Stats route triggered');
@@ -273,7 +497,21 @@ router.get('/stats', (req, res) => {
 });
 
 router.get('/user/home', (req, res) => {
-    const context = req.context;
+    let context;
+    let session;
+
+    // Session overrides
+    const sessionId = req.body.sessionId || req.query.sessionId;
+    const contextId = req.body.contextId || req.query.contextId;
+
+    // Check if session is available
+    if (sessionId) {
+        session = req.sessionManager.getSession(sessionId);
+        context = session.getContext();
+    } else {
+        context = req.context;
+    }
+
     const response = new req.ResponseObject();
     const userDataHome = context.userDataHome;
     debug('[GET] User home route triggered');

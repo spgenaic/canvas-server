@@ -16,6 +16,7 @@ const contextsRoutes = require('./routes/v1/contexts');
 const contextRoutes = require('./routes/v1/context');
 const documentsRoutes = require('./routes/v1/documents');
 const bitmapRoutes = require('./routes/v1/bitmaps');
+const sessionsRoutes = require('./routes/v1/sessions');
 
 // Defaults
 const DEFAULT_PROTOCOL = 'http'
@@ -76,6 +77,8 @@ class RestTransport extends Service {
 
         if (!options.contextManager) throw new Error('contextManager not defined');
         this.contextManager = options.contextManager;
+        if (!options.sessionManager) throw new Error('sessionManager not defined');
+        this.sessionManager = options.sessionManager;
 
         // Workaround till I implement proper multi-context routes!
         this.context = this.contextManager.getContext() // Returns the universe by default
@@ -99,8 +102,15 @@ class RestTransport extends Service {
             this.server.use(validateApiKey(this.#auth.token));
         }
 
+        this.server.use(`${this.#urlBasePath}/sessions`, (req, res, next) => {
+            req.sessionManager = this.sessionManager;
+            req.ResponseObject = ResponseObject;
+            next();
+        }, sessionsRoutes);
+
         // Routes related to the /context endpoint
         this.server.use(`${this.#urlBasePath}/context`, (req, res, next) => {
+            req.sessionManager = this.sessionManager;
             req.context = this.context;
             req.ResponseObject = ResponseObject;
             next();
