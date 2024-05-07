@@ -33,7 +33,6 @@ const RoleManager = require('./managers/role');
 // Transports
 const TransportRest = require('./transports/rest');
 const TransportSocketIO = require('./transports/socketio');
-const { max } = require('date-fns');
 
 // App constants
 const MAX_SESSIONS = 32 // 2^5
@@ -234,6 +233,10 @@ class Canvas extends EventEmitter {
     async listSessions() {
         let sessions = await this.sessionManager.listSessions();
         return sessions;
+    }
+
+    getSession(id) {
+        return this.sessionManager.getSession(id);
     }
 
     createSession(id, sessionOptions = {}) {

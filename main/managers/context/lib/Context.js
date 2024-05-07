@@ -329,7 +329,7 @@ class Context extends EE {
 		return this.documents.getDocumentByHash(hash);
 	}
 
-	getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
+	async getDocuments(featureArray = this.#featureArray, filterArray = this.#filterArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		debug(`Getting documents linked to context "${this.#url}"`)
 		debug(`Context array: "${this.#contextArray}"`)
@@ -343,7 +343,7 @@ class Context extends EE {
 		return result;
 	}
 
-	async insertDocument(doc, featureArray = this.#featureArray) {
+	async insertDocument(doc, featureArray = this.#featureArray, batchOperation = false /* temporary hack */) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.insertDocument(
 			doc,
@@ -351,6 +351,7 @@ class Context extends EE {
 			this.#featureArray
 		);
 		debug(`insertDocument() result ${result}`)
+		if (!batchOperation) this.emit("data", 'insertDocument', result);
 		return result;
 	}
 
@@ -361,9 +362,11 @@ class Context extends EE {
 		const result = await this.documents.insertDocumentArray(
 			docArray,
 			this.#contextArray,
-			this.#featureArray
+			this.#featureArray,
+			true
 		);
 		debug(`insertDocumentArray() result ${result}`)
+		this.emit("data", 'insertDocumentArray', result);
 		return result;
 	}
 
@@ -376,6 +379,7 @@ class Context extends EE {
 			contextArray,
 			featureArray
 		);
+		this.emit("data", 'updateDocument', result);
 		return result;
 	}
 
@@ -392,6 +396,7 @@ class Context extends EE {
 		}
 
 		const result = await this.documents.removeDocument(id, this.#contextArray);
+		this.emit("data", 'removeDocument', result);
 		return result;
 	}
 
@@ -412,6 +417,7 @@ class Context extends EE {
 		}
 
 		const result = await this.documents.deleteDocument(id);
+		this.emit("data", 'deleteDocument', result);
 		return result;
 	}
 

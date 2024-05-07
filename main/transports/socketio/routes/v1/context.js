@@ -199,7 +199,7 @@ module.exports = function(socket) {
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT} event`);
         const response = new ResponseObject();
-        const document = data; // Ensure validation here
+        const document = data; // TODO: Basic validation
 
         if (typeof featureArray === 'function') {
             callback = featureArray;
@@ -221,16 +221,18 @@ module.exports = function(socket) {
     });
 
 
-    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, callback) => {
+    socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);
         const response = new ResponseObject();
-        // TODO: Input validation
-        // TODO: Add featureArray, filterArray, use data.documentArray
-        // to be compliant with the REST API
         let documents = data;
 
+        if (typeof featureArray === 'function') {
+            callback = featureArray;
+            featureArray = [];
+        }
+
         try {
-            const result = await context.insertDocumentArray(documents);
+            const result = await context.insertDocumentArray(documents, featureArray);
             callback(response.success(result).getResponse());
         } catch (err) {
             console.error('Internal server error:', err);
@@ -299,6 +301,12 @@ module.exports = function(socket) {
         debug(`Emitting event ${ROUTES.EVENT_CONTEXT_URL}`)
         const response = new ResponseObject().success(url).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_URL, response);
+    });
+
+    context.on('data', (action, result) => {
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_DATA}`)
+        const response = new ResponseObject().success({action: action, result: result}).getResponse();
+        socket.emit(ROUTES.EVENT_CONTEXT_DATA, response);
     });
 
 };

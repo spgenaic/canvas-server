@@ -1,6 +1,7 @@
 module.exports = {
     // Context events
     EVENT_CONTEXT_URL: 'context:url',
+    EVENT_CONTEXT_DATA: 'context:data',
 
     // Session routes
     SESSION_LIST: 'session:list',
