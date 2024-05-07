@@ -303,6 +303,12 @@ module.exports = function(socket) {
         socket.emit(ROUTES.EVENT_CONTEXT_URL, response);
     });
 
+    context.on('data', (action, result) => {
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_DATA}`)
+        const response = new ResponseObject().success({action: action, result: result}).getResponse();
+        socket.emit(ROUTES.EVENT_CONTEXT_DATA, response);
+    });
+
 };
 
 

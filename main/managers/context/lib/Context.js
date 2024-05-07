@@ -351,7 +351,7 @@ class Context extends EE {
 			this.#featureArray
 		);
 		debug(`insertDocument() result ${result}`)
-		if (!batchOperation) this.emit("change", 'insertDocument', result);
+		if (!batchOperation) this.emit("data", 'insertDocument', result);
 		return result;
 	}
 
@@ -366,7 +366,7 @@ class Context extends EE {
 			true
 		);
 		debug(`insertDocumentArray() result ${result}`)
-		this.emit("change", 'insertDocumentArray', result);
+		this.emit("data", 'insertDocumentArray', result);
 		return result;
 	}
 
@@ -379,7 +379,7 @@ class Context extends EE {
 			contextArray,
 			featureArray
 		);
-		this.emit("change", 'updateDocument', result);
+		this.emit("data", 'updateDocument', result);
 		return result;
 	}
 
@@ -396,7 +396,7 @@ class Context extends EE {
 		}
 
 		const result = await this.documents.removeDocument(id, this.#contextArray);
-		this.emit("change", 'removeDocument', result);
+		this.emit("data", 'removeDocument', result);
 		return result;
 	}
 
@@ -417,7 +417,7 @@ class Context extends EE {
 		}
 
 		const result = await this.documents.deleteDocument(id);
-		this.emit("change", 'deleteDocument', result);
+		this.emit("data", 'deleteDocument', result);
 		return result;
 	}
 
