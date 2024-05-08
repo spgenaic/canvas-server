@@ -45,21 +45,24 @@ module.exports = {
     CONTEXT_DOCUMENT_GET_ARRAY: 'context:document:getArray',
     CONTEXT_DOCUMENT_INSERT: 'context:document:insert',
     CONTEXT_DOCUMENT_INSERT_ARRAY: 'context:document:insertArray',
-    CONTEXT_DOCUMENT_REMOVE: 'context:document:remove',
-    CONTEXT_DOCUMENT_REMOVE_ARRAY: 'context:document:removeArray',
     CONTEXT_DOCUMENT_UPDATE: 'context:document:update',
     CONTEXT_DOCUMENT_UPDATE_ARRAY: 'context:document:updateArray',
+    CONTEXT_DOCUMENT_REMOVE: 'context:document:remove',
+    CONTEXT_DOCUMENT_REMOVE_ARRAY: 'context:document:removeArray',
     CONTEXT_DOCUMENT_DELETE: 'context:document:delete',
     CONTEXT_DOCUMENT_DELETE_ARRAY: 'context:document:deleteArray',
 
     // Document routes
     DOCUMENT_LIST: 'document:list',
     DOCUMENT_GET: 'document:get',
+    DOCUMENT_GET_BY_HASH: 'document:get:byHash',
     DOCUMENT_GET_ARRAY: 'document:getArray',
     DOCUMENT_INSERT: 'document:insert',
     DOCUMENT_INSERT_ARRAY: 'document:insertArray',
     DOCUMENT_UPDATE: 'document:update',
     DOCUMENT_UPDATE_ARRAY: 'document:updateArray',
+    DOCUMENT_REMOVE: 'document:remove',
+    DOCUMENT_REMOVE_ARRAY: 'document:removeArray',
     DOCUMENT_DELETE: 'document:delete',
     DOCUMENT_DELETE_ARRAY: 'document:deleteArray'
 };

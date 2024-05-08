@@ -66,6 +66,8 @@ class SocketIoTransport extends Service {
         this.contextManager = options.contextManager;
         if (!options.sessionManager) throw new Error('sessionManager not defined');
         this.sessionManager = options.sessionManager;
+        if (!options.db) throw new Error('db not defined');
+        this.db = options.db
 
         debug(`Socket.io Transport initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
     }
@@ -94,7 +96,7 @@ class SocketIoTransport extends Service {
             socket.context = socket.session.getContext(); // Default context
 
             contextRoutes(socket);
-            documentsRoutes(socket, this.canvas.documents);
+            documentsRoutes(socket, this.db); // Maybe this is a more readable => better way
 
             socket.on(ROUTES.SESSION_LIST, (data, callback) => {
                 debug(`${ROUTES.SESSION_LIST} event`);
