@@ -198,13 +198,12 @@ module.exports = function(socket) {
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT} event`);
+        debug('Data:', data);
+        debug('Features:', featureArray);
+        debug('Type of callback:', typeof callback);
+
         const response = new ResponseObject();
         const document = data; // TODO: Basic validation
-
-        if (typeof featureArray === 'function') {
-            callback = featureArray;
-            featureArray = [];
-        }
 
         if (typeof callback !== 'function') {
             debug('Error: No callback function provided.');
@@ -219,7 +218,6 @@ module.exports = function(socket) {
             callback(response.error(err).getResponse());
         }
     });
-
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);

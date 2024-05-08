@@ -74,6 +74,8 @@ class SessionManager extends EventEmitter {
         if (this.sessions.size >= this.#maxSessions) { throw new Error('Maximum number of sessions reached'); }
         if (sessionOptions.baseUrl === undefined) { sessionOptions.baseUrl = CONTEXT_URL_BASE; }
 
+        // TODO: Refactor adhering to the single-responsibility principle
+
         debug(`Creating session: ${id}`);
         // TODO: Add support for updating context/session options
         if (this.#isSessionOpen(id)) {
@@ -105,7 +107,7 @@ class SessionManager extends EventEmitter {
         return this.sessionStore.keys(); // this is an async method
     }
 
-    openSession(id) {
+    openSession(id, autoInitSession = true) {
         if (!id) {
             debug('No session ID provided, returning the default session')
             return this.openSession(SESSION_DEFAULT_ID);
@@ -119,9 +121,7 @@ class SessionManager extends EventEmitter {
 
         if (!this.sessionStore.has(id)) {
             debug(`Session ID "${id}" not found in session store`);
-            // Autocreate or throw error? ooor return false??
-            //return this.createSession(id);
-            return false; //throw new Error('Session not found');
+            return (autoInitSession) ? this.createSession(id) : false
         }
 
         let sessionConfig = this.#loadSessionFromDb(id);

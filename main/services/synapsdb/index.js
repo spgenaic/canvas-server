@@ -456,8 +456,48 @@ class SynapsDB extends EE {
 
     #extractDocumentFeatures(doc) {
         let features = [];
-        // TODO
-        features.push(doc.type);
+
+        // Parse doc.index.staticFeatureBitmapFields
+        if (doc.index.staticFeatureBitmapFields && doc.index.staticFeatureBitmapFields.length > 0) {
+            // Check if properties defined in the staticFeatureBitmapFields exist in the document
+            for (let field of doc.index.staticFeatureBitmapFields) {
+                let fields = field.split('.');
+                let value = doc;
+                for (let f of fields) {
+                    if (value[f] === undefined) {
+                        debug(`Field "${field}" not found in document`);
+                        continue;
+                    }
+                    value = value[f];
+                }
+                if (value !== doc) {
+                    features.push(value);
+                }
+            }
+        }
+
+        // Parse doc.index.dynamicFeatureBitmapFields
+        if (doc.index.dynamicFeatureBitmapFields && doc.index.dynamicFeatureBitmapFields.length > 0) {
+            // We'll use the same features array for dynamic features
+            // TODO: Refactor to use separate arrays for static and dynamic features
+            // TODO: Use dotprop to access nested properties
+            for (let field of doc.index.dynamicFeatureBitmapFields) {
+                let fields = field.split('.');
+                let value = doc;
+                for (let f of fields) {
+                    if (value[f] === undefined) {
+                        debug(`Field "${field}" not found in document`);
+                        continue;
+                    }
+                    value = value[f];
+                }
+                if (value !== doc) {
+                    features.push(value);
+                }
+            }
+        }
+
+        debug("Document features: " + features.join(", "));
         return features;
     }
 
