@@ -34,9 +34,11 @@ module.exports = {
     CONTEXT_GET_FEATURE_ARRAY: 'context:get:featureArray',
     CONTEXT_GET_FILTER_ARRAY: 'context:get:filterArray',
 
+    // Context path routes
     CONTEXT_PATH_INSERT: 'context:path:insert',
     CONTEXT_PATH_REMOVE: 'context:path:remove',
     CONTEXT_PATH_MOVE: 'context:path:move',
+    CONTEXT_PATH_COPY: 'context:path:copy',
 
     // Context document routes
     CONTEXT_DOCUMENT_LIST: 'context:document:list',
@@ -64,5 +66,13 @@ module.exports = {
     DOCUMENT_REMOVE: 'document:remove',
     DOCUMENT_REMOVE_ARRAY: 'document:removeArray',
     DOCUMENT_DELETE: 'document:delete',
-    DOCUMENT_DELETE_ARRAY: 'document:deleteArray'
+    DOCUMENT_DELETE_ARRAY: 'document:deleteArray',
+
+    // Layer routes
+    LAYER_LIST: 'layer:list',
+    LAYER_GET: 'layer:get',
+    LAYER_INSERT: 'layer:insert',
+    LAYER_UPDATE: 'layer:update',
+    LAYER_RENAME: 'layer:rename',
+    LAYER_DELETE: 'layer:delete'
 };
