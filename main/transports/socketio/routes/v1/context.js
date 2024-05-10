@@ -149,6 +149,7 @@ module.exports = function(socket) {
     socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, /* filterArray,*/ callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_LIST} event`);
         debug(`featureArray: ${featureArray}`)
+        debug(`Type of callback: ${typeof callback}`)
         const response = new ResponseObject();
         try {
             const result = await context.listDocuments(featureArray);
@@ -221,6 +222,9 @@ module.exports = function(socket) {
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY, async (data, featureArray, callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_INSERT_ARRAY} event`);
+        debug('Data:', data);
+        debug('Features:', featureArray);
+        debug('Type of callback:', typeof callback);
         const response = new ResponseObject();
         let documents = data;
 

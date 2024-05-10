@@ -295,6 +295,10 @@ class BitmapCollection {
         if (!oidArrayOrBitmap) {
             debug(`Creating new empty bitmap with key ID "${key}"`);
             idArray = new RoaringBitmap32();
+        } else if (typeof oidArrayOrBitmap === 'string') {
+            idArray = Number.from(oidArrayOrBitmap);
+        } else if (typeof oidArrayOrBitmap === 'number') {
+            idArray = oidArrayOrBitmap
         } else if (oidArrayOrBitmap instanceof RoaringBitmap32) {
             debug(`RoaringBitmap32 supplied as input: Storing pre-populated bitmap under new key ID "${key}" with ${oidArrayOrBitmap.size} elements`);
             idArray = oidArrayOrBitmap;
@@ -302,7 +306,7 @@ class BitmapCollection {
             debug(`OID Array supplied as input: Creating new bitmap with key ID "${key}" and ${oidArrayOrBitmap.length} elements`);
             idArray = new RoaringBitmap32(oidArrayOrBitmap);
         } else {
-            throw new TypeError(`Invalid input data: ${oidArrayOrBitmap}`);
+            throw new TypeError(`Invalid input data: ${oidArrayOrBitmap} of type ${typeof oidArrayOrBitmap}`);
         }
 
         // Initialize a new bitmap using our beloved Bitmap class

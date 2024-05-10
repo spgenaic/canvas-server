@@ -370,8 +370,6 @@ class Context extends EE {
 		return result;
 	}
 
-
-
 	async updateDocument(document, contextArray, featureArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.updateDocument(

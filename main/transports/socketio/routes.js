@@ -54,6 +54,13 @@ module.exports = {
     CONTEXT_DOCUMENT_DELETE: 'context:document:delete',
     CONTEXT_DOCUMENT_DELETE_ARRAY: 'context:document:deleteArray',
 
+    // Context feature routes
+    CONTEXT_FEATURE_LIST: 'context:feature:list',
+    CONTEXT_FEATURE_INSERT: 'context:feature:insert',
+    CONTEXT_FEATURE_REMOVE: 'context:feature:remove',
+    CONTEXT_FEATURE_GET: 'context:feature:get',
+    CONTEXT_FEATURE_HAS: 'context:feature:has',
+
     // Document routes
     DOCUMENT_LIST: 'document:list',
     DOCUMENT_GET: 'document:get',
@@ -71,8 +78,17 @@ module.exports = {
     // Layer routes
     LAYER_LIST: 'layer:list',
     LAYER_GET: 'layer:get',
-    LAYER_INSERT: 'layer:insert',
+    LAYER_GET_BY_NAME: 'layer:get:byName',
     LAYER_UPDATE: 'layer:update',
     LAYER_RENAME: 'layer:rename',
-    LAYER_DELETE: 'layer:delete'
+    LAYER_DELETE: 'layer:delete',
+
+    // Feature routes
+    FEATURE_LIST: 'feature:list',
+    FEATURE_GET: 'feature:get',
+    FEATURE_INSERT: 'feature:insert',
+    FEATURE_REMOVE: 'feature:remove',
+    FEATURE_UPDATE: 'feature:update',
+    FEATURE_DELETE: 'feature:delete',
+
 };
