@@ -24,7 +24,7 @@ class Tab extends Document {
             index: {
                 primaryChecksumAlgorithm: 'sha1',
                 primaryChecksumFields: ['data.url'],
-                staticFeatureBitmapFields: ['type', 'meta.browser'],
+                staticFeatureBitmapFields: ['type'],
                 dynamicFeatureBitmapFields: [],
                 fullTextIndexFields: ['data.title'],
                 embeddingFields: ['data.title'] // TODO: Handle creation of embeddings for the document type URL
@@ -64,7 +64,7 @@ class Tab extends Document {
         base.index = {
             primaryChecksumAlgorithm: 'sha1',
             primaryChecksumFields: ['data.url'],
-            staticFeatureBitmapFields: ['type', 'meta.browser'],
+            staticFeatureBitmapFields: [],
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: ['data.title'],
             embeddingFields: ['data.title']

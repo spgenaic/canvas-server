@@ -471,7 +471,8 @@ class SynapsDB extends EE {
                     value = value[f];
                 }
                 if (value !== doc) {
-                    features.push(value);
+                    //let feature = 'static/'
+                    features.push(value.toLowerCase());
                 }
             }
         }

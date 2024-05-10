@@ -31,7 +31,7 @@ class Document {
         this.index = {
             primaryChecksumAlgorithm: DOCUMENT_DATA_CHECKSUM_ALGO,
             primaryChecksumFields: ['data'],
-            staticFeatureBitmapFields: ['type'],
+            staticFeatureBitmapFields: [],
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: [],
             embeddingFields: ['data'],
