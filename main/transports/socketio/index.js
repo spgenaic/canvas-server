@@ -108,6 +108,7 @@ class SocketIoTransport extends Service {
 
             socket.on(ROUTES.SESSION_CREATE, (sessionId, sessionOptions, callback) => {
                 debug(`${ROUTES.SESSION_CREATE} event`);
+                debug(`Session ID: ${sessionId}, Options: ${JSON.stringify(sessionOptions)}`)
                 socket.session = socket.sessionManager.createSession(sessionId, sessionOptions);
                 socket.context = socket.session.getContext(); // Returns default session context
                 contextRoutes(socket)

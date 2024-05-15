@@ -59,7 +59,7 @@ class SessionManager extends EventEmitter {
     getSession(id) {
         let session;
 
-        if (!id) {
+        if (!id || id === null) {
             debug('No session ID provided, initializing a default session')
             session = this.createSession(SESSION_DEFAULT_ID);
         } else {
@@ -71,6 +71,7 @@ class SessionManager extends EventEmitter {
     }
 
     createSession(id = 'default', sessionOptions = {}) {
+        id = (!id || id === null) ? 'default' : id;
         if (this.sessions.size >= this.#maxSessions) { throw new Error('Maximum number of sessions reached'); }
         if (sessionOptions.baseUrl === undefined) { sessionOptions.baseUrl = CONTEXT_URL_BASE; }
 
@@ -110,7 +111,7 @@ class SessionManager extends EventEmitter {
     }
 
     openSession(id, autoInitSession = true) {
-        if (!id) {
+        if (!id || id === null) {
             debug('No session ID provided, returning the default session')
             return this.openSession(SESSION_DEFAULT_ID);
         }
