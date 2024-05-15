@@ -100,6 +100,7 @@ class SocketIoTransport extends Service {
 
             socket.on(ROUTES.SESSION_LIST, async (data, callback) => {
                 debug(`${ROUTES.SESSION_LIST} event`);
+                debug(`Data: ${JSON.stringify(data)}`);
                 if (typeof data === 'function') { callback = data; }
                 const sessions = await socket.sessionManager.listSessions();
                 const response = new ResponseObject();
@@ -117,6 +118,8 @@ class SocketIoTransport extends Service {
             });
 
             socket.on(ROUTES.SESSION_CONTEXT_GET, (contextId, callback) => {
+                debug(`${ROUTES.SESSION_CONTEXT_GET} event`);
+                debug(`Context ID: ${contextId}`);
                 socket.context = socket.session.getContext(contextId);
                 // Rebind routes to new context
                 contextRoutes(socket);
@@ -125,6 +128,8 @@ class SocketIoTransport extends Service {
             });
 
             socket.on(ROUTES.SESSION_CONTEXT_CREATE, (contextUrl, contextOptions, callback) => {
+                debug(`${ROUTES.SESSION_CONTEXT_CREATE} event`);
+                debug(`Context URL: ${contextUrl}, Options: ${JSON.stringify(contextOptions)}`);
                 socket.context = socket.session.createContext(contextUrl, contextOptions);
                 // Rebind routes to new context
                 contextRoutes(socket);
