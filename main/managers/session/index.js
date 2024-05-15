@@ -104,7 +104,9 @@ class SessionManager extends EventEmitter {
 
     async listSessions() {
         // TODO: Implement a combined list of active and stored sessions
-        return this.sessionStore.keys(); // this is an async method
+        const sessions = await this.sessionStore.values(); // this is an async method
+        console.log(sessions);
+        return sessions;
     }
 
     openSession(id, autoInitSession = true) {

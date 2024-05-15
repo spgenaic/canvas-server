@@ -137,7 +137,7 @@ class Db {
 
     keys() { return this.db.getKeys(); }        // Iterator
 
-    values() { return this.db.getEntries(); }   // TODO: Fixme
+    values() { return this.listValues(); }   // TODO: Fixme
 
     set(key, value) { return this.db.putSync(key, value); }
 
