@@ -98,10 +98,10 @@ class SocketIoTransport extends Service {
             contextRoutes(socket);
             documentsRoutes(socket, this.db); // Maybe this is a more readable => better way
 
-            socket.on(ROUTES.SESSION_LIST, (data, callback) => {
+            socket.on(ROUTES.SESSION_LIST, async (data, callback) => {
                 debug(`${ROUTES.SESSION_LIST} event`);
                 if (typeof data === 'function') { callback = data; }
-                const sessions = socket.sessionManager.listSessions();
+                const sessions = await socket.sessionManager.listSessions();
                 const response = new ResponseObject();
                 callback(response.success(sessions).getResponse());
             });
