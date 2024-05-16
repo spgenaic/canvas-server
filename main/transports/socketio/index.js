@@ -124,7 +124,7 @@ class SocketIoTransport extends Service {
                 // Rebind routes to new context
                 contextRoutes(socket);
                 const response = new ResponseObject();
-                callback(response.success(socket.context.id).getResponse());
+                callback(response.success(socket.context).getResponse());
             });
 
             socket.on(ROUTES.SESSION_CONTEXT_CREATE, (contextUrl, contextOptions, callback) => {
