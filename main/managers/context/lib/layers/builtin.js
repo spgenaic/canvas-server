@@ -8,7 +8,6 @@ module.exports = [
         color: '#fff',
         locked: true
     },
-
     {
         id: '0000-0000-1000',
         type: 'system',
@@ -18,18 +17,6 @@ module.exports = [
         color: '#fff',
         locked: true
     },
-
-    //'.context',
-    //'.contexts',
-    //'.services',    // Probably will be implemented as part of the canvas subtree
-    //'.roles',    // Probably will be implemented as part of the canvas subtree
-    //'.apps',    // Probably will be implemented as part of the canvas subtree
-    //'.agents',    // Probably will be implemented as part of the canvas subtree
-    //'.minions',    // Probably will be implemented as part of the canvas subtree
-    //'.session',
-    //'.sessions',    // Probably will be implemented as part of the canvas subtree
-    //'.users'
-
     {
         id: '0000-0000-1003',
         type: 'system',
@@ -39,7 +26,6 @@ module.exports = [
         color: '#fff',
         locked: true
     },
-
     {
         id: '0000-0000-1002',
         type: 'system',
@@ -49,7 +35,6 @@ module.exports = [
         color: '#fff',
         locked: true
     },
-
     {
         id: '0000-0000-1001',
         type: 'system',
@@ -61,3 +46,14 @@ module.exports = [
     },
 ]
 
+
+    //'.context',
+    //'.contexts',
+    //'.services',    // Probably will be implemented as part of the canvas subtree
+    //'.roles',    // Probably will be implemented as part of the canvas subtree
+    //'.apps',    // Probably will be implemented as part of the canvas subtree
+    //'.agents',    // Probably will be implemented as part of the canvas subtree
+    //'.minions',    // Probably will be implemented as part of the canvas subtree
+    //'.session',
+    //'.sessions',    // Probably will be implemented as part of the canvas subtree
+    //'.users'

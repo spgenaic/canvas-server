@@ -96,13 +96,13 @@ class Url {
             .replace(/^[^:]+:/, '') // Remove the protocol
             .replace(/\/+/g, '/') // Reduce multiple slashes to a single slash
             .replace(/ +/g, '_') // Replace spaces with underscores
-            .replace(/[`$:%^*;'",<>{}[\]\\]/gi, ''); // Remove special characters
+            .replace(/[`$%^*;'",<>{}[\]\\]/gi, ''); // Remove special characters
 
         sanitized = sanitized.split('/')
             .map(part => {
                 // Remove leading dot unless it's a recognized internal layer
-                if (part.startsWith('.') && !internalLayers.includes(part)) {
-                    return part.substring(1);
+                if (part.startsWith('.')) {
+                    return internalLayers.some(layer => layer.name === part) ? part : part.substring(1);
                 }
                 return part.trim();
             })

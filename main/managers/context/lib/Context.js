@@ -161,7 +161,6 @@ class Context extends EE {
 	}
 
 	setUrl(url, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
-
 		// Validate the URL
 		if (!Url.validate(url)) {
 			throw new Error(`Invalid context URL "${url}"`);

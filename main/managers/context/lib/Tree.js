@@ -72,16 +72,26 @@ class Tree extends EventEmitter {
      * Tree interface methods
      */
 
+    pathExists(path) {
+        return this.getNode(path) ? true : false
+    }
+
     insert(path = '/', node, autoCreateLayers = true) {
         debug(`Inserting path "${path}" to the context tree`);
         if (path === '/' && !node) { return true; }
 
         let currentNode = this.root;
         let child;
+
         const layerNames = path.split('/').filter(Boolean);
         for (const layerName of layerNames) {
-
             let layer = this.dblayers.getLayerByName(layerName)
+            if (this.dblayers.isInternalLayerName(layerName)) {
+                //debug(`Layer "${layerName}" is internal and can not be used in the tree`)
+                throw new Error(`Layer "${layerName}" is internal and can not be used in the tree`)
+                //return false
+            }
+
             if (!layer) {
                 if (autoCreateLayers) {
                     layer = this.dblayers.createLayer(layerName)
@@ -269,9 +279,7 @@ class Tree extends EventEmitter {
      */
 
     getNode(path) {
-
         if (path === '/' || !path) return this.root
-
         const layerNames = path.split('/').filter(Boolean);
         let currentNode = this.root;
 
@@ -295,7 +303,6 @@ class Tree extends EventEmitter {
     }
 
     insertNode(path, node) {
-
         const targetNode = this.getNode(path);
         if (!targetNode) {
             debug(`Unable to insert node at path "${path}", target node not found`)
