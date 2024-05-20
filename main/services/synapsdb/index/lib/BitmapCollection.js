@@ -283,39 +283,23 @@ class BitmapCollection {
     }
 
     createBitmap(key, oidArrayOrBitmap = null, autoSave = true) {
-        debug(`${this.tag} -> createBitmap(): Creating bitmap with key ID "${key}", oidArrayOrBitmap: ${oidArrayOrBitmap}`)
+        debug(`${this.tag} -> createBitmap(): Creating bitmap with key ID "${key}"`);
+
         if (this.hasBitmap(key)) {
             debug(`Bitmap with key ID "${key}" already exists`);
             return false;
         }
 
-        let idArray;
-        let bitmap;
-
-        if (!oidArrayOrBitmap) {
-            debug(`Creating new empty bitmap with key ID "${key}"`);
-            idArray = new RoaringBitmap32();
-        } else if (oidArrayOrBitmap instanceof RoaringBitmap32) {
-            debug(`RoaringBitmap32 supplied as input: Storing pre-populated bitmap under new key ID "${key}" with ${oidArrayOrBitmap.size} elements`);
-            idArray = oidArrayOrBitmap;
-        } else if (Array.isArray(oidArrayOrBitmap)) {
-            debug(`OID Array supplied as input: Creating new bitmap with key ID "${key}" and ${oidArrayOrBitmap.length} elements`);
-            idArray = new RoaringBitmap32(oidArrayOrBitmap);
-        } else {
-            throw new TypeError(`Invalid input data: ${oidArrayOrBitmap}`);
-        }
-
-        // Initialize a new bitmap using our beloved Bitmap class
-        bitmap = Bitmap.create(idArray, {
+        const bitmapData = this.#parseInput(oidArrayOrBitmap);
+        const bitmap = new Bitmap(bitmapData, {
             type: 'static',
             key: key,
             rangeMin: this.rangeMin,
             rangeMax: this.rangeMax
         });
 
-        // Save bitmap to DB
         if (autoSave) { this.#saveBitmapToDb(key, bitmap); }
-        debug(`Bitmap with key ID "${key}" created successfully`)
+        debug(`Bitmap with key ID "${key}" created successfully`);
         return bitmap;
     }
 
@@ -367,6 +351,23 @@ class BitmapCollection {
     /**
      * Internal methods (sync, using a Map() like interface)
      */
+
+    #parseInput(input) {
+        if (!input) {
+            debug(`Creating new empty bitmap`);
+            return new RoaringBitmap32();
+        } else if (input instanceof RoaringBitmap32) {
+            debug(`RoaringBitmap32 supplied as input with ${input.size} elements`);
+            return input;
+        } else if (Array.isArray(input)) {
+            debug(`OID Array supplied as input with ${input.length} elements`);
+            return new RoaringBitmap32(input);
+        } else if (typeof input === 'number') {
+            return input;
+        } else {
+            throw new TypeError(`Invalid input type: ${typeof input}`);
+        }
+    }
 
     #saveBitmapToDb(key, bitmap/*, overwrite = true */) {
         debug(`Saving bitmap with key ID "${key}" to the database`)

@@ -59,7 +59,7 @@ class SessionManager extends EventEmitter {
     getSession(id) {
         let session;
 
-        if (!id) {
+        if (!id || id === null) {
             debug('No session ID provided, initializing a default session')
             session = this.createSession(SESSION_DEFAULT_ID);
         } else {
@@ -71,8 +71,11 @@ class SessionManager extends EventEmitter {
     }
 
     createSession(id = 'default', sessionOptions = {}) {
+        id = (!id || id === null) ? 'default' : id;
         if (this.sessions.size >= this.#maxSessions) { throw new Error('Maximum number of sessions reached'); }
         if (sessionOptions.baseUrl === undefined) { sessionOptions.baseUrl = CONTEXT_URL_BASE; }
+
+        // TODO: Refactor adhering to the single-responsibility principle
 
         debug(`Creating session: ${id}`);
         // TODO: Add support for updating context/session options
@@ -102,11 +105,13 @@ class SessionManager extends EventEmitter {
 
     async listSessions() {
         // TODO: Implement a combined list of active and stored sessions
-        return this.sessionStore.keys(); // this is an async method
+        const sessions = await this.sessionStore.values(); // this is an async method
+        console.log(sessions);
+        return sessions;
     }
 
-    openSession(id) {
-        if (!id) {
+    openSession(id, autoInitSession = true) {
+        if (!id || id === null) {
             debug('No session ID provided, returning the default session')
             return this.openSession(SESSION_DEFAULT_ID);
         }
@@ -119,9 +124,7 @@ class SessionManager extends EventEmitter {
 
         if (!this.sessionStore.has(id)) {
             debug(`Session ID "${id}" not found in session store`);
-            // Autocreate or throw error? ooor return false??
-            //return this.createSession(id);
-            return false; //throw new Error('Session not found');
+            return (autoInitSession) ? this.createSession(id) : false
         }
 
         let sessionConfig = this.#loadSessionFromDb(id);

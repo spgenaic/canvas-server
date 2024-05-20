@@ -343,12 +343,12 @@ class Context extends EE {
 		return result;
 	}
 
-	async insertDocument(doc, featureArray = this.#featureArray, batchOperation = false /* temporary hack */) {
+	async insertDocument(document, featureArray = this.#featureArray, batchOperation = false /* temporary hack */) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.insertDocument(
-			doc,
+			document,
 			this.#contextArray,
-			this.#featureArray
+			featureArray
 		);
 		debug(`insertDocument() result ${result}`)
 		if (!batchOperation) this.emit("data", 'insertDocument', result);
@@ -362,7 +362,7 @@ class Context extends EE {
 		const result = await this.documents.insertDocumentArray(
 			docArray,
 			this.#contextArray,
-			this.#featureArray,
+			featureArray,
 			true
 		);
 		debug(`insertDocumentArray() result ${result}`)
@@ -370,13 +370,11 @@ class Context extends EE {
 		return result;
 	}
 
-
-
 	async updateDocument(document, contextArray, featureArray) {
 		if (typeof featureArray === "string") featureArray = [featureArray];
 		const result = await this.documents.updateDocument(
 			document,
-			contextArray,
+			this.#contextArray,
 			featureArray
 		);
 		this.emit("data", 'updateDocument', result);

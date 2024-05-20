@@ -156,15 +156,15 @@ class SynapsDB extends EE {
     }
 
 
-    async getDocumentsByIdArray(idArray, metaOnly = false) {
-        debug(`getDocumentsByIdArray(): IDArray: "${idArray}", MetaOnly: ${metaOnly}`);
+    async getDocumentsByIdArray(idArray, metadataOnly = false) {
+        debug(`getDocumentsByIdArray(): IDArray: "${idArray}", MetaOnly: ${metadataOnly}`);
         if (!Array.isArray(idArray) || idArray.length < 1) {
             throw new Error("Array of document IDs required");
         }
 
         try {
             let documents = await this.documents.getMany(idArray);
-            if (metaOnly) {
+            if (metadataOnly) {
                 documents = documents.map(doc => {
                     doc.data = null; //{ metadataOnly: "true" };
                     return doc;
@@ -179,8 +179,8 @@ class SynapsDB extends EE {
     }
 
 
-    async getDocumentsByHashArray(hashArray, metaOnly = false) {
-        debug(`getDocumentsByHashArray(): HashArray: "${hashArray}"; MetaOnly: ${metaOnly}`);
+    async getDocumentsByHashArray(hashArray, metadataOnly = false) {
+        debug(`getDocumentsByHashArray(): HashArray: "${hashArray}"; MetaOnly: ${metadataOnly}`);
         if (!Array.isArray(hashArray) || hashArray.length < 1) {
             throw new Error("Array of document hashes required");
         }
@@ -189,7 +189,7 @@ class SynapsDB extends EE {
             .map(hash => this.index.hash2oid.get(hash))
             .filter(id => id !== undefined);
 
-        return this.getDocumentsByIdArray(idArray, metaOnly);
+        return this.getDocumentsByIdArray(idArray, metadataOnly);
     }
 
     // TODO: Refactor to use getDocuments() only, legacy method
@@ -209,7 +209,7 @@ class SynapsDB extends EE {
      * @returns {string} - The ID of the inserted document.
      * @throws {Error} - If the document is invalid or if there is an error inserting it into the database.
      */
-    async insertDocument(document, contextArray = [], featureArray = [], filterArray = []) {
+    async insertDocument(document, contextArray = [], featureArray = []) {
         debug(`insertDocument(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         // Parse document
@@ -266,7 +266,7 @@ class SynapsDB extends EE {
         return parsed
     }
 
-    async insertDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
+    async insertDocumentArray(documentArray, contextArray = [], featureArray = []) {
         debug(`insertDocumentArray(): Document count: ${documentArray.length}, ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
@@ -276,7 +276,7 @@ class SynapsDB extends EE {
         const insertResults = [];
         for (const [index, doc] of documentArray.entries()) {
             try {
-                const result = await this.insertDocument(doc, contextArray, featureArray, filterArray);
+                const result = await this.insertDocument(doc, contextArray, featureArray);
                 insertResults.push(result);
             } catch (error) {
                 throw new Error(`Document ${index} failed: ${error.message}`);
@@ -287,11 +287,11 @@ class SynapsDB extends EE {
         return insertResults;
     }
 
-    async updateDocument(document, contextArray = [], featureArray = [], filterArray = []) {
-        return this.insertDocument(document, contextArray, featureArray, filterArray);
+    async updateDocument(document, contextArray = [], featureArray = []) {
+        return this.insertDocument(document, contextArray, featureArray);
     }
 
-    async updateDocumentArray(documentArray, contextArray = [], featureArray = [], filterArray = []) {
+    async updateDocumentArray(documentArray, contextArray = [], featureArray = []) {
         debug(`updateDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
@@ -304,7 +304,7 @@ class SynapsDB extends EE {
         // TODO: Refactor to use Promise.all() and lmdb batch operations
         for (const doc of documentArray) {
             try {
-                const id = await this.updateDocument(doc, contextArray, featureArray, filterArray);
+                const id = await this.updateDocument(doc, contextArray, featureArray);
                 result.push(id);
             } catch (error) {
                 errors.push(error.message);
@@ -360,7 +360,7 @@ class SynapsDB extends EE {
      */
 
 
-    async removeDocument(id, contextArray, featureArray, filterArray) {
+    async removeDocument(id, contextArray, featureArray) {
         debug(`removeDocument(): ID: ${id}; ContextArray: "${contextArray}"; FeatureArray: ${featureArray}`);
         if (!id) throw new Error("Document ID required");
         if (!Array.isArray(contextArray) || contextArray.length < 1) {
@@ -383,16 +383,16 @@ class SynapsDB extends EE {
         return true
     }
 
-    async removeDocumentArray(idArray, contextArray, featureArray, filterArray) {
+    async removeDocumentArray(idArray, contextArray, featureArray) {
         debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
         if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
 
         let tasks = [];
         for (const id of idArray) {
-            tasks.push(this.removeDocument(id, contextArray, featureArray, filterArray));
+            tasks.push(this.removeDocument(id, contextArray, featureArray));
         }
 
-        await Promise.all(tasks);
+        await Promise.all(tasks); // TODO: Add try..catch from the above methods
         return true
     }
 
@@ -456,8 +456,49 @@ class SynapsDB extends EE {
 
     #extractDocumentFeatures(doc) {
         let features = [];
-        // TODO
-        features.push(doc.type);
+
+        // Parse doc.index.staticFeatureBitmapFields
+        if (doc.index.staticFeatureBitmapFields && doc.index.staticFeatureBitmapFields.length > 0) {
+            // Check if properties defined in the staticFeatureBitmapFields exist in the document
+            for (let field of doc.index.staticFeatureBitmapFields) {
+                let fields = field.split('.');
+                let value = doc;
+                for (let f of fields) {
+                    if (value[f] === undefined) {
+                        debug(`Field "${field}" not found in document`);
+                        continue;
+                    }
+                    value = value[f];
+                }
+                if (value !== doc) {
+                    //let feature = 'static/'
+                    features.push(value.toLowerCase());
+                }
+            }
+        }
+
+        // Parse doc.index.dynamicFeatureBitmapFields
+        if (doc.index.dynamicFeatureBitmapFields && doc.index.dynamicFeatureBitmapFields.length > 0) {
+            // We'll use the same features array for dynamic features
+            // TODO: Refactor to use separate arrays for static and dynamic features
+            // TODO: Use dotprop to access nested properties
+            for (let field of doc.index.dynamicFeatureBitmapFields) {
+                let fields = field.split('.');
+                let value = doc;
+                for (let f of fields) {
+                    if (value[f] === undefined) {
+                        debug(`Field "${field}" not found in document`);
+                        continue;
+                    }
+                    value = value[f];
+                }
+                if (value !== doc) {
+                    features.push(value);
+                }
+            }
+        }
+
+        debug("Document features: " + features.join(", "));
         return features;
     }
 

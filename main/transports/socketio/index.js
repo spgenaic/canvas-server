@@ -66,6 +66,8 @@ class SocketIoTransport extends Service {
         this.contextManager = options.contextManager;
         if (!options.sessionManager) throw new Error('sessionManager not defined');
         this.sessionManager = options.sessionManager;
+        if (!options.db) throw new Error('db not defined');
+        this.db = options.db
 
         debug(`Socket.io Transport initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
     }
@@ -94,18 +96,20 @@ class SocketIoTransport extends Service {
             socket.context = socket.session.getContext(); // Default context
 
             contextRoutes(socket);
-            documentsRoutes(socket, this.canvas.documents);
+            documentsRoutes(socket, this.db); // Maybe this is a more readable => better way
 
-            socket.on(ROUTES.SESSION_LIST, (data, callback) => {
+            socket.on(ROUTES.SESSION_LIST, async (data, callback) => {
                 debug(`${ROUTES.SESSION_LIST} event`);
+                debug(`Data: ${JSON.stringify(data)}`);
                 if (typeof data === 'function') { callback = data; }
-                const sessions = socket.sessionManager.listSessions();
+                const sessions = await socket.sessionManager.listSessions();
                 const response = new ResponseObject();
                 callback(response.success(sessions).getResponse());
             });
 
             socket.on(ROUTES.SESSION_CREATE, (sessionId, sessionOptions, callback) => {
                 debug(`${ROUTES.SESSION_CREATE} event`);
+                debug(`Session ID: ${sessionId}, Options: ${JSON.stringify(sessionOptions)}`)
                 socket.session = socket.sessionManager.createSession(sessionId, sessionOptions);
                 socket.context = socket.session.getContext(); // Returns default session context
                 contextRoutes(socket)
@@ -114,14 +118,18 @@ class SocketIoTransport extends Service {
             });
 
             socket.on(ROUTES.SESSION_CONTEXT_GET, (contextId, callback) => {
+                debug(`${ROUTES.SESSION_CONTEXT_GET} event`);
+                debug(`Context ID: ${contextId}`);
                 socket.context = socket.session.getContext(contextId);
                 // Rebind routes to new context
                 contextRoutes(socket);
                 const response = new ResponseObject();
-                callback(response.success(socket.context.id).getResponse());
+                callback(response.success(socket.context).getResponse());
             });
 
             socket.on(ROUTES.SESSION_CONTEXT_CREATE, (contextUrl, contextOptions, callback) => {
+                debug(`${ROUTES.SESSION_CONTEXT_CREATE} event`);
+                debug(`Context URL: ${contextUrl}, Options: ${JSON.stringify(contextOptions)}`);
                 socket.context = socket.session.createContext(contextUrl, contextOptions);
                 // Rebind routes to new context
                 contextRoutes(socket);
