@@ -3,6 +3,7 @@
 
 // Includes
 const { urlToHttpOptions } = require('node:url')
+const internalLayers = require('./layers/builtin')
 
 // Constants
 const DEFAULT_URL_PROTOCOL = 'universe:'    // TODO: Move to some sane location
@@ -17,7 +18,21 @@ class Url {
         this.setUrl(url)
     }
 
-    set url(url) { this.setUrl(url); }
+    validate(url) { return Url.validate(url); }
+
+    static validate(url) {
+        if (typeof url !== 'string') {
+            throw new Error(`Context path needs to be of type string, got "${typeof url}"`);
+        }
+
+        if (/[`$%^*;'",<>{}[\]\\]/gi.test(url)) {
+            throw new Error(`Context path cannot contain special characters, got "${url}"`);
+        }
+
+        return true;
+    }
+
+
     setUrl(url = DEFAULT_URL_PATH) {
         if (typeof url !== 'string') throw new Error('Context path needs to be of type string')
 
@@ -36,14 +51,13 @@ class Url {
         return this._path
     }
 
-    get url() { return this._string }
-    get string() { return this._string }
-    get path() { return this._path }
-    get array() { return this._array }
-    get protocol() { return this._protocol }
+    get url() { return this._string; }
+    get string() { return this._string; }
+    get path() { return this._path; }
+    get array() { return this._array; }
+    get protocol() { return this._protocol; }
 
     static parse(url) {
-
         // Get the URL path
         let path = Url.getPath(url)
 
@@ -52,20 +66,9 @@ class Url {
 
         // Construct the URL href
         return protocol + '/' + path
-
-
     }
 
-    getProtocol(url) {
-        // If no protocol is specified, return the default
-        if (!url.includes(':')) return DEFAULT_URL_PROTOCOL
-
-        // Split out the protocol string
-        let proto = url.split(':')
-
-        // Fallback to DEFAULT_URL_PROTOCOL
-        return (proto && proto.length > 0) ? proto[0] + ':' : DEFAULT_URL_PROTOCOL
-    }
+    getProtocol(url) { return Url.getProtocol(url); }
 
     static getProtocol(url) {
         // If no protocol is specified, return the default
@@ -78,11 +81,13 @@ class Url {
         return (proto && proto.length > 0) ? proto[0] + ':' : DEFAULT_URL_PROTOCOL
     }
 
-    getPath(url) {
+    getPath(url) { return Url.getPath(url);  }
+
+    static getPath(url) {
         let sanitized = url.toLowerCase();
 
         // Ensure the URL starts correctly with base URL if needed
-        if (!url.startsWith(DEFAULT_URL_PROTOCOL) && !url.startsWith('/') && this._baseUrl) {
+        if (!sanitized.startsWith(DEFAULT_URL_PROTOCOL) && !sanitized.startsWith('/') && this._baseUrl) {
             sanitized = this._baseUrl + '/' + sanitized;
         }
 
@@ -94,54 +99,23 @@ class Url {
             .replace(/[`$:%^*;'",<>{}[\]\\]/gi, ''); // Remove special characters
 
         sanitized = sanitized.split('/')
-            .map(part => part.trim())
-            .filter(part => part.length > 0) //&& part !== '_')
+            .map(part => {
+                // Remove leading dot unless it's a recognized internal layer
+                if (part.startsWith('.') && !internalLayers.includes(part)) {
+                    return part.substring(1);
+                }
+                return part.trim();
+            })
+            .filter(part => part.length > 0)
             .join("/");
 
-        if (!sanitized.startsWith("/")) sanitized = "/" + sanitized
+        if (!sanitized.startsWith("/")) sanitized = "/" + sanitized;
         return sanitized || DEFAULT_URL_PATH;
     }
 
-    static getPath(url) {
-        let sanitized = url.toLowerCase();
-        sanitized = sanitized
-            .replace(/\\/g, '/') // replace backslash with slash
-            .replace(/^[^:]+:/, '') // remove the protocol
-            .replace(/\/{3,}/g, '//') // replace three or more consecutive slashes with two slashes
-            .replace(/([^:])\/{2,}/g, "$1/") // replace two or more slashes with one, but not following a colon
-            .replace(/ +/g, '_') // replace spaces with underscore
-            .replace(/[`$:%^*;'",<>{}[\]\\]/gi, ''); // replace special characters
-
-        sanitized = sanitized.split('/')
-            .map(part => part.trim())
-            .filter(part => part !== '_')
-            .join("/");
-
-        // Remove leading slash
-        sanitized = sanitized.startsWith('/') ? sanitized.slice(1) : sanitized;
-
-        // Fallback to DEFAULT_URL_PATH
-        return sanitized || DEFAULT_URL_PATH;
-    }
-
-    getArrayFromString(url) {
-
-        let parsed = urlToHttpOptions(new URL(url))
-        if (!parsed) throw new Error(`Invalid URL: ${url}`)
-
-        let context = [
-            parsed.hostname,
-            ...parsed.pathname.split('/')
-        ]
-
-        // TODO: Rework, as this is ugly
-        // TODO: Return [ DEFAULT_URL_PATH ] instead?
-        return context.filter(v => v.length > 0)
-
-    }
+    getArrayFromString(url) { return Url.getArrayFromString(url); }
 
     static getArrayFromString(url) {
-
         let parsed = urlToHttpOptions(new URL(url))
         if (!parsed) throw new Error(`Invalid URL: ${url}`)
 
@@ -153,7 +127,6 @@ class Url {
         // TODO: Rework, as this is ugly
         // TODO: Return [ DEFAULT_URL_PATH ] instead?
         return context.filter(v => v.length > 0)
-
     }
 
 }
