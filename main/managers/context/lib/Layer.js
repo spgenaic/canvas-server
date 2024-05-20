@@ -25,47 +25,36 @@ class Layer {
         // Default options
         options = {
             schemaVersion: '2.0',
-            autoCreateBitmaps: true,
             id: uuid12(),
             type: 'context',
             color: null,
             ...options
         }
 
-        if (!options.name) throw new Error('Layer name is a mandatory parameter')
+        if (!options.name || typeof options.name !== 'string' || !options.name.trim().length) {
+            throw new Error('Layer name must be a non-empty String')
+        }
 
-        // TODO: This constructor needs a propper cleanup!
-        this.schemaVersion = options.schemaVersion
+
+        // TODO: This constructor needs a proper cleanup!
         this.id =  options.id
         this.type = this.#validateType(options.type)
         this.name = this.#sanitizeName(options.name)
         this.label = (options.label) ? this.#sanitizeLabel(options.label) : this.name
-        this.description = options?.description || ''
+        this.description = (options.description) ? this.#sanitizeDescription(options.description) : 'Canvas layer'
         this.color = options?.color || 'auto'
-
-        if (options.contextBitmaps) {
-            this.contextBitmaps = options.contextBitmaps
-        } else {
-            this.contextBitmaps = (options.autoCreateBitmaps) ? [ this.id ] : []
-        }
+        this.locked = options?.locked || false
 
         this.featureBitmaps = []
         this.filterBitmaps = []
 
-        this.locked = false // TODO: Implement locking for subtree
-
-        this.metadata = options.metadata || {} // TODO: Handle object lifetime metadata
-
+        this.metadata = options.metadata || {}
     }
 
 
     /**
      * Getters
      */
-
-    get contextBitmapArray() {
-        return this.contextBitmaps
-    }
 
     get featureBitmapArray() {
         return this.featureBitmaps
@@ -78,6 +67,27 @@ class Layer {
     /**
      * Setters
      */
+
+    setName(name) {
+        if (this.locked) throw new Error('Layer is locked')
+        this.name = this.#sanitizeName(name)
+        return this
+    }
+
+    setLabel(label) {
+        if (this.locked) throw new Error('Layer is locked')
+        this.label = this.#sanitizeLabel(label)
+        return this
+    }
+
+    setDescription(description) {
+        if (this.locked) throw new Error('Layer is locked')
+        this.description = this.#sanitizeDescription(description)
+        return this
+    }
+
+
+    // TODO: Implement the rest of the setters (featureBitmaps, filterBitmaps, metadata)
 
 
     /**
@@ -93,19 +103,40 @@ class Layer {
     }
 
     #sanitizeName(name) {
-        if (!name || typeof name !== 'string' || !name.trim().length) {
-            throw new Error(`Layer name must be a non-empty String, "${typeof name}" given`)
+        if (typeof name !== 'string') {
+            throw new Error('Name must be a string')
         }
 
-        return name.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+        if (name.length > 32) {
+            throw new Error('Name must be less than 32 characters')
+        }
+
+        return name.toLowerCase(); //name.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
     }
 
     #sanitizeLabel(label) {
-        if(!label || typeof label !== 'string' || !label.trim().length) {
-            throw new Error('Layer label must be a non-empty String')
+        if (typeof label !== 'string') {
+            throw new Error('Label must be a string')
         }
 
-        return label.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+        if (label.length > 32) {
+            throw new Error('Label must be less than 32 characters')
+        }
+
+        return label; //label.replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
+    #sanitizeDescription(description) {
+        // Check if description is a string, not empty and less than 255 characters
+        if (typeof description !== 'string') {
+            throw new Error('Description must be a string')
+        }
+
+        if (description.length > 255) {
+            throw new Error('Description must be less than 255 characters')
+        }
+
+        return description
     }
 
     toJSON() {
@@ -118,7 +149,7 @@ class Layer {
             label: this.label,
             description: this.description,
             color: this.color,
-            contextBitmaps: this.contextBitmaps,
+            locked: this.locked,
             featureBitmaps: this.featureBitmaps,
             filterBitmaps: this.filterBitmaps,
             metadata: this.metadata
@@ -135,7 +166,7 @@ class Layer {
             label: json.label,
             description: json.description,
             color: json.color,
-            contextBitmaps:json.contextBitmaps,
+            locked: json.locked,
             featureBitmaps: json.featureBitmaps,
             filterBitmaps: json.filterBitmaps,
             metadata: json.metadata

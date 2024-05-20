@@ -161,16 +161,14 @@ class Context extends EE {
 	}
 
 	setUrl(url, autoCreateLayers = CONTEXT_AUTOCREATE_LAYERS) {
-		if (!url || typeof url !== "string") {
-			throw new Error(`Context url must be of type string, "${typeof url}" given`);
+
+		// Validate the URL
+		if (!Url.validate(url)) {
+			throw new Error(`Invalid context URL "${url}"`);
 		}
 
-		let parsed = new Url(url, this.#baseUrl);
+		const parsed = new Url(url, this.#baseUrl);
 		if (this.#url === parsed.url) return this.#url;
-
-		if (!parsed.path.startsWith(this.#baseUrl)) {
-			throw new Error(`Context path "${parsed.path}" must start with base url "${this.#baseUrl}"`);
-		};
 
 		debug(`Setting context url for context "${this.#id}", session ID "${this.#sessionId}" to "${parsed.url}"`);
 		if (!this.#tree.insert(parsed.path, null, autoCreateLayers)) {
@@ -508,18 +506,18 @@ class Context extends EE {
 		let filArr = [];
 
 		layerArray.forEach((layerName) => {
-			let initialized = !this.#layerIndex.hasLayerName(layerName) && autoCreateLayers
+			let layer = !this.#layerIndex.hasLayerName(layerName) && autoCreateLayers
 					? this.createLayer(layerName)
 					: this.#layerIndex.getLayerByName(layerName);
 
-			if (!initialized) {
+			if (!layer) {
 				debug(`Layer "${layerName}" not found and autoCreateLayers is set to false, skipping initialization`);
 				return; // TODO: FIXME
 			}
 
-			ctxArr.push(...initialized.contextBitmaps);
-			ftArr.push(...initialized.featureBitmaps);
-			filArr.push(...initialized.filterBitmaps);
+			ctxArr.push(layer.id);
+			ftArr.push(...layer.featureBitmaps);
+			filArr.push(...layer.filterBitmaps);
 		});
 
 		this.#initializeContextBitmaps(ctxArr);

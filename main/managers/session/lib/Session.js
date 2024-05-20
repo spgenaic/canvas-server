@@ -15,10 +15,7 @@ class Session {
         this.contextManager = contextManager;
 
         debug(`Initializing session "${this.id}" with base URL "${this.baseUrl}"`)
-        debug(`Session options: ${JSON.stringify({
-                ...sessionOptions,
-                contexts: sessionOptions.contexts ? Object.keys(sessionOptions.contexts).length : 0
-            })}`) // ugly
+        debug(`Session options: ${JSON.stringify(sessionOptions, null, 2)}`)
 
         this.contexts = new Map(); // Map of contexts for this session
         this.initializeContexts(sessionOptions?.contexts);

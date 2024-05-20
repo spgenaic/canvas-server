@@ -1,22 +1,37 @@
 'use strict'
 
-
+// Utils
 //const Conf = require('conf')
 const JsonMap = require('../../../utils/JsonMap')
+const debug = require('debug')('canvas:context:layer-index')
+
 const Layer = require('./Layer')
+const builtInLayers = require('./layers/builtin')
 
 class LayerIndex  { //extends Conf {
 
     constructor(filePath) {
         if (!filePath) throw new Error('filePath is required')
-        this.index = new JsonMap(filePath)
-        this.nameToLayerMap = new Map()
-        this.#initNameToLayerMap()
+        this.index = new JsonMap(filePath);
+        this.nameToLayerMap = new Map();
+        this.#initBuiltInLayers();
+        this.#initNameToLayerMap();
+        debug(`Layer index initialized with ${this.index.size} layers`)
     }
 
     has(id) { return this.hasLayerID(id); }
     hasLayerID(id) { return this.index.has(id); }
     hasLayerName(name) { return this.nameToLayerMap.has(name); }
+
+    isInternalLayerName(name) {
+        const layer = this.getLayerByName(name);
+        return layer && layer.internal === true;
+    }
+
+    isInternalLayerID(id) {
+        const layer = this.getLayerByID(id);
+        return layer && layer.internal === true;
+    }
 
     list() {
         let result = []
@@ -28,7 +43,6 @@ class LayerIndex  { //extends Conf {
     }
 
     createLayer(name, options = {}) {
-
         // TODO: Refactor
         if (typeof name === 'string') {
             options = {
@@ -36,18 +50,14 @@ class LayerIndex  { //extends Conf {
                 ...options
             }
         } else { options = name }
-
+        debug(`Creating layer ${JSON.stringify(options)}`)
         if (this.hasLayerName(options.name)) return false
 
-        let layer = new Layer(options)
-        this.addLayer(layer)
+        const layer = new Layer(options)
+        if (!layer) throw new Error(`Failed to create layer with options ${options}`)
 
+        this.#addLayerToIndex(layer)
         return layer
-    }
-
-    addLayer(layer) {
-        this.index.set(layer.id, layer);
-        this.nameToLayerMap.set(layer.name, layer);
     }
 
     getLayerByID(id) {
@@ -62,6 +72,7 @@ class LayerIndex  { //extends Conf {
     updateLayer(name, options) {
         let layer = this.getLayerByName(name)
         if (!layer) return false
+        if (layer.locked) throw new Error('Layer is locked')
         Object.assign(layer, options)
         this.index.set(layer.id, layer)
         return true
@@ -69,8 +80,7 @@ class LayerIndex  { //extends Conf {
 
     renameLayer(name, newName) {
         const layer = this.getLayerByName(name);
-        if (layer) {
-            layer.name = newName;
+        if (layer.setName(newName)) {
             this.nameToLayerMap.delete(name);
             this.nameToLayerMap.set(newName, layer);
             this.index.set(layer.id, layer);
@@ -100,6 +110,17 @@ class LayerIndex  { //extends Conf {
     idToName(id) {
         const layer = this.getLayerByID(id);
         return layer.name || null
+    }
+
+    #addLayerToIndex(layer) {
+        this.index.setSync(layer.id, layer);
+        this.nameToLayerMap.set(layer.name, layer);
+    }
+
+    #initBuiltInLayers() {
+        for (const layer of builtInLayers) {
+            this.createLayer(layer)
+        }
     }
 
     #initNameToLayerMap() {
