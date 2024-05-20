@@ -25,20 +25,20 @@ class LayerIndex  { //extends Conf {
 
     isInternalLayerName(name) {
         const layer = this.getLayerByName(name);
-        return layer && layer.internal === true;
+        return layer && builtInLayers.find(layer => layer.name === name)
     }
 
     isInternalLayerID(id) {
         const layer = this.getLayerByID(id);
-        return layer && layer.internal === true;
+        return layer && builtInLayers.find(layer => layer.id === id)
     }
 
+    // TODO: Remove internal layers from the list ?
     list() {
         let result = []
         for (const [id, layer] of this.index.entries()) {
             result.push(layer)
         }
-
         return result
     }
 
@@ -56,7 +56,8 @@ class LayerIndex  { //extends Conf {
         const layer = new Layer(options)
         if (!layer) throw new Error(`Failed to create layer with options ${options}`)
 
-        this.#addLayerToIndex(layer)
+        // We only save non-internal layers
+        this.#addLayerToIndex(layer, !this.isInternalLayerID(layer.id))
         return layer
     }
 
@@ -74,31 +75,36 @@ class LayerIndex  { //extends Conf {
         if (!layer) return false
         if (layer.locked) throw new Error('Layer is locked')
         Object.assign(layer, options)
-        this.index.set(layer.id, layer)
+        this.index.setSync(layer.id, layer)
         return true
     }
 
     renameLayer(name, newName) {
         const layer = this.getLayerByName(name);
+        if (layer.locked) throw new Error('Layer is locked')
         if (layer.setName(newName)) {
-            this.nameToLayerMap.delete(name);
+            this.nameToLayerMap.deleteSync(name);
             this.nameToLayerMap.set(newName, layer);
-            this.index.set(layer.id, layer);
+            this.index.setSync(layer.id, layer);
         }
     }
 
+    // Refactor!
     removeLayer(layer) {
+        if (layer.locked) throw new Error('Layer is locked')
         this.index.delete(layer.id);
-        this.nameToLayerMap.delete(layer.name);
+        this.nameToLayerMap.deleteSync(layer.name);
     }
 
     removeLayerByID(id) {
         const layer = this.getLayerByID(id);
+        if (layer.locked) throw new Error('Layer is locked')
         return layer ? this.removeLayer(layer) : false
     }
 
     removeLayerByName(name) {
         const layer = this.getLayerByName(name);
+        if (layer.locked) throw new Error('Layer is locked')
         return layer ? this.removeLayer(layer) : false
     }
 
@@ -112,8 +118,10 @@ class LayerIndex  { //extends Conf {
         return layer.name || null
     }
 
-    #addLayerToIndex(layer) {
-        this.index.setSync(layer.id, layer);
+    #addLayerToIndex(layer, persistent = true) {
+        if (persistent) {
+            this.index.setSync(layer.id, layer);
+        }
         this.nameToLayerMap.set(layer.name, layer);
     }
 
