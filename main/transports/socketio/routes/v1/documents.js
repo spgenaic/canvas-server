@@ -24,12 +24,6 @@ module.exports = function (socket, db) {
         debug(`featureArray: ${featureArray}`)
         debug(`filterArray: ${filterArray}`)
 
-        // Backward compatibility
-        if (typeof filterArray === 'function') {
-            callback = filterArray;
-            filterArray = [];
-        }
-
         if (typeof callback === 'undefined') {
             throw new Error('No callback function provided.');
         }
@@ -77,12 +71,6 @@ module.exports = function (socket, db) {
         debug(`contextArray: ${contextArray}`)
         debug(`featureArray: ${featureArray}`)
         debug(`filterArray: ${filterArray}`)
-
-        // Backward compatibility
-        if (typeof filterArray === 'function') {
-            callback = filterArray;
-            filterArray = [];
-        }
 
         if (typeof callback === 'undefined') {
             throw new Error('No callback function provided.');
