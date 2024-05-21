@@ -94,7 +94,6 @@ module.exports = function(socket) {
             const result = context.setUrl(url, true);
             (typeof callback === 'function') ?
                 callback(response.success(result).getResponse()) :
-                socket.emit(ROUTES.EVENT_CONTEXT_URL, response.success(result).getResponse());
         } catch (err) {
             console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
