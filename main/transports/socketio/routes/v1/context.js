@@ -25,6 +25,12 @@ module.exports = function(socket) {
      * Getters
      */
 
+    socket.on(ROUTES.CONTEXT_GET_STATS, (callback) => {
+        debug(`${ROUTES.CONTEXT_GET_STATS} event`);
+        const response = new ResponseObject();
+        callback(response.success(context.stats()).getResponse());
+    });
+
     socket.on(ROUTES.CONTEXT_GET_ID, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_ID} event`);
         if (typeof data === 'function') { callback = data; }
@@ -308,6 +314,12 @@ module.exports = function(socket) {
         const response = new ResponseObject().success({action: action, result: result}).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_DATA, response);
     });
+
+    context.on('update', (context) => {
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_UPDATE}`)
+        const response = new ResponseObject().success(context).getResponse();
+        socket.emit(ROUTES.EVENT_CONTEXT_UPDATE, response);
+    })
 
 };
 
