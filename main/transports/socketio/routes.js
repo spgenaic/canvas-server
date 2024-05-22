@@ -22,6 +22,7 @@ module.exports = {
     SESSION_CONTEXT_REMOVE: 'session:context:remove',
 
     // Context routes
+    CONTEXT_GET: 'context:get',
     CONTEXT_GET_ID: 'context:get:id',
     CONTEXT_GET_STATS: 'context:get:stats',
 

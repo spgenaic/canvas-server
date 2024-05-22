@@ -25,6 +25,13 @@ module.exports = function(socket) {
      * Getters
      */
 
+    // TODO: Refactor?
+    socket.on(ROUTES.CONTEXT_GET, (callback) => {
+        debug(`${ROUTES.CONTEXT_GET} event`);
+        const response = new ResponseObject();
+        callback(response.success(context).getResponse());
+    });
+
     socket.on(ROUTES.CONTEXT_GET_STATS, (callback) => {
         debug(`${ROUTES.CONTEXT_GET_STATS} event`);
         const response = new ResponseObject();
@@ -315,9 +322,9 @@ module.exports = function(socket) {
         socket.emit(ROUTES.EVENT_CONTEXT_DATA, response);
     });
 
-    context.on('update', (context) => {
+    context.on('update', (ctx) => {
         debug(`Emitting event ${ROUTES.EVENT_CONTEXT_UPDATE}`)
-        const response = new ResponseObject().success(context).getResponse();
+        const response = new ResponseObject().success(ctx).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_UPDATE, response);
     })
 
