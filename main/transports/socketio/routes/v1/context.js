@@ -30,7 +30,7 @@ module.exports = function(socket) {
         debug(`${ROUTES.CONTEXT_GET} event`);
         if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
-        const ctx = context;
+        const ctx = context.stats();
         callback(response.success(ctx).getResponse());
     });
 
