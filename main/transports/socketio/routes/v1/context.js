@@ -26,16 +26,20 @@ module.exports = function(socket) {
      */
 
     // TODO: Refactor?
-    socket.on(ROUTES.CONTEXT_GET, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET} event`);
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
-        callback(response.success(context).getResponse());
+        const ctx = context;
+        callback(response.success(ctx).getResponse());
     });
 
-    socket.on(ROUTES.CONTEXT_GET_STATS, (callback) => {
+    socket.on(ROUTES.CONTEXT_GET_STATS, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_STATS} event`);
+        if (typeof data === 'function') { callback = data; }
         const response = new ResponseObject();
-        callback(response.success(context.stats()).getResponse());
+        const ctxStats = context.stats();
+        callback(response.success(ctxStats).getResponse());
     });
 
     socket.on(ROUTES.CONTEXT_GET_ID, (data, callback) => {
