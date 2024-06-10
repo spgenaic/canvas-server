@@ -6,11 +6,11 @@ const { uuid12 } = require('./utils')
 
 const LAYER_TYPES = [
     'universe',     // TODO
-    'workspace',    // Collection of canvases, has additional parameters (color, description)
+    'workspace',    // Collection of canvases, has additional parameters (color, description ..)
     'canvas',       // Can store context, feature and filter bitmaps + dashboard / UI layouts
     'context',      // Has context bitmaps only
     'filter',       // Represents a single filter bitmap
-    'label',        // Label only (no bitmaps)
+    'label',        // Label only (no associated bitmaps)
     'system'
 ]
 
