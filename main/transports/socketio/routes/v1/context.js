@@ -25,6 +25,23 @@ module.exports = function(socket) {
      * Getters
      */
 
+    // TODO: Refactor?
+    socket.on(ROUTES.CONTEXT_GET, (data, callback) => {
+        debug(`${ROUTES.CONTEXT_GET} event`);
+        if (typeof data === 'function') { callback = data; }
+        const response = new ResponseObject();
+        const ctx = context.stats();
+        callback(response.success(ctx).getResponse());
+    });
+
+    socket.on(ROUTES.CONTEXT_GET_STATS, (data, callback) => {
+        debug(`${ROUTES.CONTEXT_GET_STATS} event`);
+        if (typeof data === 'function') { callback = data; }
+        const response = new ResponseObject();
+        const ctxStats = context.stats();
+        callback(response.success(ctxStats).getResponse());
+    });
+
     socket.on(ROUTES.CONTEXT_GET_ID, (data, callback) => {
         debug(`${ROUTES.CONTEXT_GET_ID} event`);
         if (typeof data === 'function') { callback = data; }
@@ -92,8 +109,7 @@ module.exports = function(socket) {
         const response = new ResponseObject();
         try {
             const result = context.setUrl(url, true);
-            (typeof callback === 'function') ?
-                callback(response.success(result).getResponse()) :
+            callback(response.success(result).getResponse())
         } catch (err) {
             console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
@@ -309,6 +325,12 @@ module.exports = function(socket) {
         const response = new ResponseObject().success({action: action, result: result}).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_DATA, response);
     });
+
+    context.on('update', (ctx) => {
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_UPDATE}`)
+        const response = new ResponseObject().success(ctx).getResponse();
+        socket.emit(ROUTES.EVENT_CONTEXT_UPDATE, response);
+    })
 
 };
 

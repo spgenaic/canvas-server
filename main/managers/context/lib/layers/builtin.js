@@ -39,7 +39,7 @@ module.exports = [
         id: '0000-0000-1001',
         type: 'system',
         name: '.device',
-        label: 'Devicee',
+        label: 'Device',
         description: 'Current user device',
         color: '#fff',
         locked: true
@@ -47,13 +47,6 @@ module.exports = [
 ]
 
 
-    //'.context',
-    //'.contexts',
-    //'.services',    // Probably will be implemented as part of the canvas subtree
-    //'.roles',    // Probably will be implemented as part of the canvas subtree
-    //'.apps',    // Probably will be implemented as part of the canvas subtree
-    //'.agents',    // Probably will be implemented as part of the canvas subtree
-    //'.minions',    // Probably will be implemented as part of the canvas subtree
-    //'.session',
-    //'.sessions',    // Probably will be implemented as part of the canvas subtree
+//'.context'
+
     //'.users'

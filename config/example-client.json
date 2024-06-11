@@ -1,0 +1,11 @@
+{
+    "bootServer": {
+        "host": "127.0.0.1",
+        "port": "9000",
+        "auth": {
+            "user": "",
+            "password": "",
+            "token": "canvas-server-token"
+        }
+    }
+}

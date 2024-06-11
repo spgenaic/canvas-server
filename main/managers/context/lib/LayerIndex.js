@@ -23,6 +23,9 @@ class LayerIndex  { //extends Conf {
     hasLayerID(id) { return this.index.has(id); }
     hasLayerName(name) { return this.nameToLayerMap.has(name); }
 
+    // TODO: Remove or refactor
+    isInternalLayer(name) { return this.isInternalLayerName(name); }
+
     isInternalLayerName(name) {
         const layer = this.getLayerByName(name);
         return layer && builtInLayers.find(layer => layer.name === name)

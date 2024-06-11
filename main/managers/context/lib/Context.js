@@ -184,6 +184,7 @@ class Context extends EE {
 		this.#initializeLayers(parsed.array);
 
 		this.emit("url", this.#url);
+		this.emit("update", this.stats()); // Test
 		return this.#url;
 	}
 

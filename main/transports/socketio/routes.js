@@ -2,6 +2,7 @@ module.exports = {
     // Context events
     EVENT_CONTEXT_URL: 'context:url',
     EVENT_CONTEXT_DATA: 'context:data',
+    EVENT_CONTEXT_UPDATE: 'context:update',
 
     // Session routes
     SESSION_LIST: 'session:list',
@@ -21,7 +22,9 @@ module.exports = {
     SESSION_CONTEXT_REMOVE: 'session:context:remove',
 
     // Context routes
+    CONTEXT_GET: 'context:get',
     CONTEXT_GET_ID: 'context:get:id',
+    CONTEXT_GET_STATS: 'context:get:stats',
 
     CONTEXT_GET_URL: 'context:get:url',
     CONTEXT_SET_URL: 'context:set:url',
