@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     volumes:
       - ${CANVAS_SERVER_CONFIG:-./config}:/opt/canvas-server/config
       - ${CANVAS_SERVER_HOME:-./user}:/opt/canvas-server/user
