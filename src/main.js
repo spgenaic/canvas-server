@@ -258,6 +258,7 @@ class Canvas extends EventEmitter {
 
     async shutdownServices() {
         debug('Shutting down services');
+        await this.db.stop()
         return true;
     }
 

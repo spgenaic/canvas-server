@@ -169,17 +169,21 @@ class HttpTransport extends Service {
 
     async stop() {
         if (this.server) {
-            await new Promise((resolve, reject) => {
-                this.server.close((err) => {
-                    if (err) { reject(err); }
-                    else { resolve(); }
-                });
+            debug('Shutting down server...');
+            this.server.close((err) => {
+                if (err) {
+                    console.error('Error shutting down server:', err);
+                    process.exit(1);
+                }
+                console.log('Server gracefully shut down');
+                process.exit(0);
             });
 
-            this.server = null;
+            // Close all socket.io connections
+            if (this.io) {
+                this.io.close();
+            }
         }
-
-        console.log('HTTP transport(s) stopped');
     }
 
     async restart() {
