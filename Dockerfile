@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y git curl && apt-get clean
 RUN git clone --branch dev https://github.com/idncsk/canvas-server canvas-server
 
 # Install PM2 globally
-# RUN npm install -g pm2
+#RUN npm install -g pm2
 
 # Lets switch the workdir to our beloved src
 WORKDIR /opt/canvas-server/src

@@ -14,7 +14,8 @@ const socketIo = require('socket.io');
 
 // Defaults
 const DEFAULT_PROTOCOL = 'http';
-const DEFAULT_HOST = '127.0.0.1';
+//const DEFAULT_HOST = '127.0.0.1';
+const DEFAULT_HOST = '0.0.0.0'; // TODO: Change me, this is to make Docker happy if no config is supplied
 const DEFAULT_PORT = 8000;
 const DEFAULT_ACCESS_TOKEN = 'canvas-server-token';
 

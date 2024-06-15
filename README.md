@@ -30,10 +30,17 @@ To automatically start canvas-server as a system (or user) service, please consu
 $ git clone https://github.com/idncsk/canvas-server /path/to/canvas-server
 $ cd /path/to/canvas-server
 $ docker-compose up --build
+# or, to ensure you are running the latest and greatest
+# $ docker-compose build --no-cache
+# $ docker-compose up --force-recreate
+# Cleanup
+$ docker-compose down --rmi canvas-server
+
 ```
 
 Supported ENV vars with their defaults
-```
+
+```bash
 ${CANVAS_SERVER_CONFIG:-./config}:/opt/canvas-server/config
 ${CANVAS_SERVER_HOME:-./user}:/opt/canvas-server/user
 ${CANVAS_SERVER_DATA:-./data}:/opt/canvas-server/data
