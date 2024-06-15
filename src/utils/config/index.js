@@ -25,6 +25,10 @@
  *
  */
 
+// TODO: Refactor to check for deep object values too
+// If server.transports would not be found in server.json, try file server.transports.json instead
+// For this we need to patch the get/set functions in the Conf class
+
 const Conf = require('conf');
 const fs = require('fs');
 const path = require('path');
