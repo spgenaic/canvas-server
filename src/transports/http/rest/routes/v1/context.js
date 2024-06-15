@@ -148,7 +148,7 @@ router.get('/path', (req, res) => {
 });
 
 router.get('/paths', (req, res) => {
-    context = req.context;
+    const context = req.context;
     const response = new req.ResponseObject();
     const paths = context.paths;
     debug('[GET] Paths route triggered');

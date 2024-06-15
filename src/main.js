@@ -48,6 +48,9 @@ const CONTEXT_URL_BASE_ID = 'universe';
 
 class Canvas extends EventEmitter {
 
+    #status;
+    #isMaster;
+
     constructor(options = {
         sessionEnabled: true,
         enableUserRoles: true,
@@ -148,8 +151,8 @@ class Canvas extends EventEmitter {
         this.IPC = IPC;          // Shared IPC socket
 
         // App State
-        this.isMaster = true;
-        this.status = 'stopped';
+        this.#isMaster = true;
+        this.#status = 'stopped';
     }
 
     // Getters
@@ -161,7 +164,8 @@ class Canvas extends EventEmitter {
     static get userPaths() { return USER.paths; }
     get pid() { return this.PID; }
     get ipc() { return this.IPC; }
-    get status() { return this.status; }
+    get status() { return this.#status; }
+    get isMaster() { return this.#isMaster; }
 
 
     /**
@@ -173,8 +177,8 @@ class Canvas extends EventEmitter {
         // Maybe we should support starting the whole canvas-server with a locked context path
         // but lets be KISS-y for now
     }) {
-        if (this.status == 'running' && this.isMaster) {throw new Error('Canvas Server already running');}
-        this.status = 'starting';
+        if (this.#status == 'running' && this.#isMaster) {throw new Error('Canvas Server already running');}
+        this.#status = 'starting';
         this.emit('starting');
         try {
             this.setupProcessEventListeners();
@@ -190,7 +194,7 @@ class Canvas extends EventEmitter {
             process.exit(1);
         }
 
-        this.status = 'running';
+        this.#status = 'running';
         this.emit('running');
         return true;
     }
@@ -198,7 +202,7 @@ class Canvas extends EventEmitter {
     async shutdown(exit = true) {
         debug(exit ? 'Shutting down Canvas Server...' : 'Shutting down Canvas Server for restart');
         this.emit('before-shutdown');
-        this.status = 'stopping';
+        this.#status = 'stopping';
         try {
             if (this.sessionEnabled) { await this.sessionManager.saveSessions(); }
             await this.shutdownRoles();
@@ -219,7 +223,6 @@ class Canvas extends EventEmitter {
         await this.start();
     }
 
-    status() { return this.status; }
     stats() { return []; }
 
 

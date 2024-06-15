@@ -226,7 +226,7 @@ class BitmapCollection {
         let partial;
         for (const bitmap of roaringBitmapArray) {
             debug(bitmap.toArray());
-            if (!bitmap instanceof RoaringBitmap32) {throw new TypeError(`Bitmap must be an instance of RoaringBitmap32, "${typeof bitmap}" given`);}
+            if (!(bitmap instanceof RoaringBitmap32)) {throw new TypeError(`Bitmap must be an instance of RoaringBitmap32, "${typeof bitmap}" given`);}
             if (!partial) {
                 partial = bitmap;
                 continue;

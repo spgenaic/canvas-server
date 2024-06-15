@@ -13,6 +13,7 @@ const log = console.log;
 
 // Constants
 const SOCKET_PATH = os.tmpdir() + '/ws-ipcd.sock';
+const DEFAULT_SOCKET_PATH = SOCKET_PATH;
 const CLIENT_SOCKET_TIMEOUT_MS = 1000;
 const CLIENT_RECONNECT_TIMEOUT_MS = 2000;
 const CLIENT_RECONNECT_ERROR_COUNT = 3;   // Number of connection errors till we attempt a reconnect
@@ -30,7 +31,7 @@ const CLIENT_IGNORE_EVENTS = [
 const SCHEMA_V0 = {};
 
 class Server extends EE {
-  
+
     constructor(socketPath) {
 
         super();
@@ -42,20 +43,20 @@ class Server extends EE {
         this.listener = null;
 
         if (fs.existsSync(this.socketPath)) {this._unlinkSocket();}
-        
+
     }
 
     start() {
 
-        this.listener = net.createServer((socket) => {            
+        this.listener = net.createServer((socket) => {
             socket.on('data', (data) => this._handleData(data, socket));
         })
-    
+
             .listen(this.socketPath)
-            .on('connection', (socket) => this._handleConnection(socket))        
+            .on('connection', (socket) => this._handleConnection(socket))
             .on('error', (error) => this._handleError(error));
 
-        log(`IPC Server::Listening on ${this.socketPath} with PID:${process.pid}`);        
+        log(`IPC Server::Listening on ${this.socketPath} with PID:${process.pid}`);
         process.on('SIGINT', () => this.stop());
 
         return this.listener;
@@ -72,14 +73,14 @@ class Server extends EE {
             payload: '',
         };
 
-        if (typeof socket === 'object') 
+        if (typeof socket === 'object')
         {return (socket.writable) ? socket.write(msgPack(data)) : false;}
 
-        if (typeof socket === 'number') 
+        if (typeof socket === 'number')
         {return (this.sockets[socket].writable) ? this.sockets[socket].write(msgPack(data)) : false;}
 
         return false;
-    
+
     }
 
     broadcast(data) {
@@ -96,7 +97,7 @@ class Server extends EE {
 
             log(`IPC Server: Sending broadcast message to ${Object.keys(this.sockets).length} clients`);
             let clients = Object.keys(this.sockets);
-            
+
             while(clients.length){
                 let client = clients.pop();
                 this.sockets[client].write(message);
@@ -110,7 +111,7 @@ class Server extends EE {
         if(!this.isQuitting) {
             this.isQuitting = true;
             log(`IPC server::Terminating, PID ${process.pid}`);
-        
+
             if (Object.keys(this.sockets).length) {
                 let clients = Object.keys(this.sockets);
                 while(clients.length){
@@ -129,7 +130,7 @@ class Server extends EE {
         socket.id = socketID;
 
         this.sockets[socketID] = socket;
-        this.connectionCount++;   
+        this.connectionCount++;
 
         log(`IPC Server: Client #${this.connectionCount} ID ${socketID} connected`);
 
@@ -153,7 +154,7 @@ class Server extends EE {
     }
 
     _handleData(data, socket) {
-        
+
         data = msgUnpack(data);
         data.socketID = socket.id;
 
@@ -181,7 +182,7 @@ class Server extends EE {
 
             case 'broadcast':
                 this.emit('broadcast', data);
-                break;                
+                break;
 
             default:
                 log(`Got ${data.type} => Default action`);
@@ -190,7 +191,7 @@ class Server extends EE {
 
         return;
         //socket.write(msgPack(reply))
-        
+
     }
 
     _handleError(e) {
@@ -200,7 +201,7 @@ class Server extends EE {
                 this._unlinkSocket();
                 this.start();
                 break;
-            case 'EPIPE': 
+            case 'EPIPE':
                 log('EPIPE Event ignored');
                 break;
             default:
@@ -211,7 +212,7 @@ class Server extends EE {
     }
 
     _unlinkSocket() {
-        try { fs.unlinkSync(this.socketPath); } 
+        try { fs.unlinkSync(this.socketPath); }
         catch(err) { if (err) {throw err;} }
     }
 
@@ -223,7 +224,7 @@ class Client extends EE {
 
         super();
 
-        this.socketPath = (socketPath) ? xpipe(socketPath) : DEFAULT_SOCKET_PATH;       
+        this.socketPath = (socketPath) ? xpipe(socketPath) : DEFAULT_SOCKET_PATH;
         this.isQuitting = false;
         this.isConneted = false;
         this.socket = null;
@@ -262,10 +263,10 @@ class Client extends EE {
 
     }
 
-    disconnect() { 
+    disconnect() {
         log('IPC Client: Server disconnect');
         this.isConnected = false;
-        this.socket.end(); 
+        this.socket.end();
         process.removeAllListeners();
         this.socket.unref();
     }
@@ -294,7 +295,7 @@ class Client extends EE {
                 log('IPC Client: Connection error threshold reached, attempting a full reconnect');
                 this.disconnect();
             }
-            
+
             if (!this.connect()) {return false;}
 
         }
@@ -312,7 +313,7 @@ class Client extends EE {
             id: requestID,
             type: 'req',
             payload: data,
-        })) {return false;} 
+        })) {return false;}
 
         this.once(requestID, (reply) => {
             log(`IPC Client: Got reply for ${requestID}`);
@@ -321,7 +322,7 @@ class Client extends EE {
         });
 
         return true;
-        
+
     }
 
     _handleConnection() {
@@ -338,7 +339,7 @@ class Client extends EE {
             this.emit('data', data);
             return data;
         }
-    
+
         switch(data.type) {
 
             case 'req':
@@ -354,8 +355,8 @@ class Client extends EE {
 
             case 'broadcast':
                 this.emit('broadcast', data);
-                break;                
-    
+                break;
+
             case '__disconnect':
                 this.emit('disconnect');
                 return this.disconnect();
@@ -420,6 +421,6 @@ function msgUnpack(msg) {
 }
 
 function genUUID() {
-    // Replace with UUID 
+    // Replace with UUID
     return Date.now();
 }
