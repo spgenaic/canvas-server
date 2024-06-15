@@ -61,15 +61,17 @@ class HttpTransport extends Service {
     #protocol;
     #host;
     #port;
+    #restApiBasePath;
     #auth;
 
     constructor({
         protocol = DEFAULT_PROTOCOL,
         host = DEFAULT_HOST,
         port = DEFAULT_PORT,
+        baseUrl = `${DEFAULT_API_BASE_PATH}/${DEFAULT_API_VERSION}`,
         auth = {
             token: DEFAULT_ACCESS_TOKEN,
-            disableApiKeyValidation: false,
+            enabled: true,
         },
         ...options
     } = {}) {
@@ -79,6 +81,7 @@ class HttpTransport extends Service {
         this.#protocol = protocol;
         this.#host = host;
         this.#port = port;
+        this.#restApiBasePath = baseUrl;
         this.#auth = auth;
 
         // The really ugly part
@@ -95,7 +98,6 @@ class HttpTransport extends Service {
         this.sessionManager = options.sessionManager;
 
         // Set the base path (as we only have one api version, this is ..fine)
-        this.restApiBasePath = `${DEFAULT_API_BASE_PATH}/${DEFAULT_API_VERSION}`;
         this.ResponseObject = ResponseObject; // TODO: Refactor
 
         // Workaround till I implement proper multi-context routes!
@@ -103,7 +105,8 @@ class HttpTransport extends Service {
         //this.context = this.contextManager.getContext();
         this.context = this.session.getContext();
 
-        debug(`HTTP Transport class initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`);
+        debug(`HTTP Transport class initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}, rest base path: ${this.#restApiBasePath}`);
+        debug('Auth:', this.#auth.enabled ? 'enabled' : 'disabled');
     }
 
     async start() {
@@ -131,7 +134,7 @@ class HttpTransport extends Service {
         });
 
         // Toggle API Key validation
-        if (!this.#auth.disableApiKeyValidation) {
+        if (this.#auth.enabled) {
             app.use(validateApiKey(this.#auth.token));
         }
 
