@@ -33,6 +33,7 @@ const RoleManager = require('./managers/role/index.js');
 // Transports
 const TransportRest = require('./transports/rest/index.js');
 const TransportSocketIO = require('./transports/socketio/index.js');
+const TransportHttp = require('./transports/http');
 
 // App constants
 const MAX_SESSIONS = 32 // 2^5
@@ -281,8 +282,9 @@ class Canvas extends EventEmitter {
         let config = this.config.open('transports')
 
         const transports = [
-            { name: 'rest', class: TransportRest },
-            { name: 'socketio', class: TransportSocketIO }
+            { name: 'http', class: TransportHttp }
+            //{ name: 'rest', class: TransportRest },
+            //{ name: 'socketio', class: TransportSocketIO }
         ];
 
         // TODO: The whole thing has to be refactored
