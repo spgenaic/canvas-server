@@ -1,10 +1,11 @@
 /**
- * Canvas Server *single-user* runtime
+ * Canvas Server *single-user* env bootstrap
  */
 
 // Utils
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const pkg = require('./package.json');
 const device = require('./managers/device').getCurrentDevice();
 
@@ -13,42 +14,33 @@ const device = require('./managers/device').getCurrentDevice();
  * System directories
  *
  * SERVER_ROOT
- * ├── main
- * ├── config
- * ├── user
- * ├── var
- * |   ├── .env
+ * ├── src
+ * ├── home     || ~/.canvas        || Canvas/Server
+ * ├── data     || ~/.canvas/data   || Canvas/Server/data
+ * ├── config   || ~/.canvas/config || Canvas/Server/config
+ * ├── var      || ~/.canvas/var    || Canvas/Server/var
  * |   ├── log
  * |   ├── run
  */
 
 const SERVER_ROOT = path.dirname(path.resolve(__dirname));
-const SERVER_HOME = path.join(SERVER_ROOT, 'src');
-const SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config');
-const SERVER_ROLES = process.env['CANVAS_SERVER_ROLES'] || path.join(SERVER_ROOT, 'server/roles');
-const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var');
+const SERVER_SRC = path.join(SERVER_ROOT, 'src');
+var SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config');
+var SERVER_HOME = process.env['CANVAS_SERVER_HOME'] || path.join(SERVER_ROOT, 'user');
+var SERVER_DATA = process.env['CANVAS_SERVER_DATA'] || path.join(SERVER_ROOT, 'data');
+var SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var');
 
-
-/**
- * User directories
- *
- * SERVER_ROOT/user
- * ├── config
- * ├── data
- * ├── db
- * ├── var
- */
-
-// User env
-const USER_HOME = process.env['CANVAS_USER_HOME'] || path.join(device.os.homedir, '.canvas'); //path.join(SERVER_ROOT, 'user')
-const USER_CONFIG = process.env['CANVAS_USER_CONFIG'] || path.join(USER_HOME, 'config');
-const USER_DATA = process.env['CANVAS_USER_DATA'] || path.join(USER_HOME, 'data');
-const USER_DB = process.env['CANVAS_USER_DB'] || path.join(USER_HOME, 'db');
-const USER_VAR = process.env['CANVAS_USER_VAR'] || path.join(USER_HOME, 'var');
+// Hack for seamless local development
+if (fs.existsSync(path.join(SERVER_HOME, '.ignore'))) {
+    SERVER_HOME = path.join(os.homedir(), '.canvas');
+    SERVER_CONFIG = path.join(SERVER_HOME, 'config');
+    SERVER_DATA = path.join(SERVER_HOME, 'data');
+    SERVER_VAR = path.join(SERVER_HOME, 'var');
+}
 
 // Collect all ENV constants
 const env = {
-    DOTENV: path.join(SERVER_VAR, '.env'),
+    FILE: path.join(SERVER_ROOT, '.env'),
 
     SERVER: {
         appName: (pkg.productName) ? pkg.productName : pkg.name,
@@ -57,20 +49,11 @@ const env = {
         license: pkg.license,
         paths: {
             root: SERVER_ROOT,
-            home: SERVER_HOME,
+            src: SERVER_SRC,
             config: SERVER_CONFIG,
-            roles: SERVER_ROLES,
+            home: SERVER_HOME,
+            data: SERVER_DATA,
             var: SERVER_VAR,
-        },
-    },
-
-    USER: {
-        paths: {
-            home: USER_HOME,
-            config: USER_CONFIG,
-            data: USER_DATA,
-            db: USER_DB,
-            var: USER_VAR,
         },
     },
 
@@ -89,29 +72,24 @@ const env = {
 
 };
 
-// Generate ini file
+// Generate a .env ini file
 const INI = {
     // Server
-    CANVAS_SERVER_NAME: env.SERVER.name,
-    CANVAS_SERVER_VERSION: env.SERVER.version,
-    CANVAS_SERVER_DESCRIPTION: env.SERVER.description,
-    CANVAS_SERVER_LICENSE: env.SERVER.license,
+    CANVAS_SERVER_APP_NAME: env.SERVER.name,
+    CANVAS_SERVER_APP_VERSION: env.SERVER.version,
+    CANVAS_SERVER_APP_DESCRIPTION: env.SERVER.description,
+    CANVAS_SERVER_APP_LICENSE: env.SERVER.license,
+
     CANVAS_SERVER_ROOT: env.SERVER.paths.root,
-    CANVAS_SERVER_HOME: env.SERVER.paths.home,
+    CANVAS_SERVER_SRC: env.SERVER.paths.src,
     CANVAS_SERVER_CONFIG: env.SERVER.paths.config,
-    CANVAS_SERVER_ROLES: env.SERVER.paths.roles,
+    CANVAS_SERVER_HOME: env.SERVER.paths.home,
+    CANVAS_SERVER_DATA: env.SERVER.paths.data,
     CANVAS_SERVER_VAR: env.SERVER.paths.var,
 
     // Server runtime
     CANVAS_SERVER_PID: env.PID,
     CANVAS_SERVER_IPC: env.IPC,
-
-    // User
-    CANVAS_USER_HOME: env.USER.paths.home,
-    CANVAS_USER_CONFIG: env.USER.paths.config,
-    CANVAS_USER_DATA: env.USER.paths.data,
-    CANVAS_USER_DB: env.USER.paths.db,
-    CANVAS_USER_VAR: env.USER.paths.var,
 
     // Developer settings
     NODE_ENV: process.env.NODE_ENV || 'development',
@@ -119,7 +97,7 @@ const INI = {
 };
 
 // Update .env to-be read by external server roles
-generateDotenvFile(INI, path.join(SERVER_VAR, '.env'));
+generateDotenvFile(INI, env.FILE);
 
 // Update process env vars
 // We could just run require('dotenv').config() at this point

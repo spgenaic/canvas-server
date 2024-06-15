@@ -9,6 +9,7 @@ services:
       - NODE_ENV=production
     volumes:
       - ${CANVAS_SERVER_CONFIG:-./config}:/opt/canvas-server/config
+      - ${CANVAS_SERVER_HOME:-./user}:/opt/canvas-server/user
       - ${CANVAS_SERVER_DATA:-./data}:/opt/canvas-server/data
       - ${CANVAS_SERVER_VAR:-./var}:/opt/canvas-server/var
     container_name: canvas-server

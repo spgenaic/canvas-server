@@ -14,8 +14,10 @@
 ## Data directories
 /user/**
 !user/.keep
+!user/.ignore
 /data/**
 !data/.keep
+!data/.ignore
 
 ## Dev
 /.vscode

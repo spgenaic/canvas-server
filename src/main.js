@@ -5,8 +5,6 @@
 // Environment variables
 const {
     SERVER,
-    USER,
-    DEVICE,
     PID,
     IPC,
 } = require('./env.js');
@@ -67,12 +65,13 @@ class Canvas extends EventEmitter {
 
         this.config = Config({
             serverConfigDir: SERVER.paths.config,
-            userConfigDir: USER.paths.config,
+            userConfigDir: SERVER.paths.config,
             configPriority: 'server',
             versioning: false,
         });
 
         this.logger = log;
+        // TODO: Add proper logging..finally
         /* new Log({
             appName: SERVER.name,
             logLevel: process.env.LOG_LEVEL || 'debug',
@@ -92,8 +91,8 @@ class Canvas extends EventEmitter {
          */
 
         this.db = new SynapsDB({
-            path: USER.paths.db,
-            backupPath: path.join(USER.paths.db, 'backup'),
+            path: path.join(SERVER.paths.home, 'db'),
+            backupPath: path.join(SERVER.paths.home, 'db', 'backup'),
             backupOnOpen: true,
             backupOnClose: false,
             compression: true,
@@ -107,8 +106,8 @@ class Canvas extends EventEmitter {
 
         this.stored = new StoreD({
             paths: {
-                data: USER.paths.data,
-                cache: path.join(USER.paths.var, 'cache'),
+                data: SERVER.paths.data,
+                cache: path.join(SERVER.paths.var, 'cache'),
             },
             cachePolicy: 'pull-through',
         });
@@ -118,11 +117,12 @@ class Canvas extends EventEmitter {
          * Managers
          */
 
+        // TODO: Remove or refactor, this ugliness is not really needed
         this.serviceManager = new ServiceManager({
-            config: path.join(USER.paths.config, 'services.json'),
+            config: path.join(SERVER.paths.config, 'services.json'),
             serviceDirs: [
-                path.join(SERVER.paths.home, 'services'),
-                path.join(SERVER.paths.home, 'transports'),
+                path.join(SERVER.paths.src, 'services'),
+                path.join(SERVER.paths.src, 'transports'),
             ],
         });
 
@@ -160,8 +160,7 @@ class Canvas extends EventEmitter {
     static get version() { return SERVER.version; }
     static get description() { return SERVER.description; }
     static get license() { return SERVER.license; }
-    static get serverPaths() { return SERVER.paths; }
-    static get userPaths() { return USER.paths; }
+    static get paths() { return SERVER.paths; }
     get pid() { return this.PID; }
     get ipc() { return this.IPC; }
     get status() { return this.#status; }
