@@ -1,0 +1,15 @@
+version: '3'
+services:
+  app:
+    build: .
+    image: canvas-server-image:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ${CANVAS_SERVER_CONFIG:-./config}:/opt/canvas-server/config
+      - ${CANVAS_SERVER_HOME:-./user}:/opt/canvas-server/user
+      - ${CANVAS_SERVER_DATA:-./data}:/opt/canvas-server/data
+      - ${CANVAS_SERVER_VAR:-./var}:/opt/canvas-server/var
+    container_name: canvas-server
