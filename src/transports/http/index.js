@@ -61,7 +61,6 @@ class HttpTransport extends Service {
     #protocol;
     #host;
     #port;
-    #restApiBasePath;
     #auth;
 
     constructor({
@@ -81,8 +80,8 @@ class HttpTransport extends Service {
         this.#protocol = protocol;
         this.#host = host;
         this.#port = port;
-        this.#restApiBasePath = baseUrl;
         this.#auth = auth;
+        this.restApiBasePath = baseUrl;
 
         // The really ugly part
         if (!options.canvas) {throw new Error('Canvas not defined');}
@@ -105,7 +104,7 @@ class HttpTransport extends Service {
         //this.context = this.contextManager.getContext();
         this.context = this.session.getContext();
 
-        debug(`HTTP Transport class initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}, rest base path: ${this.#restApiBasePath}`);
+        debug(`HTTP Transport class initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}, rest base path: ${this.restApiBasePath}`);
         debug('Auth:', this.#auth.enabled ? 'enabled' : 'disabled');
     }
 
