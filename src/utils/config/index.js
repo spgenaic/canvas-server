@@ -28,7 +28,7 @@
 const Conf = require('conf');
 const fs = require('fs');
 const path = require('path');
-const device = require('../../managers/device').getCurrentDevice();
+const device = require('../../managers/device').getCurrentDevice(); // TODO: Refactor
 
 const findFile = (files) => {
     for (const file of files) {
