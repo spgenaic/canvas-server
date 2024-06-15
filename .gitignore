@@ -11,10 +11,11 @@
 /runtime/**
 !/runtime/.keep
 
-## User directories
+## Data directories
 /user/**
 !user/.keep
-!user/.ignore
+/data/**
+!data/.keep
 
 ## Dev
 /.vscode
