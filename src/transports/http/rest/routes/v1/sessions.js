@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
     const response = new req.ResponseObject();
 
     const list = await sm.listSessions();
-    debug(`[GET] List sessions`);
+    debug('[GET] List sessions');
     res.status(200).json(response.success(list).getResponse());
 });
 

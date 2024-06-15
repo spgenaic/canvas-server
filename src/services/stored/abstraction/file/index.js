@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 
 /**
@@ -6,37 +6,37 @@
  */
 
 // Utils
-const log           = console.log
+const log           = console.log;
 //const fileinfo      = require('./fileinfo')
 //const hash          = require('./hash')
 //const { struct }    = require('superstruct')
 //const Data          = require('../../')
 
 // Includes
-const StorageAbstraction = require('../StorageAbstraction')
+const StorageAbstraction = require('../StorageAbstraction');
 
 
 class File extends StorageAbstraction {
 
-/**
+    /**
  *Creates an instance of File
  * @param {*} f : File path
  * @param {*} hash : Hash ID(will be generated if missing)
  * @memberof File
  */
-constructor(f, hash) {
-    this.id = 0
-    this.names = new Set()
-    this.paths = new Set()
-    super()
-  }
+    constructor(f, hash) {
+        this.id = 0;
+        this.names = new Set();
+        this.paths = new Set();
+        super();
+    }
   
-  async save() {}
+    async save() {}
 
-  async remove() {}
+    async remove() {}
 
-  async rename() {}
+    async rename() {}
 
 }
 
-module.exports = File
+module.exports = File;

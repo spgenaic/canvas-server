@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 
 /**
@@ -6,15 +6,15 @@
  */
 
 // Environment
-const { SERVER, USER, DEVICE } = require('../../env.js')
+const { SERVER, USER, DEVICE } = require('../../env.js');
 
 // Utils
-const EventEmitter = require("eventemitter2");
-const debug = require("debug")("canvas-server:roleManager");
+const EventEmitter = require('eventemitter2');
+const debug = require('debug')('canvas-server:roleManager');
 const path = require('path');
 
 // Backends
-process.env['PM2_HOME'] = path.join(SERVER.paths.var, 'pm2')
+process.env['PM2_HOME'] = path.join(SERVER.paths.var, 'pm2');
 const pm2 = require('pm2');
 const Docker = require('dockerode');
 
@@ -26,7 +26,7 @@ class RoleManager extends EventEmitter {
 
     constructor(options = {}) {
 
-        debug('Initializing Canvas Role Manager')
+        debug('Initializing Canvas Role Manager');
         super();
 
         this.loadedRoles = new Map();
@@ -34,7 +34,7 @@ class RoleManager extends EventEmitter {
 
         // Initialize backends
         this.docker = new Docker();
-        this.pm2 = pm2 //TODO: Fix
+        this.pm2 = pm2; //TODO: Fix
     }
 
     /**
@@ -43,7 +43,7 @@ class RoleManager extends EventEmitter {
 
     async startRole(role, options = {}) {
         if (role.type === 'docker') {
-           await this.startContainer(role.identifier);
+            await this.startContainer(role.identifier);
         } else if (role.type === 'pm2') {
             await this.startProcess(role.identifier);
         }
@@ -78,7 +78,7 @@ class RoleManager extends EventEmitter {
     startProcess(processName) {
         return new Promise((resolve, reject) => {
             this.pm2.start(processName, (err, apps) => {
-                if (err) reject(err);
+                if (err) {reject(err);}
                 resolve(apps);
             });
         });
@@ -87,7 +87,7 @@ class RoleManager extends EventEmitter {
     stopProcess(processName) {
         return new Promise((resolve, reject) => {
             this.pm2.stop(processName, (err, proc) => {
-                if (err) reject(err);
+                if (err) {reject(err);}
                 resolve(proc);
             });
         });

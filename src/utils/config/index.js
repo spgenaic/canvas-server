@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 
 /**
@@ -25,10 +25,10 @@
  *
  */
 
-const Conf = require("conf");
-const fs = require("fs");
-const path = require("path");
-const device = require('../../managers/device').getCurrentDevice()
+const Conf = require('conf');
+const fs = require('fs');
+const path = require('path');
+const device = require('../../managers/device').getCurrentDevice();
 
 const findFile = (files) => {
     for (const file of files) {
@@ -66,7 +66,7 @@ const Config = (configOpts) => {
 
             if (!file) {
                 const defaultFile = path.join(configOpts.userConfigDir, `${name}.json`);
-                if (!fs.existsSync(configOpts.userConfigDir)) { fs.mkdirSync(configOpts.userConfigDir); };
+                if (!fs.existsSync(configOpts.userConfigDir)) { fs.mkdirSync(configOpts.userConfigDir); }
                 fs.writeFileSync(defaultFile, '{}', { encoding: 'utf-8' });
                 return new Conf({ configName: name, cwd: configOpts.userConfigDir });
             } else {

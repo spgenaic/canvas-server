@@ -1,6 +1,6 @@
 //const openai = require('openai-api')
 
-const debug = require('debug')('canvas:neurald')
+const debug = require('debug')('canvas:neurald');
 
 // Power law
 // Scale invariance
@@ -13,7 +13,7 @@ class NeuralD {
 
     }) {
 
-        debug('Initializing Canvas NeuralD')
+        debug('Initializing Canvas NeuralD');
 
         // Inputs
         //canvas(context changes, documents, ui events, etc)
@@ -60,4 +60,4 @@ class NeuralD {
 }
 
 
-module.exports = NeuralD
+module.exports = NeuralD;

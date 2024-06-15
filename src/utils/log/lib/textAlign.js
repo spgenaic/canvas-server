@@ -1,49 +1,49 @@
-  function centerAlign(str, len, space = ' ') {
-    const free = len - str.length
+function centerAlign(str, len, space = ' ') {
+    const free = len - str.length;
     if (free <= 0) {
-      return str
+        return str;
     }
-    const freeLeft = Math.floor(free / 2)
-    let _str = ''
+    const freeLeft = Math.floor(free / 2);
+    let _str = '';
     for (let i = 0; i < len; i++) {
-      _str += (i < freeLeft || i >= freeLeft + str.length) ? space : str[i - freeLeft]
+        _str += (i < freeLeft || i >= freeLeft + str.length) ? space : str[i - freeLeft];
     }
-    return _str
-  }
+    return _str;
+}
   
-  function rightAlign(str, len, space = ' ') {
-    const free = len - str.length
+function rightAlign(str, len, space = ' ') {
+    const free = len - str.length;
     if (free <= 0) {
-      return str
+        return str;
     }
-    let _str = ''
+    let _str = '';
     for (let i = 0; i < len; i++) {
-      _str += i < free ? space : str[i - free]
+        _str += i < free ? space : str[i - free];
     }
-    return _str
-  }
+    return _str;
+}
   
-  function leftAlign(str, len, space = ' ') {
-    let _str = ''
+function leftAlign(str, len, space = ' ') {
+    let _str = '';
     for (let i = 0; i < len; i++) {
-      _str += i < str.length ? str[i] : space
+        _str += i < str.length ? str[i] : space;
     }
-    return _str
-  }
+    return _str;
+}
   
-  function align(alignment, str, len, space = ' ') {
+function align(alignment, str, len, space = ' ') {
     switch (alignment) {
-      case 'left': return leftAlign(str, len, space)
-      case 'right': return rightAlign(str, len, space)
-      case 'center': return centerAlign(str, len, space)
-      default: return str
+        case 'left': return leftAlign(str, len, space);
+        case 'right': return rightAlign(str, len, space);
+        case 'center': return centerAlign(str, len, space);
+        default: return str;
     }
-  }
+}
 
 
-  module.exports = {
+module.exports = {
     align,
     centerAlign,
     leftAlign,
-    rightAlign
-  }
+    rightAlign,
+};

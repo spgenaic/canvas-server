@@ -15,20 +15,20 @@ const readFileSync = fs.readFileSync;
 
 class JsonMap extends Map {
 
-    #initialized = false
+    #initialized = false;
 
     constructor(filePath) {
 
-        if (!filePath || typeof filePath !== 'string') throw new Error('File path must be a string');
-        super()
+        if (!filePath || typeof filePath !== 'string') {throw new Error('File path must be a string');}
+        super();
 
         this.filePath = path.extname(filePath) === '.json' ? filePath : filePath + '.json';
-        this.dataRoot =  path.dirname(this.filePath)
+        this.dataRoot =  path.dirname(this.filePath);
         if (!fs.existsSync(this.dataRoot)){
             fs.mkdirSync(this.dataRoot, { recursive: true });
         }
 
-        this.loadSync()
+        this.loadSync();
 
     }
 
@@ -58,16 +58,16 @@ class JsonMap extends Map {
     }
 
     clearSync() {
-        super.clear()
+        super.clear();
         this.saveSync();
     }
 
     async load() {
         try {
             const data = await readFile(this.filePath, 'utf8');
-            const jsonData = JSON.parse(data)
+            const jsonData = JSON.parse(data);
             for (const [key, value] of jsonData) { super.set(key, value); }
-            this.#initialized = true
+            this.#initialized = true;
 
         } catch (err) {
             if (err.code === 'ENOENT') {
@@ -82,10 +82,10 @@ class JsonMap extends Map {
     loadSync() {
         try {
             const data = readFileSync(this.filePath, 'utf8');
-            if (!data) return
-            const jsonData = JSON.parse(data)
+            if (!data) {return;}
+            const jsonData = JSON.parse(data);
             for (const [key, value] of jsonData) { super.set(key, value); }
-            this.#initialized = true
+            this.#initialized = true;
         } catch (err) {
             if (err.code === 'ENOENT') {
                 console.info(`The file ${this.filePath} does not exist, file will be created on first update`);

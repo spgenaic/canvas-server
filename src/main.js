@@ -8,7 +8,7 @@ const {
     USER,
     DEVICE,
     PID,
-    IPC
+    IPC,
 } = require('./env.js');
 
 // Utils
@@ -31,17 +31,15 @@ const ContextManager = require('./managers/context/index.js');
 const RoleManager = require('./managers/role/index.js');
 
 // Transports
-const TransportRest = require('./transports/rest/index.js');
-const TransportSocketIO = require('./transports/socketio/index.js');
 const TransportHttp = require('./transports/http');
 
 // App constants
-const MAX_SESSIONS = 32 // 2^5
-const MAX_CONTEXTS_PER_SESSION = 32 // 2^5
+const MAX_SESSIONS = 32; // 2^5
+const MAX_CONTEXTS_PER_SESSION = 32; // 2^5
 const CONTEXT_AUTOCREATE_LAYERS = true;
-const CONTEXT_URL_PROTO = "universe";
-const CONTEXT_URL_BASE = "/";
-const CONTEXT_URL_BASE_ID = "universe";
+const CONTEXT_URL_PROTO = 'universe';
+const CONTEXT_URL_BASE = '/';
+const CONTEXT_URL_BASE_ID = 'universe';
 
 
 /**
@@ -52,7 +50,7 @@ class Canvas extends EventEmitter {
 
     constructor(options = {
         sessionEnabled: true,
-        enableUserRoles: true
+        enableUserRoles: true,
     }) {
 
         debug('Initializing Canvas Server');
@@ -62,14 +60,14 @@ class Canvas extends EventEmitter {
          * Utils
          */
 
-        super() // EventEmitter2
+        super(); // EventEmitter2
 
         this.config = Config({
             serverConfigDir: SERVER.paths.config,
             userConfigDir: USER.paths.config,
             configPriority: 'server',
-            versioning: false
-        })
+            versioning: false,
+        });
 
         this.logger = log;
         /* new Log({
@@ -95,14 +93,14 @@ class Canvas extends EventEmitter {
             backupPath: path.join(USER.paths.db, 'backup'),
             backupOnOpen: true,
             backupOnClose: false,
-            compression: true
-        })
+            compression: true,
+        });
 
         this.neurald = new NeuralD({
             db: this.db.createDataset('neurald'),
             config: this.config,
-            logger: this.logger
-        })
+            logger: this.logger,
+        });
 
         this.stored = new StoreD({
             paths: {
@@ -110,7 +108,7 @@ class Canvas extends EventEmitter {
                 cache: path.join(USER.paths.var, 'cache'),
             },
             cachePolicy: 'pull-through',
-        })
+        });
 
 
         /**
@@ -121,15 +119,15 @@ class Canvas extends EventEmitter {
             config: path.join(USER.paths.config, 'services.json'),
             serviceDirs: [
                 path.join(SERVER.paths.home, 'services'),
-                path.join(SERVER.paths.home, 'transports')
-            ]
+                path.join(SERVER.paths.home, 'transports'),
+            ],
         });
 
         this.roleManager = new RoleManager();
 
         this.contextManager = new ContextManager({
-            db: this.db
-        })
+            db: this.db,
+        });
 
         this.sessionManager = new SessionManager({
             sessionStore: (this.sessionEnabled) ? this.db.createDataset('session') : new Map(),
@@ -143,15 +141,15 @@ class Canvas extends EventEmitter {
          * Transports
          */
 
-        this.transports = {}
+        this.transports = {};
 
         // Static variables
-        this.PID = PID          // Current App instance PID
-        this.IPC = IPC          // Shared IPC socket
+        this.PID = PID;          // Current App instance PID
+        this.IPC = IPC;          // Shared IPC socket
 
         // App State
-        this.isMaster = true
-        this.status = 'stopped'
+        this.isMaster = true;
+        this.status = 'stopped';
     }
 
     // Getters
@@ -175,18 +173,18 @@ class Canvas extends EventEmitter {
         // Maybe we should support starting the whole canvas-server with a locked context path
         // but lets be KISS-y for now
     }) {
-        if (this.status == 'running' && this.isMaster) throw new Error('Canvas Server already running')
-        this.status = 'starting'
-        this.emit('starting')
+        if (this.status == 'running' && this.isMaster) {throw new Error('Canvas Server already running');}
+        this.status = 'starting';
+        this.emit('starting');
         try {
-            this.setupProcessEventListeners()
+            this.setupProcessEventListeners();
 
             // Start the default session (if enabled, maybe we'll remove this)
             if (this.sessionEnabled) { this.sessionManager.createSession('default'); }
 
-            await this.initializeServices()
-            await this.initializeTransports()
-            await this.initializeRoles()
+            await this.initializeServices();
+            await this.initializeTransports();
+            await this.initializeRoles();
         } catch (error) {
             console.error('Error during Canvas Server startup:', error);
             process.exit(1);
@@ -199,15 +197,15 @@ class Canvas extends EventEmitter {
 
     async shutdown(exit = true) {
         debug(exit ? 'Shutting down Canvas Server...' : 'Shutting down Canvas Server for restart');
-        this.emit('before-shutdown')
-        this.status = 'stopping'
+        this.emit('before-shutdown');
+        this.status = 'stopping';
         try {
             if (this.sessionEnabled) { await this.sessionManager.saveSessions(); }
             await this.shutdownRoles();
             await this.shutdownTransports();
             await this.shutdownServices();
             console.log('Graceful shutdown completed successfully.');
-            if (exit) process.exit(0);
+            if (exit) {process.exit(0);}
         } catch (error) {
             console.error('Error during shutdown:', error);
             process.exit(1);
@@ -216,9 +214,9 @@ class Canvas extends EventEmitter {
 
     async restart() {
         debug('Restarting Canvas Server');
-        this.emit('restart')
-        await this.shutdown(false)
-        await this.start()
+        this.emit('restart');
+        await this.shutdown(false);
+        await this.start();
     }
 
     status() { return this.status; }
@@ -241,19 +239,19 @@ class Canvas extends EventEmitter {
     }
 
     createSession(id, sessionOptions = {}) {
-        return this.sessionManager.createSession(id, sessionOptions)
+        return this.sessionManager.createSession(id, sessionOptions);
     }
 
     openSession(id) {
-        return this.sessionManager.openSession(id)
+        return this.sessionManager.openSession(id);
     }
 
     closeSession(id) {
-        return this.sessionManager.closeSession(id)
+        return this.sessionManager.closeSession(id);
     }
 
     deleteSession(id) {
-        return this.sessionManager.deleteSession(id)
+        return this.sessionManager.deleteSession(id);
     }
 
     // saveSession(id) { return this.sessionManager.saveSession(id) }
@@ -265,11 +263,11 @@ class Canvas extends EventEmitter {
      */
 
     async initializeServices() {
-        return true
+        return true;
     }
 
     async shutdownServices() {
-        return true
+        return true;
     }
 
 
@@ -279,10 +277,10 @@ class Canvas extends EventEmitter {
 
     async initializeTransports() {
         // Load configuration options for transports
-        let config = this.config.open('transports')
+        let config = this.config.open('transports');
 
         const transports = [
-            { name: 'http', class: TransportHttp }
+            { name: 'http', class: TransportHttp },
             //{ name: 'rest', class: TransportRest },
             //{ name: 'socketio', class: TransportSocketIO }
         ];
@@ -310,7 +308,7 @@ class Canvas extends EventEmitter {
     }
 
     async shutdownTransports() {
-        return true
+        return true;
     }
 
 
@@ -319,11 +317,11 @@ class Canvas extends EventEmitter {
      */
 
     async initializeRoles() {
-        return true
+        return true;
     }
 
     async shutdownRoles() {
-        return true
+        return true;
     }
 
 
@@ -361,7 +359,7 @@ class Canvas extends EventEmitter {
         });
 
         process.on('beforeExit', async (code) => {
-            if (code !== 0) return;
+            if (code !== 0) {return;}
             debug('Process beforeExit: ', code);
             await this.shutdown();
         });
@@ -373,4 +371,4 @@ class Canvas extends EventEmitter {
 
 }
 
-module.exports = Canvas
+module.exports = Canvas;

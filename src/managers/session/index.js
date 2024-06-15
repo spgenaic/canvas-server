@@ -1,18 +1,18 @@
 // Utils
-const EventEmitter = require("eventemitter2");
-const debug = require("debug")("canvas:session-manager");
+const EventEmitter = require('eventemitter2');
+const debug = require('debug')('canvas:session-manager');
 
 // Includes
-const Session = require("./lib/Session");
+const Session = require('./lib/Session');
 
 // Defaults
-const MAX_SESSIONS = 32 // 2^5
-const MAX_CONTEXTS_PER_SESSION = 32 // 2^5
-const SESSION_DEFAULT_ID = "default";
+const MAX_SESSIONS = 32; // 2^5
+const MAX_CONTEXTS_PER_SESSION = 32; // 2^5
+const SESSION_DEFAULT_ID = 'default';
 const CONTEXT_AUTOCREATE_LAYERS = true;
-const CONTEXT_URL_PROTO = "universe";
-const CONTEXT_URL_BASE = "/";
-const CONTEXT_URL_BASE_ID = "universe";
+const CONTEXT_URL_PROTO = 'universe';
+const CONTEXT_URL_BASE = '/';
+const CONTEXT_URL_BASE_ID = 'universe';
 
 /**
  * Session manager
@@ -36,7 +36,7 @@ class SessionManager extends EventEmitter {
 
     constructor(options = {}) {
         super();
-        debug("Initializing Session Manager");
+        debug('Initializing Session Manager');
 
         if (!options.sessionStore) {
             throw new Error('Session store required');
@@ -60,11 +60,11 @@ class SessionManager extends EventEmitter {
         let session;
 
         if (!id || id === null) {
-            debug('No session ID provided, initializing a default session')
+            debug('No session ID provided, initializing a default session');
             session = this.createSession(SESSION_DEFAULT_ID);
         } else {
             session = this.openSession(id);
-            if (!session) throw new Error(`Session with id "${id}" not found`)
+            if (!session) {throw new Error(`Session with id "${id}" not found`);}
         }
 
         return session;
@@ -81,7 +81,7 @@ class SessionManager extends EventEmitter {
         // TODO: Add support for updating context/session options
         if (this.#isSessionOpen(id)) {
             debug(`Session id "${id}" already exists and is active`);
-            return this.sessions.get(id)
+            return this.sessions.get(id);
         }
 
         if (this.sessionStore.has(id)) {
@@ -112,7 +112,7 @@ class SessionManager extends EventEmitter {
 
     openSession(id, autoInitSession = true) {
         if (!id || id === null) {
-            debug('No session ID provided, returning the default session')
+            debug('No session ID provided, returning the default session');
             return this.openSession(SESSION_DEFAULT_ID);
         }
 
@@ -124,7 +124,7 @@ class SessionManager extends EventEmitter {
 
         if (!this.sessionStore.has(id)) {
             debug(`Session ID "${id}" not found in session store`);
-            return (autoInitSession) ? this.createSession(id) : false
+            return (autoInitSession) ? this.createSession(id) : false;
         }
 
         let sessionConfig = this.#loadSessionFromDb(id);
@@ -162,7 +162,7 @@ class SessionManager extends EventEmitter {
             debug(`Session id "${id}" active, attempting to close it`);
             if (this.closeSession(id)) {
                 throw new Error('Error closing session');
-            };
+            }
         }
 
         if (!this.sessionStore.has(id)) {
@@ -172,7 +172,7 @@ class SessionManager extends EventEmitter {
 
         if (!this.#deleteSessionFromDb(id)) {
             throw new Error('Error deleting session from DB');
-        };
+        }
 
         debug(`Session id "${id}" deleted`);
         this.emit('session-deleted', id);

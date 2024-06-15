@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 // Import necessary libraries
 const crypto = require('crypto');
@@ -35,14 +35,14 @@ class Document {
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: [],
             embeddingFields: ['data'],
-            ...options?.index // Maybe we should move this to the top to not override the default values
-        }
+            ...options?.index, // Maybe we should move this to the top to not override the default values
+        };
 
         // Metadata
         this.meta = {
             dataContentType: DOCUMENT_DATA_FORMAT,
             dataContentEncoding: DOCUMENT_DATA_ENCODING,
-            ...options?.meta
+            ...options?.meta,
         };
 
         // Document data
@@ -75,8 +75,8 @@ class Document {
             meta: this.meta,
             data: this.data,
 
-            versions: this.versions
-        }
+            versions: this.versions,
+        };
     }
 
     static toJSON() {
@@ -92,18 +92,18 @@ class Document {
                 staticFeatureBitmapFields: ['type'],
                 dynamicFeatureBitmapFields: [],
                 fullTextIndexFields: [],
-                embeddingFields: ['data']
+                embeddingFields: ['data'],
             },
 
             meta: {
                 checksum: null,
                 dataContentType: DOCUMENT_DATA_FORMAT,
-                dataContentEncoding: DOCUMENT_DATA_ENCODING
+                dataContentEncoding: DOCUMENT_DATA_ENCODING,
             },
 
             data: {},
-            versions: []
-        }
+            versions: [],
+        };
     }
 
     static fromJSON(json) {
@@ -113,7 +113,7 @@ class Document {
     }
 
     calculateChecksum(fields, data = this) { // TODO: Refactor,"this" is a mess!
-        if (!fields) throw new Error('Checksum fields are not defined');
+        if (!fields) {throw new Error('Checksum fields are not defined');}
         const resolveField = (fieldPath, obj) => fieldPath.split('.').reduce((acc, part) => acc && acc[part], obj);
         const checksumData = fields.reduce((acc, field) => {
             const value = resolveField(field, data);
@@ -127,19 +127,19 @@ class Document {
     }
 
     createHash(str, algorithm = DOCUMENT_DATA_CHECKSUM_ALGO, encoding = DOCUMENT_DATA_ENCODING) {
-        if (typeof str === 'object') str = JSON.stringify(str)
+        if (typeof str === 'object') {str = JSON.stringify(str);}
         return crypto
             .createHash(algorithm)
             .update(str, encoding)
-            .digest('hex')
+            .digest('hex');
     }
 
     static createHash(str, algorithm = DOCUMENT_DATA_CHECKSUM_ALGO, encoding = DOCUMENT_DATA_ENCODING) {
-        if (typeof str === 'object') str = JSON.stringify(str)
+        if (typeof str === 'object') {str = JSON.stringify(str);}
         return crypto
             .createHash(algorithm)
             .update(str, encoding)
-            .digest('hex')
+            .digest('hex');
     }
 
     // TODO: Should replace the toJSON and fromJSON methods
@@ -155,20 +155,20 @@ class Document {
 
     validate() {
         // Check for mandatory parameters (TODO)
-        if (!this.type) throw new Error('Document type is not defined')
-        if (!this.data) throw new Error('Document data is not defined')
+        if (!this.type) {throw new Error('Document type is not defined');}
+        if (!this.data) {throw new Error('Document data is not defined');}
         return true;
     }
 
     static validate(document) {
-        if (!document) throw new Error('Document is not defined')
+        if (!document) {throw new Error('Document is not defined');}
 
         // Check for mandatory parameters (TODO)
         // initialize and run doc.validate()?
         return (
             document.type &&
             document.data
-        ) || false
+        ) || false;
     }
 
     get schema() { return this.toJSON(); }
@@ -184,4 +184,4 @@ class Document {
     }
 }
 
-module.exports = Document
+module.exports = Document;

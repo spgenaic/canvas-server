@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 
 /**
@@ -10,10 +10,10 @@
  */
 
 // Utils
-const EventEmitter = require("eventemitter2");
-const path = require("path");
+const EventEmitter = require('eventemitter2');
+const path = require('path');
 const fs = require('fs');
-const debug = require("debug")("canvas:service-manager")
+const debug = require('debug')('canvas:service-manager');
 
 /**
  * Service Manager
@@ -23,11 +23,11 @@ class ServiceManager extends EventEmitter {
 
     constructor(options = {}) {
 
-        debug('Initializing Canvas Service Manager')
+        debug('Initializing Canvas Service Manager');
         super();
 
-        if (!options.serviceDirs) throw new Error('ServiceManager requires a serviceDirs path')
-        this.dirs = options.serviceDirs
+        if (!options.serviceDirs) {throw new Error('ServiceManager requires a serviceDirs path');}
+        this.dirs = options.serviceDirs;
 
         this.services = new Map();
         this.loadedServices = new Map();
@@ -42,8 +42,8 @@ class ServiceManager extends EventEmitter {
             'all': Array.from(this.services.keys()),
             'loaded': this.listLoadedServices(),
             'initialized': this.listInitializedServices(),
-            'running': this.listRunningServices()
-        }
+            'running': this.listRunningServices(),
+        };
     }
 
     listLoadedServices() { return Array.from(this.loadedServices.keys()); }
@@ -53,7 +53,7 @@ class ServiceManager extends EventEmitter {
     listRunningServices() {
         let running = [];
         for (let [name, service] of this.initializedServices) {
-            if (service.isRunning()) running.push(name);
+            if (service.isRunning()) {running.push(name);}
         }
         return running;
     }
@@ -68,7 +68,7 @@ class ServiceManager extends EventEmitter {
 
         try {
             let servicePath = this.services.get(name);
-            if (!fs.existsSync(servicePath)) throw new Error(`Service ${name} not found at path "${servicePath}"`)
+            if (!fs.existsSync(servicePath)) {throw new Error(`Service ${name} not found at path "${servicePath}"`);}
             // Implement subfolder search for services/core
             const LoadedService = require(servicePath);
             this.loadedServices.set(name, LoadedService);
@@ -101,15 +101,15 @@ class ServiceManager extends EventEmitter {
 
     scanServiceDirectories(dirs = this.dirs) {
         for (let dir of dirs) {
-          debug(`[scanServices] Scanning services at path "${dir}"`);
-          const serviceDirs = fs.readdirSync(dir);
-          for (let svcDir of serviceDirs) {
-            const fullSvcDir = path.join(dir, svcDir); // get the full path
-            const stat = fs.statSync(fullSvcDir);
-            if (stat.isDirectory()) {
-              this.services.set(path.basename(fullSvcDir), fullSvcDir); // add to the Map
+            debug(`[scanServices] Scanning services at path "${dir}"`);
+            const serviceDirs = fs.readdirSync(dir);
+            for (let svcDir of serviceDirs) {
+                const fullSvcDir = path.join(dir, svcDir); // get the full path
+                const stat = fs.statSync(fullSvcDir);
+                if (stat.isDirectory()) {
+                    this.services.set(path.basename(fullSvcDir), fullSvcDir); // add to the Map
+                }
             }
-          }
         }
     }
 
@@ -124,7 +124,7 @@ class ServiceManager extends EventEmitter {
         try {
             const Service = this.loadedServices.get(name);
             if (!Service) {
-              throw new Error(`Service '${name}' has not been loaded`);
+                throw new Error(`Service '${name}' has not been loaded`);
             }
 
             const serviceInstance = new Service(options);
@@ -137,7 +137,7 @@ class ServiceManager extends EventEmitter {
     }
 
     async startService(name) {
-        debug(`[startService] Starting service '${name}'`)
+        debug(`[startService] Starting service '${name}'`);
         const service = this.initializedServices.get(name);
         if (!service) {
             throw new Error(`Service '${name}' has not been initialized`);
@@ -146,7 +146,7 @@ class ServiceManager extends EventEmitter {
     }
 
     async shutdownService(name) {
-        debug(`[shutdownService] Shutting down service '${name}'`)
+        debug(`[shutdownService] Shutting down service '${name}'`);
         const service = this.initializedServices.get(name);
         if (!service) {
             debug(`[shutdownService] Service '${name}' is not running, nothing to do`);
@@ -157,7 +157,7 @@ class ServiceManager extends EventEmitter {
     }
 
     async stopService(name) {
-        debug(`[stopService] Stopping service '${name}'`)
+        debug(`[stopService] Stopping service '${name}'`);
         const service = this.initializedServices.get(name);
         if (!service || !service.isRunning) {
             debug(`[stopService] Service '${name}' is not initialized or running, nothing to do`);
@@ -168,25 +168,25 @@ class ServiceManager extends EventEmitter {
     }
 
     async restartService(name) {
-        debug(`[restartService] Restarting service '${name}'`)
+        debug(`[restartService] Restarting service '${name}'`);
         await this.shutdownService(name);
         await this.startService(name);
     }
 
     async shutdownAllServices() {
-        debug(`[shutdownAllServices] Shutting down all services`)
+        debug('[shutdownAllServices] Shutting down all services');
         const shutdownPromises = Array.from(this.initializedServices.keys()).map(name => this.shutdownService(name));
         await Promise.all(shutdownPromises);
     }
 
     async stopAllServices() {
-        debug(`[stopAllServices] Stopping all services`)
+        debug('[stopAllServices] Stopping all services');
         const stopPromises = Array.from(this.initializedServices.keys()).map(name => this.stopService(name));
         await Promise.all(stopPromises);
     }
 
     async reloadServiceFromDisk(name, options) {
-        debug(`[reloadServiceFromDisk] Reloading service '${name}'`)
+        debug(`[reloadServiceFromDisk] Reloading service '${name}'`);
         await this.stopService(name);
         this.unloadService(name);
         this.loadService(name);
@@ -195,7 +195,7 @@ class ServiceManager extends EventEmitter {
     }
 
     async loadInitializeAndStartService(name, options) {
-        debug(`[loadInitializeAndStartService] Loading, initializing and starting service '${name}'`)
+        debug(`[loadInitializeAndStartService] Loading, initializing and starting service '${name}'`);
         this.loadService(name);
         this.initializeService(name, options);
         await this.startService(name);

@@ -56,7 +56,7 @@ router.put('/url', (req, res) => {
         context.set(url, autoCreateLayers);
         res.status(200).json(response.success(url, 'Context set successfully').getResponse());
     } catch (error) {
-        console.error(error)
+        console.error(error);
         res.status(400).json(response.error('Unable to set context to url ' + url, error).getResponse());
     }
 });
@@ -85,7 +85,7 @@ router.post('/url', (req, res) => {
         context.set(url, autoCreateLayers);
         res.status(200).json(response.success(url, 'Context set successfully').getResponse());
     } catch (error) {
-        console.error(error)
+        console.error(error);
         res.status(400).json(response.error('Unable to set context to url ' + url, error).getResponse());
     }
 });
@@ -108,7 +108,7 @@ router.get('/array', (req, res) => {
 
     const response = new req.ResponseObject();
     const pathArray = context.pathArray;
-    debug(`[GET] Array route triggered`);
+    debug('[GET] Array route triggered');
     res.status(200).json(response.success(pathArray).getResponse());
 });
 
@@ -121,7 +121,7 @@ router.get('/tree', (req, res) => {
     const context = req.context;
     const response = new req.ResponseObject();
     const tree = context.tree;
-    debug(`[GET] Tree route triggered`);
+    debug('[GET] Tree route triggered');
     res.status(200).json(response.success(tree).getResponse());
 });
 
@@ -143,7 +143,7 @@ router.get('/path', (req, res) => {
 
     const response = new req.ResponseObject();
     const path = context.path;
-    debug(`[GET] Path route triggered`);
+    debug('[GET] Path route triggered');
     res.status(200).json(response.success(path).getResponse());
 });
 
@@ -151,7 +151,7 @@ router.get('/paths', (req, res) => {
     context = req.context;
     const response = new req.ResponseObject();
     const paths = context.paths;
-    debug(`[GET] Paths route triggered`);
+    debug('[GET] Paths route triggered');
     res.status(200).json(response.success(paths).getResponse());
 });
 
@@ -429,7 +429,7 @@ router.get('/documents', async (req, res) => {
         }
     } catch (error) {
         console.error('[ERROR] Fetching documents:', error);
-        res.status(500).send(response.error("Internal server error while retrieving documents").getResponse());
+        res.status(500).send(response.error('Internal server error while retrieving documents').getResponse());
     }
 });
 
@@ -460,7 +460,7 @@ router.post('/documents', async (req, res) => {
         await context.insertDocumentArray(
             documentArray,
             featureArray,
-            filterArray
+            filterArray,
         );
         res.status(200).json(response.success('Documents inserted successfully').getResponse());
     } catch (error) {

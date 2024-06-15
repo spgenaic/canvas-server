@@ -1,5 +1,5 @@
 // Utils
-const debug = require('debug')('canvas:transports:http:rest')
+const debug = require('debug')('canvas:transports:http:rest');
 
 // Routes
 //const schemasRoutes = require('./routes/v1/schemas');
@@ -10,7 +10,7 @@ const documentsRoutes = require('./routes/v1/documents');
 const sessionsRoutes = require('./routes/v1/sessions');
 
 module.exports = (app, parent) => {
-    debug('Initializing REST API routes')
+    debug('Initializing REST API routes');
 
     app.use(`${parent.restApiBasePath}/sessions`, (req, res, next) => {
         req.sessionManager = parent.sessionManager;
@@ -32,4 +32,4 @@ module.exports = (app, parent) => {
         req.ResponseObject = parent.ResponseObject;
         next();
     }, documentsRoutes);
-}
+};

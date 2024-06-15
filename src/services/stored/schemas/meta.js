@@ -1,86 +1,86 @@
-'use strict'
+'use strict';
 
 
 module.exports = {
-    type: "object",
-    version: "1.0",
+    type: 'object',
+    version: '1.0',
     properties: {
 
-        "id": {
-            type: "string",
-            description: "Object ID"
+        'id': {
+            type: 'string',
+            description: 'Object ID',
         },
 
-        "type": {
-            type: "string",
-            description: "Object type, for example data/abstraction/file"
+        'type': {
+            type: 'string',
+            description: 'Object type, for example data/abstraction/file',
         },
 
 
-        "url": {
-            type: "object",
+        'url': {
+            type: 'object',
             properties: {
                 public: {
-                    type: "array"
+                    type: 'array',
                 },
                 private: {
-                    type: "array"
-                }
-            }
+                    type: 'array',
+                },
+            },
         },
 
-        "meta": {
-            type: "object",
+        'meta': {
+            type: 'object',
             properties: {
 
                 size: {
-                    type: "number"
+                    type: 'number',
                 },
 
                 abstraction: {
-                    type: "string"
+                    type: 'string',
                 },
 
                 xattr: {
-                    type: "array"
-                }
+                    type: 'array',
+                },
 
             },
-            required: ["size", "abstraction"]
+            required: ['size', 'abstraction'],
         },
 
-        "hash": {
-            type: "array",
+        'hash': {
+            type: 'array',
         },
 
-        "paths": {
-            type: "array",
+        'paths': {
+            type: 'array',
         },
 
-        "segments": {
-            type: "array",
+        'segments': {
+            type: 'array',
         },
 
-        "encryption": {
-            type: "object",
+        'encryption': {
+            type: 'object',
         },
 
-        "compression": {
-            type: "object",
+        'compression': {
+            type: 'object',
         },
 
-        "versions": {
-            type: "array",
+        'versions': {
+            type: 'array',
         },
 
-        "acl": {
-            type: "object",
-        }
+        'acl': {
+            type: 'object',
+        },
 
 
     },
 
-    required: ["id", "meta", "hash", "paths"],
+    required: ['id', 'meta', 'hash', 'paths'],
     additionalProperties: false,
 
-}
+};

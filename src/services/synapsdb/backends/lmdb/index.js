@@ -1,15 +1,15 @@
-'use strict'
+'use strict';
 
 
 // Utils
-const os = require('os')
-const path = require('path')
-const fs = require('fs')
-const mkdirp = require('mkdirp')
-const debug = require('debug')('@canvas:db:backend:lmdb')
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
+const debug = require('debug')('@canvas:db:backend:lmdb');
 
 // Database backend
-const { open } = require('lmdb')
+const { open } = require('lmdb');
 
 // TODO: Rework extending using openAsClass()
 
@@ -46,33 +46,33 @@ class Db {
                 // encoding: options.encoding || 'binary',
                 // useVersions: options.useVersions || false,
 
-                ...options
-            }
+                ...options,
+            };
 
-            this.db = new open(options)
-            debug(`Initialized LMDB database backend at "${options.path}"`)
+            this.db = new open(options);
+            debug(`Initialized LMDB database backend at "${options.path}"`);
 
         } else {
-            this.db = options
-            this.#dataset = dataset
-            debug(`Initialized LMDB dataset "${dataset}"`)
+            this.db = options;
+            this.#dataset = dataset;
+            debug(`Initialized LMDB dataset "${dataset}"`);
         }
 
         // Set the db path in the wrapper class
-        this.path = options.path
+        this.path = options.path;
 
         // This is unfortunate
         this.backupOptions = {
             backupPath: path.join(options.path, 'backup'),
             backupOnOpen: options.backupOnOpen,
             backupOnClose: options.backupOnClose,
-            compact: options.backupCompact
-        }
+            compact: options.backupCompact,
+        };
 
         // This is even more so
         if (this.backupOptions.backupOnOpen) {
             // TODO: Check if the database changed from the last backup
-            this.#backupDatabase( /* we always compact the db */ )
+            this.#backupDatabase( /* we always compact the db */ );
         }
 
     }
@@ -90,30 +90,30 @@ class Db {
     listKeys() {
         let keys = [];
         this.db.getKeys().forEach(element => {
-            keys.push(element)
+            keys.push(element);
         });
-        return keys
+        return keys;
     }
 
     listValues() {
-        let values = []
+        let values = [];
         this.db.getRange().forEach(element => {
-            values.push(element.value)
+            values.push(element.value);
         });
-        return values
+        return values;
     }
 
     listEntries() {
         let entries = [];
         this.db.getRange().forEach(element => {
-            entries.push(element)
+            entries.push(element);
         });
-        return entries
+        return entries;
     }
 
     // Creates a new dataset using the same wrapper class
     createDataset(dataset, options = {}) {
-        debug(`Creating new dataset "${dataset}" using options: ${JSON.stringify(options)}`)
+        debug(`Creating new dataset "${dataset}" using options: ${JSON.stringify(options)}`);
         let db = this.db.openDB(dataset, options);
         return new Db(db, dataset);
     }
@@ -193,7 +193,7 @@ class Db {
     * @param version If provided the remove will only succeed if the previous version number matches this (atomically checked)
     **/
     removeVersion(key, version) {
-        if (version === undefined) throw new Error("Version must be provided")
+        if (version === undefined) {throw new Error('Version must be provided');}
         return this.db.remove(key, version);
     }
 
@@ -341,7 +341,7 @@ class Db {
         // Create the backup folder
         try {
             mkdirp.sync(backupPath);
-            debug(`Created backup folder "${backupPath}"`)
+            debug(`Created backup folder "${backupPath}"`);
         } catch (error) {
             console.error(`Error occured while creating backup folder: ${error.message}`);
             throw error;
@@ -365,8 +365,8 @@ class Db {
         }
 
         return backupFolderPath;
-      }
+    }
 
 }
 
-module.exports = Db
+module.exports = Db;

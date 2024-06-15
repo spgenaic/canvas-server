@@ -3,10 +3,10 @@
  */
 
 // Utils
-const path = require('path')
-const fs = require('fs')
-const pkg = require('./package.json')
-const device = require('./managers/device').getCurrentDevice()
+const path = require('path');
+const fs = require('fs');
+const pkg = require('./package.json');
+const device = require('./managers/device').getCurrentDevice();
 
 
 /**
@@ -22,11 +22,11 @@ const device = require('./managers/device').getCurrentDevice()
  * |   ├── run
  */
 
-const SERVER_ROOT = path.dirname(path.resolve(__dirname))
-const SERVER_HOME = path.join(SERVER_ROOT, 'src')
-const SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config')
-const SERVER_ROLES = process.env['CANVAS_SERVER_ROLES'] || path.join(SERVER_ROOT, 'server/roles')
-const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var')
+const SERVER_ROOT = path.dirname(path.resolve(__dirname));
+const SERVER_HOME = path.join(SERVER_ROOT, 'src');
+const SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config');
+const SERVER_ROLES = process.env['CANVAS_SERVER_ROLES'] || path.join(SERVER_ROOT, 'server/roles');
+const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var');
 
 
 /**
@@ -40,11 +40,11 @@ const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'v
  */
 
 // User env
-const USER_HOME = process.env['CANVAS_USER_HOME'] || path.join(device.os.homedir, '.canvas') //path.join(SERVER_ROOT, 'user')
-const USER_CONFIG = process.env['CANVAS_USER_CONFIG'] || path.join(USER_HOME, 'config')
-const USER_DATA = process.env['CANVAS_USER_DATA'] || path.join(USER_HOME, 'data')
-const USER_DB = process.env['CANVAS_USER_DB'] || path.join(USER_HOME, 'db')
-const USER_VAR = process.env['CANVAS_USER_VAR'] || path.join(USER_HOME, 'var')
+const USER_HOME = process.env['CANVAS_USER_HOME'] || path.join(device.os.homedir, '.canvas'); //path.join(SERVER_ROOT, 'user')
+const USER_CONFIG = process.env['CANVAS_USER_CONFIG'] || path.join(USER_HOME, 'config');
+const USER_DATA = process.env['CANVAS_USER_DATA'] || path.join(USER_HOME, 'data');
+const USER_DB = process.env['CANVAS_USER_DB'] || path.join(USER_HOME, 'db');
+const USER_VAR = process.env['CANVAS_USER_VAR'] || path.join(USER_HOME, 'var');
 
 // Collect all ENV constants
 const env = {
@@ -60,8 +60,8 @@ const env = {
             home: SERVER_HOME,
             config: SERVER_CONFIG,
             roles: SERVER_ROLES,
-            var: SERVER_VAR
-        }
+            var: SERVER_VAR,
+        },
     },
 
     USER: {
@@ -70,8 +70,8 @@ const env = {
             config: USER_CONFIG,
             data: USER_DATA,
             db: USER_DB,
-            var: USER_VAR
-        }
+            var: USER_VAR,
+        },
     },
 
     DEVICE: {
@@ -79,15 +79,15 @@ const env = {
         endianness: device.endianness,
         type: device.type,
         os: device.os,
-        network: device.network
+        network: device.network,
     },
 
     PID: path.join(SERVER_VAR, 'run', 'canvas-server.pid'),
     IPC: (process.platform === 'win32') ?
         path.join('\\\\?\\pipe', process.cwd(), pkg.name) :
-        path.join(SERVER_VAR, 'run', 'canvas-server.sock')
+        path.join(SERVER_VAR, 'run', 'canvas-server.sock'),
 
-}
+};
 
 // Generate ini file
 const INI = {
@@ -115,15 +115,15 @@ const INI = {
 
     // Developer settings
     NODE_ENV: process.env.NODE_ENV || 'development',
-    LOG_LEVEL: process.env.LOG_LEVEL || 'debug'
-}
+    LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
+};
 
 // Update .env to-be read by external server roles
-generateDotenvFile(INI, path.join(SERVER_VAR, '.env'))
+generateDotenvFile(INI, path.join(SERVER_VAR, '.env'));
 
 // Update process env vars
 // We could just run require('dotenv').config() at this point
-process.title = `${pkg.productName} | v${pkg.version}`
+process.title = `${pkg.productName} | v${pkg.version}`;
 Object.assign(process.env, {...INI});
 
 
@@ -131,7 +131,7 @@ Object.assign(process.env, {...INI});
  * Exports
  */
 
-module.exports = env
+module.exports = env;
 
 
 /**

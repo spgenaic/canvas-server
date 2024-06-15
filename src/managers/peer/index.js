@@ -1,10 +1,10 @@
-'use strict'
+'use strict';
 
 // Environment
-const { APP, USER, DEVICE } = require('../../env.js')
+const { APP, USER, DEVICE } = require('../../env.js');
 
 // Utils
-const EventEmitter = require("eventemitter2");
+const EventEmitter = require('eventemitter2');
 
 
 /**

@@ -2,8 +2,8 @@
  * Data abstraction for storing Notes
  */
 
-const Document = require('../Document')
-const DOCUMENT_SCHEMA_VERSION = '2.0'
+const Document = require('../Document');
+const DOCUMENT_SCHEMA_VERSION = '2.0';
 const DOCUMENT_SCHEMA_TYPE = 'data/abstraction/note';
 
 class Note extends Document {
@@ -13,7 +13,7 @@ class Note extends Document {
             ...params,
             type: DOCUMENT_SCHEMA_TYPE,
             schemaVersion: DOCUMENT_SCHEMA_VERSION,
-        })
+        });
 
         this.data = params.data || {};
     }

@@ -1,16 +1,16 @@
-'use strict'
+'use strict';
 
 
 // Utils
-const EventEmitter = require('eventemitter2')
-const debug = require('debug')('canvas:context:tree')
-const path = require('path')
-const os = require('os')
+const EventEmitter = require('eventemitter2');
+const debug = require('debug')('canvas:context:tree');
+const path = require('path');
+const os = require('os');
 
 // App modules
-const LayerIndex = require('./LayerIndex')
-const TreeIndex = require('./TreeIndex')
-const TreeNode = require('./TreeNode')
+const LayerIndex = require('./LayerIndex');
+const TreeIndex = require('./TreeIndex');
+const TreeNode = require('./TreeNode');
 
 
 /**
@@ -23,7 +23,7 @@ class Tree extends EventEmitter {
     constructor(options = {
         // TODO: Refactor!
         treePath: path.join(os.homedir(), '.canvas', 'tree.json'),
-        layerPath: path.join(os.homedir(), '.canvas', 'layers.json')
+        layerPath: path.join(os.homedir(), '.canvas', 'layers.json'),
     }) {
 
         // Initialize event emitter
@@ -39,7 +39,7 @@ class Tree extends EventEmitter {
         debug('Initializing context tree');
         this.rootLayer = this.dblayers.getLayerByName('/');
         if (!this.rootLayer) {
-            throw new Error('Root layer not found in the layer index')
+            throw new Error('Root layer not found in the layer index');
         }
 
         this.root = new TreeNode(this.rootLayer.id, this.rootLayer);
@@ -47,16 +47,16 @@ class Tree extends EventEmitter {
 
         // Load tree from the database
         if (this.load()) {
-            debug('Context tree loaded from database')
+            debug('Context tree loaded from database');
         } else {
-            debug('Context tree not found in database, using vanilla root node')
+            debug('Context tree not found in database, using vanilla root node');
         }
 
         // Emit the ready event
         debug('Context tree initialized');
         debug(JSON.stringify(this.#buildJsonTree(), null, 2));
 
-        this.emit('ready')
+        this.emit('ready');
 
     }
 
@@ -73,7 +73,7 @@ class Tree extends EventEmitter {
      */
 
     pathExists(path) {
-        return this.getNode(path) ? true : false
+        return this.getNode(path) ? true : false;
     }
 
     insert(path = '/', node, autoCreateLayers = true) {
@@ -85,26 +85,26 @@ class Tree extends EventEmitter {
 
         const layerNames = path.split('/').filter(Boolean);
         for (const layerName of layerNames) {
-            let layer = this.dblayers.getLayerByName(layerName)
+            let layer = this.dblayers.getLayerByName(layerName);
             if (this.dblayers.isInternalLayerName(layerName)) {
                 //debug(`Layer "${layerName}" is internal and can not be used in the tree`)
-                throw new Error(`Layer "${layerName}" is internal and can not be used in the tree`)
+                throw new Error(`Layer "${layerName}" is internal and can not be used in the tree`);
                 //return false
             }
 
             if (!layer) {
                 if (autoCreateLayers) {
-                    layer = this.dblayers.createLayer(layerName)
+                    layer = this.dblayers.createLayer(layerName);
                 } else {
-                    debug(`Layer "${layerName}" not found at path "${path} and autoCreateLayers is disabled"`)
-                    return false
+                    debug(`Layer "${layerName}" not found at path "${path} and autoCreateLayers is disabled"`);
+                    return false;
                 }
             }
 
             child = currentNode.getChild(layer.id);
             if (!child) {
-                child = new TreeNode(layer.id, this.dblayers.getLayerByID(layer.id))
-                currentNode.addChild(child)
+                child = new TreeNode(layer.id, this.dblayers.getLayerByID(layer.id));
+                currentNode.addChild(child);
             }
 
             currentNode = child;
@@ -115,7 +115,7 @@ class Tree extends EventEmitter {
             child = currentNode.getChild(node.id);
             if (child && (child instanceof TreeNode)) {
                 // Add node to parent
-                currentNode.addChild(child)
+                currentNode.addChild(child);
             }
         }
 
@@ -127,12 +127,12 @@ class Tree extends EventEmitter {
     }
 
     move(pathFrom, pathTo, recursive = false) {
-        if (recursive) return this.moveRecursive(pathFrom, pathTo)
-        debug(`Moving layer from "${pathFrom}" to "${pathTo}"`)
+        if (recursive) {return this.moveRecursive(pathFrom, pathTo);}
+        debug(`Moving layer from "${pathFrom}" to "${pathTo}"`);
 
         const node = this.getNode(pathFrom);
         if (!node) {
-            debug('Unable to move layer, source node not found')
+            debug('Unable to move layer, source node not found');
             return false;
         }
 
@@ -140,16 +140,16 @@ class Tree extends EventEmitter {
         const parentNode = this.getNode(parentPath);
         if (!parentNode) { return false; }
 
-        let layer = node.payload
-        let targetNode = new TreeNode(layer.id, layer)
+        let layer = node.payload;
+        let targetNode = new TreeNode(layer.id, layer);
 
         if (!this.insert(pathTo, targetNode)) {
-            console.log(`Unable to move layer "${layer.name}" to path "${pathTo}"`)
-            return false
+            console.log(`Unable to move layer "${layer.name}" to path "${pathTo}"`);
+            return false;
         }
 
         // Remove existing node from parent
-        parentNode.removeChild(node.id)
+        parentNode.removeChild(node.id);
 
         // Move all node children to parent
         if (node.hasChildren) {
@@ -160,56 +160,56 @@ class Tree extends EventEmitter {
         }
 
         // Commit changes
-        this.save()
+        this.save();
 
     }
 
     moveRecursive(pathFrom, pathTo) {
-        debug(`Moving layer from "${pathFrom}" to "${pathTo}" recursively`)
+        debug(`Moving layer from "${pathFrom}" to "${pathTo}" recursively`);
         const node = this.getNode(pathFrom);
         const parentPath = pathFrom.split('/').slice(0, -1).join('/');
         const parentNode = this.getNode(parentPath);
-        const layer = node.payload
+        const layer = node.payload;
 
         if (pathTo.includes(layer.name)) {
-            throw new Error(`Destination path "${pathTo}" includes "${layer.name}"`)
+            throw new Error(`Destination path "${pathTo}" includes "${layer.name}"`);
         }
 
         if (!this.insert(pathTo, node)) {
-            console.log(`Unable to move layer "${layer.name}" into path "${pathTo}"`)
-            return false
+            console.log(`Unable to move layer "${layer.name}" into path "${pathTo}"`);
+            return false;
         }
 
         // Remove existing node from parent
-        parentNode.removeChild(node.id)
+        parentNode.removeChild(node.id);
 
         // Commit changes
-        this.save()
+        this.save();
 
     }
 
     copy(pathFrom, pathTo, recursive) {
 
         // Commit changes
-        this.save()
+        this.save();
     }
 
     copyRecursive(pathFrom, pathTo) {
 
         // Commit changes
-        this.save()
+        this.save();
     }
 
     remove(path, recursive = false) {
         const node = this.getNode(path);
         if (!node) {
-            debug(`Unable to remove layer, source node not found at path "${path}"`)
+            debug(`Unable to remove layer, source node not found at path "${path}"`);
             return false;
         }
 
         const parentPath = path.split('/').slice(0, -1).join('/');
         const parentNode = this.getNode(parentPath);
-        if (!parentNode) throw new Error(`Unable to remove layer, parent node not found at path "${parentPath}"`)
+        if (!parentNode) {throw new Error(`Unable to remove layer, parent node not found at path "${parentPath}"`);}
 
         if (!recursive && node.hasChildren) {
             // Merge all node children to parent
@@ -219,15 +219,15 @@ class Tree extends EventEmitter {
         }
 
         // Remove existing node from parent
-        parentNode.removeChild(node.id)
+        parentNode.removeChild(node.id);
 
         // Commit changes
-        this.save()
-        return true
+        this.save();
+        return true;
     }
 
     renameLayer(name, newName) {
-        return this.dblayers.renameLayer(name, newName)
+        return this.dblayers.renameLayer(name, newName);
     }
 
     // Store tree as JSON to the database (sync!)
@@ -245,16 +245,16 @@ class Tree extends EventEmitter {
 
     // Load JSON tree from the database
     load() {
-        debug('Loading JSON Tree from database...')
+        debug('Loading JSON Tree from database...');
         const json = this.dbtree.get('tree');
         if (!json) {
-            debug('No persistent JSON data found')
-            return false
+            debug('No persistent JSON data found');
+            return false;
             //throw new Error('No JSON data supplied')
         }
 
-        this.root = this.#buildTreeFromJson(json)
-        return true
+        this.root = this.#buildTreeFromJson(json);
+        return true;
     }
 
 
@@ -268,9 +268,9 @@ class Tree extends EventEmitter {
     getJsonTree() { return this.#buildJsonTree(); }
     loadJsonTree(json) { return this.#buildTreeFromJson(json); }
     clear() {
-        debug('Clearing context tree')
+        debug('Clearing context tree');
         this.root = new TreeNode(this.rootLayer.id, this.rootLayer);
-        this.save()
+        this.save();
     }
 
 
@@ -279,21 +279,21 @@ class Tree extends EventEmitter {
      */
 
     getNode(path) {
-        if (path === '/' || !path) return this.root
+        if (path === '/' || !path) {return this.root;}
         const layerNames = path.split('/').filter(Boolean);
         let currentNode = this.root;
 
         for (const layerName of layerNames) {
-            let layer = this.dblayers.getLayerByName(layerName)
+            let layer = this.dblayers.getLayerByName(layerName);
             if (!layer) {
-                debug(`Layer "${layerName}" not found in index`)
-                return false
+                debug(`Layer "${layerName}" not found in index`);
+                return false;
             }
 
             let child = currentNode.getChild(layer.id);
             if (!child) {
-                debug(`Target path "${path}" does not exist`)
-                return false
+                debug(`Target path "${path}" does not exist`);
+                return false;
             }
 
             currentNode = child;
@@ -305,22 +305,22 @@ class Tree extends EventEmitter {
     insertNode(path, node) {
         const targetNode = this.getNode(path);
         if (!targetNode) {
-            debug(`Unable to insert node at path "${path}", target node not found`)
+            debug(`Unable to insert node at path "${path}", target node not found`);
             return false;
         }
 
         if (!node || !(node instanceof TreeNode)) {
-            debug('Unable to move layer, source node not found')
+            debug('Unable to move layer, source node not found');
             return false;
         }
 
         // Check if node already exists
         if (!targetNode.hasChild(node.id)) {
-            targetNode.addChild(node)
+            targetNode.addChild(node);
         }
 
         //this.emit('insert', path, node)
-        this.save()
+        this.save();
         return true;
 
     }
@@ -328,13 +328,13 @@ class Tree extends EventEmitter {
     removeNode(path, recursive = false) {
         const node = this.getNode(path);
         if (!node) {
-            debug(`Unable to remove layer, source node not found at path "${path}"`)
+            debug(`Unable to remove layer, source node not found at path "${path}"`);
             return false;
         }
 
         const parentPath = path.split('/').slice(0, -1).join('/');
         const parentNode = this.getNode(parentPath);
-        if (!parentNode) throw new Error(`Unable to remove layer, parent node not found at path "${parentPath}"`)
+        if (!parentNode) {throw new Error(`Unable to remove layer, parent node not found at path "${parentPath}"`);}
 
         if (!recursive && node.hasChildren) {
             // Merge all node children to parent
@@ -344,11 +344,11 @@ class Tree extends EventEmitter {
         }
 
         // Remove existing node from parent
-        parentNode.removeChild(node.id)
+        parentNode.removeChild(node.id);
 
         // Commit changes
-        this.save()
-        return true
+        this.save();
+        return true;
     }
 
     moveNode(pathFrom, pathTo, recursive = false) { }
@@ -372,7 +372,7 @@ class Tree extends EventEmitter {
             }
 
             if (!layer && autoCreateLayers) {
-                console.log('Not here')
+                console.log('Not here');
                 layer = this.dblayers.createLayer(nodeData.name);
             }
 
@@ -394,7 +394,7 @@ class Tree extends EventEmitter {
                 .filter(child => child instanceof TreeNode)
                 .map(child => child.hasChildren ? buildTree(child) : {
                     id: child.id,
-                    children: []
+                    children: [],
                 });
 
             return {
@@ -423,7 +423,7 @@ class Tree extends EventEmitter {
             description: payload.description,
             color: payload.color,
             locked: payload.locked,
-            children
+            children,
         });
 
         return buildTree(node);
@@ -447,4 +447,4 @@ class Tree extends EventEmitter {
 
 }
 
-module.exports = Tree
+module.exports = Tree;

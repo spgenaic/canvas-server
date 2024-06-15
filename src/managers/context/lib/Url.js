@@ -1,13 +1,13 @@
-'use strict'
+'use strict';
 
 
 // Includes
-const { urlToHttpOptions } = require('node:url')
-const internalLayers = require('./layers/builtin')
+const { urlToHttpOptions } = require('node:url');
+const internalLayers = require('./layers/builtin');
 
 // Constants
-const DEFAULT_URL_PROTOCOL = 'universe:'    // TODO: Move to some sane location
-const DEFAULT_URL_PATH = '/'
+const DEFAULT_URL_PROTOCOL = 'universe:';    // TODO: Move to some sane location
+const DEFAULT_URL_PATH = '/';
 
 
 class Url {
@@ -15,7 +15,7 @@ class Url {
     constructor(url, baseUrl = null, protocol = DEFAULT_URL_PROTOCOL) {
         this._baseUrl = baseUrl;
         this._protocol = protocol;
-        this.setUrl(url)
+        this.setUrl(url);
     }
 
     validate(url) { return Url.validate(url); }
@@ -34,21 +34,21 @@ class Url {
 
 
     setUrl(url = DEFAULT_URL_PATH) {
-        if (typeof url !== 'string') throw new Error('Context path needs to be of type string')
+        if (typeof url !== 'string') {throw new Error('Context path needs to be of type string');}
 
         // Get the URL path
-        this._path = this.getPath(url)
+        this._path = this.getPath(url);
 
         // Get the URL protocol
-        this._protocol = this.getProtocol(url)
+        this._protocol = this.getProtocol(url);
 
         // Construct the URL href
-        this._string = this._protocol + '//' + this._path
+        this._string = this._protocol + '//' + this._path;
 
         // Get the URL array
-        this._array = this.getArrayFromString(this._string)
+        this._array = this.getArrayFromString(this._string);
 
-        return this._path
+        return this._path;
     }
 
     get url() { return this._string; }
@@ -59,26 +59,26 @@ class Url {
 
     static parse(url) {
         // Get the URL path
-        let path = Url.getPath(url)
+        let path = Url.getPath(url);
 
         // Get the URL protocol
-        let protocol = Url.getProtocol(url)
+        let protocol = Url.getProtocol(url);
 
         // Construct the URL href
-        return protocol + '/' + path
+        return protocol + '/' + path;
     }
 
     getProtocol(url) { return Url.getProtocol(url); }
 
     static getProtocol(url) {
         // If no protocol is specified, return the default
-        if (!url.includes(':')) return DEFAULT_URL_PROTOCOL
+        if (!url.includes(':')) {return DEFAULT_URL_PROTOCOL;}
 
         // Split out the protocol string
-        let proto = url.split(':')
+        let proto = url.split(':');
 
         // Fallback to DEFAULT_URL_PROTOCOL
-        return (proto && proto.length > 0) ? proto[0] + ':' : DEFAULT_URL_PROTOCOL
+        return (proto && proto.length > 0) ? proto[0] + ':' : DEFAULT_URL_PROTOCOL;
     }
 
     getPath(url) { return Url.getPath(url);  }
@@ -107,28 +107,28 @@ class Url {
                 return part.trim();
             })
             .filter(part => part.length > 0)
-            .join("/");
+            .join('/');
 
-        if (!sanitized.startsWith("/")) sanitized = "/" + sanitized;
+        if (!sanitized.startsWith('/')) {sanitized = '/' + sanitized;}
         return sanitized || DEFAULT_URL_PATH;
     }
 
     getArrayFromString(url) { return Url.getArrayFromString(url); }
 
     static getArrayFromString(url) {
-        let parsed = urlToHttpOptions(new URL(url))
-        if (!parsed) throw new Error(`Invalid URL: ${url}`)
+        let parsed = urlToHttpOptions(new URL(url));
+        if (!parsed) {throw new Error(`Invalid URL: ${url}`);}
 
         let context = [
             parsed.hostname,
-            ...parsed.pathname.split('/')
-        ]
+            ...parsed.pathname.split('/'),
+        ];
 
         // TODO: Rework, as this is ugly
         // TODO: Return [ DEFAULT_URL_PATH ] instead?
-        return context.filter(v => v.length > 0)
+        return context.filter(v => v.length > 0);
     }
 
 }
 
-module.exports = Url
+module.exports = Url;

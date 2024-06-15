@@ -1,8 +1,8 @@
-'use strict'
+'use strict';
 
 
 // Utils
-const { uuid12 } = require('./utils')
+const { uuid12 } = require('./utils');
 
 const LAYER_TYPES = [
     'universe',     // TODO
@@ -11,8 +11,8 @@ const LAYER_TYPES = [
     'context',      // Has context bitmaps only
     'filter',       // Represents a single filter bitmap
     'label',        // Label only (no associated bitmaps)
-    'system'
-]
+    'system',
+];
 
 class Layer {
 
@@ -28,27 +28,27 @@ class Layer {
             id: uuid12(),
             type: 'context',
             color: null,
-            ...options
-        }
+            ...options,
+        };
 
         if (!options.name || typeof options.name !== 'string' || !options.name.trim().length) {
-            throw new Error('Layer name must be a non-empty String')
+            throw new Error('Layer name must be a non-empty String');
         }
 
 
         // TODO: This constructor needs a proper cleanup!
-        this.id =  options.id
-        this.type = this.#validateType(options.type)
-        this.name = this.#sanitizeName(options.name)
-        this.label = (options.label) ? this.#sanitizeLabel(options.label) : this.name
-        this.description = (options.description) ? this.#sanitizeDescription(options.description) : 'Canvas layer'
-        this.color = options?.color || 'auto'
-        this.locked = options?.locked || false
+        this.id =  options.id;
+        this.type = this.#validateType(options.type);
+        this.name = this.#sanitizeName(options.name);
+        this.label = (options.label) ? this.#sanitizeLabel(options.label) : this.name;
+        this.description = (options.description) ? this.#sanitizeDescription(options.description) : 'Canvas layer';
+        this.color = options?.color || 'auto';
+        this.locked = options?.locked || false;
 
-        this.featureBitmaps = []
-        this.filterBitmaps = []
+        this.featureBitmaps = [];
+        this.filterBitmaps = [];
 
-        this.metadata = options.metadata || {}
+        this.metadata = options.metadata || {};
     }
 
 
@@ -57,11 +57,11 @@ class Layer {
      */
 
     get featureBitmapArray() {
-        return this.featureBitmaps
+        return this.featureBitmaps;
     }
 
     get filterBitmapArray() {
-        return this.filterBitmaps
+        return this.filterBitmaps;
     }
 
     /**
@@ -69,21 +69,21 @@ class Layer {
      */
 
     setName(name) {
-        if (this.locked) throw new Error('Layer is locked')
-        this.name = this.#sanitizeName(name)
-        return this
+        if (this.locked) {throw new Error('Layer is locked');}
+        this.name = this.#sanitizeName(name);
+        return this;
     }
 
     setLabel(label) {
-        if (this.locked) throw new Error('Layer is locked')
-        this.label = this.#sanitizeLabel(label)
-        return this
+        if (this.locked) {throw new Error('Layer is locked');}
+        this.label = this.#sanitizeLabel(label);
+        return this;
     }
 
     setDescription(description) {
-        if (this.locked) throw new Error('Layer is locked')
-        this.description = this.#sanitizeDescription(description)
-        return this
+        if (this.locked) {throw new Error('Layer is locked');}
+        this.description = this.#sanitizeDescription(description);
+        return this;
     }
 
 
@@ -96,19 +96,19 @@ class Layer {
 
     #validateType(type) {
         if (! LAYER_TYPES.includes(type)) {
-            throw new Error('Unsupported layer type')
+            throw new Error('Unsupported layer type');
         }
 
-        return type
+        return type;
     }
 
     #sanitizeName(name) {
         if (typeof name !== 'string') {
-            throw new Error('Name must be a string')
+            throw new Error('Name must be a string');
         }
 
         if (name.length > 32) {
-            throw new Error('Name must be less than 32 characters')
+            throw new Error('Name must be less than 32 characters');
         }
 
         return name.toLowerCase(); //name.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
@@ -116,11 +116,11 @@ class Layer {
 
     #sanitizeLabel(label) {
         if (typeof label !== 'string') {
-            throw new Error('Label must be a string')
+            throw new Error('Label must be a string');
         }
 
         if (label.length > 32) {
-            throw new Error('Label must be less than 32 characters')
+            throw new Error('Label must be less than 32 characters');
         }
 
         return label; //label.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -129,14 +129,14 @@ class Layer {
     #sanitizeDescription(description) {
         // Check if description is a string, not empty and less than 255 characters
         if (typeof description !== 'string') {
-            throw new Error('Description must be a string')
+            throw new Error('Description must be a string');
         }
 
         if (description.length > 255) {
-            throw new Error('Description must be less than 255 characters')
+            throw new Error('Description must be less than 255 characters');
         }
 
-        return description
+        return description;
     }
 
     toJSON() {
@@ -152,8 +152,8 @@ class Layer {
             locked: this.locked,
             featureBitmaps: this.featureBitmaps,
             filterBitmaps: this.filterBitmaps,
-            metadata: this.metadata
-        }
+            metadata: this.metadata,
+        };
     }
 
     static fromJSON(json) {
@@ -169,11 +169,11 @@ class Layer {
             locked: json.locked,
             featureBitmaps: json.featureBitmaps,
             filterBitmaps: json.filterBitmaps,
-            metadata: json.metadata
-        })
+            metadata: json.metadata,
+        });
         return layer;
     }
 
 }
 
-module.exports = Layer
+module.exports = Layer;

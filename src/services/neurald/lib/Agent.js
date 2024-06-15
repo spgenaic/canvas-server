@@ -5,22 +5,22 @@ class Agent {
 
     constructor() {
 
-        this.role = "agent";
-        this.name = "Agent";
-        this.type = "General";
-        this.personality = "";
+        this.role = 'agent';
+        this.name = 'Agent';
+        this.type = 'General';
+        this.personality = '';
         
 
-        this.memory = {}
+        this.memory = {};
 
         this.permissions = {
             io: [
                 'command',
                 'talk',
                 'notify',
-                'message'
-            ]
-        }
+                'message',
+            ],
+        };
 
         // Tools
         // Functions

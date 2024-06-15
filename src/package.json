@@ -6,6 +6,7 @@
   "main": "init.js",
   "scripts": {
     "test": "eslint . --ext .js",
+    "test:fix": "eslint . --ext .js --fix",
     "jsdoc": "jsdoc -r -c jsdoc.json",
     "cli": "node ./cli",
     "start": "DEBUG=canvas* node .",

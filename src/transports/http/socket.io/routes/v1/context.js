@@ -1,11 +1,11 @@
 // Utils
-const debug = require('debug')('canvas:transports:socketio:route:context')
+const debug = require('debug')('canvas:transports:socketio:route:context');
 
 /**
  * Constants
  */
 
-const ROUTES = require('../../routes.js')
+const ROUTES = require('../../routes.js');
 const ResponseObject = require('../../../../../schemas/transport/responseObject.js');
 
 /**
@@ -107,7 +107,7 @@ module.exports = function(socket) {
         const response = new ResponseObject();
         try {
             const result = context.setUrl(url, true);
-            callback(response.success(result).getResponse())
+            callback(response.success(result).getResponse());
         } catch (err) {
             console.error('Internal server error:', err);
             callback(response.serverError(err).getResponse());
@@ -115,7 +115,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_PATH_INSERT, (path, /* autocreateLayers, */ callback) => {
-        debug(`${ROUTES.CONTEXT_PATH_INSERT} event with path "${path}"`)
+        debug(`${ROUTES.CONTEXT_PATH_INSERT} event with path "${path}"`);
 
         const response = new ResponseObject();
         try {
@@ -129,7 +129,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_PATH_REMOVE, (path, recursive = false, callback) => {
-        debug(`${ROUTES.CONTEXT_PATH_REMOVE} event with path "${path}", recursive "${recursive}"`)
+        debug(`${ROUTES.CONTEXT_PATH_REMOVE} event with path "${path}", recursive "${recursive}"`);
         const response = new ResponseObject();
 
         try {
@@ -142,7 +142,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_PATH_MOVE, async (pathFrom, pathTo, recursive, callback) => {
-        debug(`${ROUTES.CONTEXT_PATH_MOVE} event with pathFrom "${pathFrom}", pathTo "${pathTo}", recursive "${recursive}"`)
+        debug(`${ROUTES.CONTEXT_PATH_MOVE} event with pathFrom "${pathFrom}", pathTo "${pathTo}", recursive "${recursive}"`);
         const response = new ResponseObject();
 
         try {
@@ -161,8 +161,8 @@ module.exports = function(socket) {
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_LIST, async (featureArray, /* filterArray,*/ callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_LIST} event`);
-        debug(`featureArray: ${featureArray}`)
-        debug(`Type of callback: ${typeof callback}`)
+        debug(`featureArray: ${featureArray}`);
+        debug(`Type of callback: ${typeof callback}`);
         const response = new ResponseObject();
         try {
             const result = await context.listDocuments(featureArray);
@@ -199,7 +199,7 @@ module.exports = function(socket) {
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_GET_ARRAY, async (featureArray, /* filterArray,*/ callback) => {
         debug(`${ROUTES.CONTEXT_DOCUMENT_GET_ARRAY} event`);
-        debug(`featureArray: ${featureArray}`)
+        debug(`featureArray: ${featureArray}`);
         const response = new ResponseObject();
         try {
             const result = await context.getDocuments(featureArray);
@@ -256,7 +256,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE, async (id, callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE} event for document id "${id}""`)
+        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE} event for document id "${id}""`);
         const response = new ResponseObject();
 
         try {
@@ -269,7 +269,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY, async (docArray, callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`)
+        debug(`${ROUTES.CONTEXT_DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`);
         const response = new ResponseObject();
 
         try {
@@ -282,7 +282,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE, async (id, callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE} event for document id "${id}""`)
+        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE} event for document id "${id}""`);
         const response = new ResponseObject();
 
         try {
@@ -295,7 +295,7 @@ module.exports = function(socket) {
     });
 
     socket.on(ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY, async (docArray, callback) => {
-        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`)
+        debug(`${ROUTES.CONTEXT_DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`);
         const response = new ResponseObject();
 
         try {
@@ -313,22 +313,22 @@ module.exports = function(socket) {
      */
 
     context.on('url', (url) => {
-        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_URL}`)
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_URL}`);
         const response = new ResponseObject().success(url).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_URL, response);
     });
 
     context.on('data', (action, result) => {
-        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_DATA}`)
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_DATA}`);
         const response = new ResponseObject().success({action: action, result: result}).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_DATA, response);
     });
 
     context.on('update', (ctx) => {
-        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_UPDATE}`)
+        debug(`Emitting event ${ROUTES.EVENT_CONTEXT_UPDATE}`);
         const response = new ResponseObject().success(ctx).getResponse();
         socket.emit(ROUTES.EVENT_CONTEXT_UPDATE, response);
-    })
+    });
 
 };
 

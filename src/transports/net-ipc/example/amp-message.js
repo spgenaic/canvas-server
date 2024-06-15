@@ -19,10 +19,10 @@ console.log(msg.toBuffer());
  
 var other = new Message(msg.toBuffer());
 
-console.log('----------------------')
-console.log(other) 
-console.log(other.args) 
-console.log('----------------------')
+console.log('----------------------');
+console.log(other); 
+console.log(other.args); 
+console.log('----------------------');
 
 
 console.log(other.shift());

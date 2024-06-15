@@ -1,19 +1,19 @@
 // Utils
-const debug = require('debug')('canvas:db')
-const EE = require('eventemitter2')
+const debug = require('debug')('canvas:db');
+const EE = require('eventemitter2');
 
 // Backend
-const Db = require('./backends/lmdb/index.js')
+const Db = require('./backends/lmdb/index.js');
 
 // App includes
-const Index = require('./index/index.js')
+const Index = require('./index/index.js');
 
 // Schemas
-const documentSchemas = require('./schemas/registry.js')
+const documentSchemas = require('./schemas/registry.js');
 
 // Constants
-const INTERNAL_BITMAP_ID_MIN = 1000
-const INTERNAL_BITMAP_ID_MAX = 1000000
+const INTERNAL_BITMAP_ID_MIN = 1000;
+const INTERNAL_BITMAP_ID_MAX = 1000000;
 
 
 /**
@@ -30,23 +30,23 @@ class SynapsDB extends EE {
             backupOnClose: false,   // Backup database on close
             compression: true,      // Enable compression
             eventEmitter: {},       // Event emitter options, probably not needed
-        }
+        },
     ) {
         // Event emitter
         super(options.eventEmitter);
 
         // Initialize database backend
-        if (!options.path) throw new Error("Database path required");
+        if (!options.path) {throw new Error('Database path required');}
         this.#db = new Db(options);
 
         // Initialize internal datasets
         this.index = new Index({
-            db: this.#db.createDataset("index"),
-            eventEmitter: options.eventEmitter
+            db: this.#db.createDataset('index'),
+            eventEmitter: options.eventEmitter,
         });
 
         // Initialize documents dataset
-        this.documents = this.#db.createDataset("documents");
+        this.documents = this.#db.createDataset('documents');
 
         // Initialize dataset cache
         this.datasets = new Map();
@@ -63,7 +63,7 @@ class SynapsDB extends EE {
         contextArray,
         featureArray,
         filterArray,
-        returnMetaOnly = false
+        returnMetaOnly = false,
     ) { debug('search() not implemented yet!'); return false; }
 
     // Find documents based on query
@@ -72,7 +72,7 @@ class SynapsDB extends EE {
         contextArray,
         featureArray,
         filterArray,
-        returnMetaOnly = false
+        returnMetaOnly = false,
     ) { debug('find() not implemented yet!'); return false; }
 
 
@@ -84,20 +84,20 @@ class SynapsDB extends EE {
     getDocument(id) { return this.getDocumentById(id); }
     hasDocument(id) {
         debug(`hasDocument(): ID: ${id}`);
-        if (!id) throw new Error("Document ID required");
+        if (!id) {throw new Error('Document ID required');}
         return this.documents.has(id);
     }
 
     getDocumentById(id) {   // TODO: add metadataOnly support for all get methods?
-        debug(`getDocumentById(): ID: ${id}`)
-        if (!id) throw new Error("Document ID required");
+        debug(`getDocumentById(): ID: ${id}`);
+        if (!id) {throw new Error('Document ID required');}
         return this.documents.get(id);
     }
 
     getDocumentByHash(hash) {
         debug(`getDocumentByHash(): Hash: "${hash}"`);
-        if (!hash) throw new Error("Document hash required");
-        if (typeof hash !== "string") throw new Error("Document hash has to be a string of formant algo/hash");
+        if (!hash) {throw new Error('Document hash required');}
+        if (typeof hash !== 'string') {throw new Error('Document hash has to be a string of formant algo/hash');}
         let id = this.index.hash2oid.get(hash);
         if (!id) {
             debug(`Document not found for hash: "${hash}"`);
@@ -114,33 +114,33 @@ class SynapsDB extends EE {
             // TODO: Move entirely to index
             const [contextBitmap, featureBitmap] = await Promise.all([
                 contextArray.length ? this.index.contextArrayAND(contextArray) : null,
-                featureArray.length ? this.index.featureArrayAND(featureArray) : null
+                featureArray.length ? this.index.featureArrayAND(featureArray) : null,
             ]);
 
             let bitmaps = [];
-            if (contextBitmap) bitmaps.push(contextBitmap);
-            if (featureBitmap) bitmaps.push(featureBitmap);
+            if (contextBitmap) {bitmaps.push(contextBitmap);}
+            if (featureBitmap) {bitmaps.push(featureBitmap);}
 
             let result = [];
             if (bitmaps.length) {
                 result = this.index.bitmapAND(bitmaps, true);
             } else {
-                debug("No bitmaps specified, returning all documents from your universe");
+                debug('No bitmaps specified, returning all documents from your universe');
                 result = await this.documents.listKeys();
             }
 
-            debug("Result IDs", result);
+            debug('Result IDs', result);
             if (!result.length) {
-                debug("No documents found, returning an empty array");
+                debug('No documents found, returning an empty array');
                 return [];
             }
 
             // Retrieve documents by IDs
             let documents = await this.documents.getMany(result);
-            debug("Documents found", documents.length);
+            debug('Documents found', documents.length);
 
             if (metadataOnly) {
-                debug("Returning metadata only");
+                debug('Returning metadata only');
                 documents = documents.map(doc => {
                     doc.index = null;
                     doc.data = null; //{ metadataOnly: "true" };
@@ -150,7 +150,7 @@ class SynapsDB extends EE {
 
             return documents;
         } catch (error) {
-            debug("Error retrieving documents:", error.message);
+            debug('Error retrieving documents:', error.message);
             throw error;
         }
     }
@@ -159,7 +159,7 @@ class SynapsDB extends EE {
     async getDocumentsByIdArray(idArray, metadataOnly = false) {
         debug(`getDocumentsByIdArray(): IDArray: "${idArray}", MetaOnly: ${metadataOnly}`);
         if (!Array.isArray(idArray) || idArray.length < 1) {
-            throw new Error("Array of document IDs required");
+            throw new Error('Array of document IDs required');
         }
 
         try {
@@ -170,11 +170,11 @@ class SynapsDB extends EE {
                     return doc;
                 });
             }
-            debug("Documents found", documents.length)
+            debug('Documents found', documents.length);
             return documents;
         } catch (error) {
-            console.error("Failed to retrieve documents:", error);
-            throw new Error("Error retrieving documents by ID array");
+            console.error('Failed to retrieve documents:', error);
+            throw new Error('Error retrieving documents by ID array');
         }
     }
 
@@ -182,7 +182,7 @@ class SynapsDB extends EE {
     async getDocumentsByHashArray(hashArray, metadataOnly = false) {
         debug(`getDocumentsByHashArray(): HashArray: "${hashArray}"; MetaOnly: ${metadataOnly}`);
         if (!Array.isArray(hashArray) || hashArray.length < 1) {
-            throw new Error("Array of document hashes required");
+            throw new Error('Array of document hashes required');
         }
 
         const idArray = hashArray
@@ -194,7 +194,7 @@ class SynapsDB extends EE {
 
     // TODO: Refactor to use getDocuments() only, legacy method
     async listDocuments(contextArray = [], featureArray = [], filterArray = []) {
-        debug(`listDocuments(): -> getDocuments() with MetaOnly: true`);
+        debug('listDocuments(): -> getDocuments() with MetaOnly: true');
         return this.getDocuments(contextArray, featureArray, filterArray, true);
     }
 
@@ -214,7 +214,7 @@ class SynapsDB extends EE {
 
         // Parse document
         let parsed = await this.#parseDocument(document);
-        if (!parsed) throw new Error('Failed to parse document');
+        if (!parsed) {throw new Error('Failed to parse document');}
 
         // Check if document already exists based on its checksum
         if (this.index.hash2oid.has(parsed.meta.checksum)) {
@@ -232,7 +232,7 @@ class SynapsDB extends EE {
         try {
             debug(`Inserting document into the database index: ${parsed.meta.checksum} -> ${parsed.id}`);
             await this.index.hash2oid.db.put(parsed.meta.checksum, parsed.id);
-            debug(`Inserting document into the database: ${JSON.stringify(parsed, null, 2)}`)
+            debug(`Inserting document into the database: ${JSON.stringify(parsed, null, 2)}`);
             await this.documents.put(parsed.id, parsed);
         } catch (error) {
             console.error(`Error inserting document into the database: ${error.message}`);
@@ -258,19 +258,19 @@ class SynapsDB extends EE {
             await this.index.updateFeatureBitmaps(combinedFeatureArray, parsed.id);
         }
 
-        debug(`Document inserted under ID: ${parsed.id}`)
+        debug(`Document inserted under ID: ${parsed.id}`);
 
         // New return value
-        parsed.index = null
-        parsed.data = null
-        return parsed
+        parsed.index = null;
+        parsed.data = null;
+        return parsed;
     }
 
     async insertDocumentArray(documentArray, contextArray = [], featureArray = []) {
         debug(`insertDocumentArray(): Document count: ${documentArray.length}, ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
-            throw new Error("Document array required");
+            throw new Error('Document array required');
         }
 
         const insertResults = [];
@@ -295,7 +295,7 @@ class SynapsDB extends EE {
         debug(`updateDocumentArray(): ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
 
         if (!Array.isArray(documentArray) || documentArray.length < 1) {
-            throw new Error("Document array required");
+            throw new Error('Document array required');
         }
 
         let result = [];
@@ -312,7 +312,7 @@ class SynapsDB extends EE {
         }
 
         if (errors.length > 0) {
-            throw new Error(`Errors updating documents: ${errors.join("; ")}`);
+            throw new Error(`Errors updating documents: ${errors.join('; ')}`);
         }
 
         return result;
@@ -322,28 +322,28 @@ class SynapsDB extends EE {
         // TODO: We are not removing the entry, just updating meta: {} to mark it as deleted
         // TODO: We should also clear all bitmaps, tick the "removed" bitmap and remove the data: {} part
         debug(`deleteDocument(): ID: ${id}`);
-        if (!id) throw new Error("Document ID required");
-        if (!Number.isInteger(id)) throw new Error('Document ID must be an integer')
+        if (!id) {throw new Error('Document ID required');}
+        if (!Number.isInteger(id)) {throw new Error('Document ID must be an integer');}
 
         let document = this.documents.get(id);
-        if (!document) return false;
+        if (!document) {return false;}
 
         // TODO: Do not remove the document, just mark it as deleted and keep the metadata
         try {
             // Remove document from DB
-            await this.documents.remove(id)
+            await this.documents.remove(id);
             // Clear indexes
-            await this.index.clear(id, document.meta.checksum)
+            await this.index.clear(id, document.meta.checksum);
         } catch (error) {
-            console.error(`Error deleting document with ID ${id}, ${error}`)
-            throw new Error(`Error deleting document with ID ${id}, ${error}`)
+            console.error(`Error deleting document with ID ${id}, ${error}`);
+            throw new Error(`Error deleting document with ID ${id}, ${error}`);
         }
 
-        return true
+        return true;
     }
 
     async deleteDocumentArray(idArray) {
-        if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
+        if (!Array.isArray(idArray) || idArray.length < 1) {throw new Error('Array of document IDs required');}
 
         let tasks = [];
         for (const id of idArray) {
@@ -351,7 +351,7 @@ class SynapsDB extends EE {
         }
 
         await Promise.all(tasks);
-        return true
+        return true;
     }
 
 
@@ -362,9 +362,9 @@ class SynapsDB extends EE {
 
     async removeDocument(id, contextArray, featureArray) {
         debug(`removeDocument(): ID: ${id}; ContextArray: "${contextArray}"; FeatureArray: ${featureArray}`);
-        if (!id) throw new Error("Document ID required");
+        if (!id) {throw new Error('Document ID required');}
         if (!Array.isArray(contextArray) || contextArray.length < 1) {
-            throw new Error("Context array required, got " + JSON.stringify(contextArray));
+            throw new Error('Context array required, got ' + JSON.stringify(contextArray));
         }
 
         let document = this.documents.get(id);
@@ -380,12 +380,12 @@ class SynapsDB extends EE {
             await this.index.untickFeatureArray(featureArray, document.id);
         }
 
-        return true
+        return true;
     }
 
     async removeDocumentArray(idArray, contextArray, featureArray) {
         debug(`removeDocumentArray(): IDArray: ${idArray}; ContextArray: "${contextArray}"; FeatureArray: "${featureArray}"`);
-        if (!Array.isArray(idArray) || idArray.length < 1) throw new Error("Array of document IDs required");
+        if (!Array.isArray(idArray) || idArray.length < 1) {throw new Error('Array of document IDs required');}
 
         let tasks = [];
         for (const id of idArray) {
@@ -393,7 +393,7 @@ class SynapsDB extends EE {
         }
 
         await Promise.all(tasks); // TODO: Add try..catch from the above methods
-        return true
+        return true;
     }
 
 
@@ -411,7 +411,7 @@ class SynapsDB extends EE {
 
     // TODO: Remove or refactor
     createDataset(name) {
-        if (this.datasets.has(name)) return this.datasets.get(name);
+        if (this.datasets.has(name)) {return this.datasets.get(name);}
         let dataset = this.#db.createDataset(name);
         this.datasets.set(name, dataset);
         return dataset;
@@ -419,7 +419,7 @@ class SynapsDB extends EE {
 
     // TODO: Remove or refactor
     deleteDataset(name) {
-        if (!this.datasets.has(name)) return false;
+        if (!this.datasets.has(name)) {return false;}
         return this.datasets.delete(name);
     }
 
@@ -429,16 +429,16 @@ class SynapsDB extends EE {
      */
 
     async #parseDocument(doc) {
-        debug("Input document " + JSON.stringify(doc, null, 2));
+        debug('Input document ' + JSON.stringify(doc, null, 2));
 
-        if (typeof doc !== "object") {
+        if (typeof doc !== 'object') {
             debug(`Document has to be an object, got ${typeof doc}`);
-            throw new Error("Document has to be an object");
+            throw new Error('Document has to be an object');
         }
 
         if (!doc.type) {
-            debug(`Missing document type`);
-            throw new Error("Document type required");
+            debug('Missing document type');
+            throw new Error('Document type required');
         }
 
         const Schema = this.getDocumentSchema(doc.type);
@@ -450,7 +450,7 @@ class SynapsDB extends EE {
         // Initialize document object
         const parsed = new Schema(doc);
 
-        debug("Parsed document: " + JSON.stringify(parsed, null, 2));
+        debug('Parsed document: ' + JSON.stringify(parsed, null, 2));
         return parsed;
     }
 
@@ -498,7 +498,7 @@ class SynapsDB extends EE {
             }
         }
 
-        debug("Document features: " + features.join(", "));
+        debug('Document features: ' + features.join(', '));
         return features;
     }
 

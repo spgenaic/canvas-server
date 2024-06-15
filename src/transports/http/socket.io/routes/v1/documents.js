@@ -1,12 +1,12 @@
 // Utils
-const debug = require('debug')('canvas:transports:socketio:route:documents')
+const debug = require('debug')('canvas:transports:socketio:route:documents');
 
 
 /**
  * Constants
  */
 
-const ROUTES = require('../../routes.js')
+const ROUTES = require('../../routes.js');
 const ResponseObject = require('../../../../../schemas/transport/responseObject.js');
 
 /**
@@ -19,9 +19,9 @@ module.exports = function (socket, db) {
 
     socket.on(ROUTES.DOCUMENT_LIST, async (contextArray, featureArray, filterArray, callback) => {
         debug(`${ROUTES.DOCUMENT_LIST} event`);
-        debug(`contextArray: ${contextArray}`)
-        debug(`featureArray: ${featureArray}`)
-        debug(`filterArray: ${filterArray}`)
+        debug(`contextArray: ${contextArray}`);
+        debug(`featureArray: ${featureArray}`);
+        debug(`filterArray: ${filterArray}`);
 
         if (typeof callback === 'undefined') {
             throw new Error('No callback function provided.');
@@ -67,9 +67,9 @@ module.exports = function (socket, db) {
     // TODO: Change to GET_MANY
     socket.on(ROUTES.DOCUMENT_GET_ARRAY, async (contextArray, featureArray, filterArray, callback) => {
         debug(`${ROUTES.DOCUMENT_GET_ARRAY} event`);
-        debug(`contextArray: ${contextArray}`)
-        debug(`featureArray: ${featureArray}`)
-        debug(`filterArray: ${filterArray}`)
+        debug(`contextArray: ${contextArray}`);
+        debug(`featureArray: ${featureArray}`);
+        debug(`filterArray: ${filterArray}`);
 
         if (typeof callback === 'undefined') {
             throw new Error('No callback function provided.');
@@ -87,8 +87,8 @@ module.exports = function (socket, db) {
 
     socket.on(ROUTES.DOCUMENT_INSERT, async (data, contextArray, featureArray, callback) => {
         debug(`${ROUTES.DOCUMENT_INSERT} event`);
-        debug(`contextArray: ${contextArray}`)
-        debug(`featureArray: ${featureArray}`)
+        debug(`contextArray: ${contextArray}`);
+        debug(`featureArray: ${featureArray}`);
 
         if (typeof callback === 'undefined') {
             throw new Error('No callback function provided.');
@@ -106,8 +106,8 @@ module.exports = function (socket, db) {
 
     socket.on(ROUTES.DOCUMENT_INSERT_ARRAY, async (data, contextArray, featureArray, callback) => {
         debug(`${ROUTES.DOCUMENT_INSERT_ARRAY} event`);
-        debug(`contextArray: ${contextArray}`)
-        debug(`featureArray: ${featureArray}`)
+        debug(`contextArray: ${contextArray}`);
+        debug(`featureArray: ${featureArray}`);
 
         if (typeof callback === 'undefined') {
             throw new Error('No callback function provided.');
@@ -126,8 +126,8 @@ module.exports = function (socket, db) {
     });
 
     socket.on(ROUTES.DOCUMENT_REMOVE, async (id, contextArray, callback) => {
-        debug(`${ROUTES.DOCUMENT_REMOVE} event for document id "${id}""`)
-        debug(`contextArray: ${contextArray}`)
+        debug(`${ROUTES.DOCUMENT_REMOVE} event for document id "${id}""`);
+        debug(`contextArray: ${contextArray}`);
 
         const response = new ResponseObject();
 
@@ -145,8 +145,8 @@ module.exports = function (socket, db) {
     });
 
     socket.on(ROUTES.DOCUMENT_REMOVE_ARRAY, async (docArray, contextArray, callback) => {
-        debug(`${ROUTES.DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`)
-        debug(`contextArray: ${contextArray}`)
+        debug(`${ROUTES.DOCUMENT_REMOVE_ARRAY} event for document array "${docArray}""`);
+        debug(`contextArray: ${contextArray}`);
 
         const response = new ResponseObject();
 
@@ -164,7 +164,7 @@ module.exports = function (socket, db) {
     });
 
     socket.on(ROUTES.DOCUMENT_DELETE, async (id, callback) => {
-        debug(`${ROUTES.DOCUMENT_DELETE} event for document id "${id}""`)
+        debug(`${ROUTES.DOCUMENT_DELETE} event for document id "${id}""`);
         const response = new ResponseObject();
 
         try {
@@ -177,7 +177,7 @@ module.exports = function (socket, db) {
     });
 
     socket.on(ROUTES.DOCUMENT_DELETE_ARRAY, async (docArray, callback) => {
-        debug(`${ROUTES.DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`)
+        debug(`${ROUTES.DOCUMENT_DELETE_ARRAY} event document array "${docArray}""`);
         const response = new ResponseObject();
 
         try {

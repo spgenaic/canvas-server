@@ -2,7 +2,7 @@
 const Service = require('../../managers/service/lib/Service');
 
 // Utils
-const debug = require('debug')('canvas:transports:http')
+const debug = require('debug')('canvas:transports:http');
 const bodyParser = require('body-parser');
 const ResponseObject = require('../../schemas/transport/responseObject');
 
@@ -13,14 +13,14 @@ const cors = require('cors');
 const socketIo = require('socket.io');
 
 // Defaults
-const DEFAULT_PROTOCOL = 'http'
-const DEFAULT_HOST = '127.0.0.1'
-const DEFAULT_PORT = 8000
-const DEFAULT_ACCESS_TOKEN = 'canvas-server-token'
+const DEFAULT_PROTOCOL = 'http';
+const DEFAULT_HOST = '127.0.0.1';
+const DEFAULT_PORT = 8000;
+const DEFAULT_ACCESS_TOKEN = 'canvas-server-token';
 
 // REST API defaults
-const DEFAULT_API_BASE_PATH = '/rest'
-const DEFAULT_API_VERSION = 'v1'
+const DEFAULT_API_BASE_PATH = '/rest';
+const DEFAULT_API_VERSION = 'v1';
 
 // Middleware functions
 // TODO: Move to utils
@@ -31,7 +31,7 @@ function validateApiKey(key) {
             req?.body['access_token'] ||
             req?.params['access_token'];
 
-        debug('Validating AUTH key')
+        debug('Validating AUTH key');
         debug(`Auth Timestamp: ${new Date().toISOString()}`);
         debug(`User-Agent: ${req.get('User-Agent')}`);
         debug(`Request Method: ${req.method}`);
@@ -69,7 +69,7 @@ class HttpTransport extends Service {
         port = DEFAULT_PORT,
         auth = {
             token: DEFAULT_ACCESS_TOKEN,
-            disableApiKeyValidation: false
+            disableApiKeyValidation: false,
         },
         ...options
     } = {}) {
@@ -82,20 +82,20 @@ class HttpTransport extends Service {
         this.#auth = auth;
 
         // The really ugly part
-        if (!options.canvas) throw new Error('Canvas not defined');
+        if (!options.canvas) {throw new Error('Canvas not defined');}
         this.canvas = options.canvas;
 
-        if (!options.db) throw new Error('DB not defined');
+        if (!options.db) {throw new Error('DB not defined');}
         this.db = options.db;
 
-        if (!options.contextManager) throw new Error('contextManager not defined');
+        if (!options.contextManager) {throw new Error('contextManager not defined');}
         this.contextManager = options.contextManager;
 
-        if (!options.sessionManager) throw new Error('sessionManager not defined');
+        if (!options.sessionManager) {throw new Error('sessionManager not defined');}
         this.sessionManager = options.sessionManager;
 
         // Set the base path (as we only have one api version, this is ..fine)
-        this.restApiBasePath = `${DEFAULT_API_BASE_PATH}/${DEFAULT_API_VERSION}`
+        this.restApiBasePath = `${DEFAULT_API_BASE_PATH}/${DEFAULT_API_VERSION}`;
         this.ResponseObject = ResponseObject; // TODO: Refactor
 
         // Workaround till I implement proper multi-context routes!
@@ -103,7 +103,7 @@ class HttpTransport extends Service {
         //this.context = this.contextManager.getContext();
         this.context = this.session.getContext();
 
-        debug(`HTTP Transport class initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`)
+        debug(`HTTP Transport class initialized, protocol: ${this.#protocol}, host: ${this.#host}, port: ${this.#port}`);
     }
 
     async start() {
@@ -116,8 +116,8 @@ class HttpTransport extends Service {
 
         // Add CSP headers
         app.use((req, res, next) => {
-            res.setHeader("Content-Security-Policy", "default-src 'self'");
-            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader('Content-Security-Policy', "default-src 'self'");
+            res.setHeader('Access-Control-Allow-Origin', '*');
             next();
         });
 
@@ -201,8 +201,8 @@ class HttpTransport extends Service {
             host: this.#host,
             port: this.#port,
             listening: true,
-            connectedClients: clientsCount
-        }
+            connectedClients: clientsCount,
+        };
     }
 
 }

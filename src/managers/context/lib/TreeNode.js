@@ -6,11 +6,11 @@ class TreeNode {
 
     constructor(id, payload) {
 
-        if (!id) throw new Error('Treenode ID not provided')
-        if (typeof id !== 'string') throw new Error(`TreeNode ID must be of type string, "${typeof id}" given`)
+        if (!id) {throw new Error('Treenode ID not provided');}
+        if (typeof id !== 'string') {throw new Error(`TreeNode ID must be of type string, "${typeof id}" given`);}
 
-        if (!payload) throw new Error('TreeNode payload must be provided')
-        if (typeof payload !== 'object') throw new Error(`TreeNode payload must be of type object, "${typeof payload}" given`)
+        if (!payload) {throw new Error('TreeNode payload must be provided');}
+        if (typeof payload !== 'object') {throw new Error(`TreeNode payload must be of type object, "${typeof payload}" given`);}
 
         this.id = id;
         this.payload = payload;
@@ -30,8 +30,8 @@ class TreeNode {
             throw new Error(`Child must be an instance of TreeNode, "${typeof child}" given`);
         }
 
-        if (!this.hasChild(child.id)) this.children.set(child.id, child);
-        return true
+        if (!this.hasChild(child.id)) {this.children.set(child.id, child);}
+        return true;
 
     }
 

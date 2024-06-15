@@ -1,8 +1,8 @@
-'use strict'
+'use strict';
 
 
-const path = require('path')
-const Conf = require('conf') // Temporary
+const path = require('path');
+const Conf = require('conf'); // Temporary
 
 // TODO: Add tree versioning
 class TreeIndex extends Conf {
@@ -10,16 +10,16 @@ class TreeIndex extends Conf {
     constructor(filePath) {
 
         // Temporary leftover
-        if (!filePath) throw new Error('userDataPath is required')
+        if (!filePath) {throw new Error('userDataPath is required');}
 
         // Conf workaround for now
-        let dataDir = path.dirname(filePath)
-        let configName = path.basename(filePath, ".json")
+        let dataDir = path.dirname(filePath);
+        let configName = path.basename(filePath, '.json');
 
         super({
             configName: configName,
-            cwd: dataDir
-        })
+            cwd: dataDir,
+        });
     }
 
     putSync(key, value) { return this.set(key, value); }
@@ -37,4 +37,4 @@ class TreeIndex extends Conf {
 }
 
 
-module.exports = TreeIndex
+module.exports = TreeIndex;

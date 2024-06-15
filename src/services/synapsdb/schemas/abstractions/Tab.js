@@ -2,8 +2,8 @@
  * Data abstraction for storing browser tab data
  */
 
-const Document = require('../Document')
-const DOCUMENT_SCHEMA_VERSION = '2.0'
+const Document = require('../Document');
+const DOCUMENT_SCHEMA_VERSION = '2.0';
 const DOCUMENT_SCHEMA_TYPE = 'data/abstraction/tab';
 const DOCUMENT_DATA_FORMAT = 'application/json';
 
@@ -12,8 +12,8 @@ class Tab extends Document {
     constructor(params) {
 
         //if (!params.id) throw new Error('Tab ID is not defined')
-        if (!params.data) throw new Error('Tab data is not defined')
-        if (!params.data.url) throw new Error('Tab data.URL is not defined')
+        if (!params.data) {throw new Error('Tab data is not defined');}
+        if (!params.data.url) {throw new Error('Tab data.URL is not defined');}
 
         super({
             id: params.id || null,
@@ -27,18 +27,18 @@ class Tab extends Document {
                 staticFeatureBitmapFields: ['type'],
                 dynamicFeatureBitmapFields: [],
                 fullTextIndexFields: ['data.title'],
-                embeddingFields: ['data.title'] // TODO: Handle creation of embeddings for the document type URL
+                embeddingFields: ['data.title'], // TODO: Handle creation of embeddings for the document type URL
             },
 
             meta: {
                 browser: 'unknown',
                 ...params.meta,
                 dataContentType: DOCUMENT_DATA_FORMAT,
-                dataContentEncoding: 'utf8'
+                dataContentEncoding: 'utf8',
             },
 
-            data: params.data
-        })
+            data: params.data,
+        });
 
         this.meta.checksum = this.calculateChecksum(this.index.primaryChecksumFields);
 
@@ -67,13 +67,13 @@ class Tab extends Document {
             staticFeatureBitmapFields: [],
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: ['data.title'],
-            embeddingFields: ['data.title']
+            embeddingFields: ['data.title'],
         };
 
         base.meta = {
             dataContentType: DOCUMENT_DATA_FORMAT,
             dataContentEncoding: 'utf8',
-            browser: 'unknown'
+            browser: 'unknown',
         };
 
         base.data.url = 'https://getcanvas.org/';
@@ -84,4 +84,4 @@ class Tab extends Document {
 
 }
 
-module.exports = Tab
+module.exports = Tab;

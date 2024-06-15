@@ -1,4 +1,4 @@
-const { RoaringBitmap32 } = require("roaring");
+const { RoaringBitmap32 } = require('roaring');
 const debug = require('debug')('canvas:db:index:bitmap');
 
 class Bitmap extends RoaringBitmap32 {
@@ -38,7 +38,7 @@ class Bitmap extends RoaringBitmap32 {
 
     tickArray(oidArray) {
         if (!Array.isArray(oidArray)) { throw new Error(`Not an array: ${oidArray}`); }
-        if (oidArray.length === 0) return;
+        if (oidArray.length === 0) {return;}
 
         // Range check
         for (const oid of oidArray) {
@@ -75,7 +75,7 @@ class Bitmap extends RoaringBitmap32 {
         if (!this.#arrayIsWithinRange(oidArray)) {
             throw new Error(`Out of range: ${oidArray}, range: ${this.rangeMin} - ${this.rangeMax}`);
         }
-        if (oidArray.length === 0) return;
+        if (oidArray.length === 0) {return;}
 
         this.removeMany(oidArray);
     }
@@ -95,7 +95,7 @@ class Bitmap extends RoaringBitmap32 {
     static create(oidArrayOrBitmap, options = {
         type: 'static',
         rangeMin: 0,
-        rangeMax: 4294967296
+        rangeMax: 4294967296,
     }) {
 
         // Perform validation
@@ -149,7 +149,7 @@ class Bitmap extends RoaringBitmap32 {
     #arrayIsWithinRange(oidArray) {
         if (!Array.isArray(oidArray)) { throw new Error(`Not an array: ${oidArray}`); }
         for (const oid of oidArray) {
-            if (!this.#oidIsWithinRange(oid)) return false;
+            if (!this.#oidIsWithinRange(oid)) {return false;}
         }
         return true;
     }

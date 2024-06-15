@@ -7,7 +7,7 @@ module.exports = [
         label: 'Universe',
         description: 'And then, there was light',
         color: '#fff',
-        locked: true
+        locked: true,
     },
 
     /**
@@ -21,7 +21,7 @@ module.exports = [
         label: 'Canvas',
         description: 'Main Canvas server system tree',
         color: '#fff',
-        locked: true
+        locked: true,
     },
 
     // System
@@ -45,7 +45,7 @@ module.exports = [
         label: 'Session',
         description: 'Current user session',
         color: '#fff',
-        locked: true
+        locked: true,
     },
     {
         id: '0000-0000-2002',
@@ -54,7 +54,7 @@ module.exports = [
         label: 'User',
         description: 'Current user',
         color: '#fff',
-        locked: true
-    }
+        locked: true,
+    },
 
-]
+];

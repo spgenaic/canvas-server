@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
             documentArray,
             contextArray,
             featureArray,
-            filterArray
+            filterArray,
         );
         debug('[POST] Documents route triggered');
         res.status(200).json(response.success('Document inserted successfully').getResponse());
@@ -92,7 +92,7 @@ router.post('/', async (req, res) => {
 
     try {
         let result = await db.createDocument(document);
-        if (result.status === "error") {
+        if (result.status === 'error') {
             res.status(500).json(response.error(result.message).getResponse());
         } else {
             res.status(200).json(response.success(null, result.message).getResponse());
@@ -112,7 +112,7 @@ router.put('/:id', async (req, res) => {
 
     try {
         let result = await db.updateDocument(id, document);
-        if (result.status === "error") {
+        if (result.status === 'error') {
             res.status(500).json(response.error(result.message).getResponse());
         } else {
             res.status(200).json(response.success(null, result.message).getResponse());

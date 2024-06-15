@@ -1,40 +1,40 @@
-const bitmap = {}
+const bitmap = {};
 
 class Timeline {
 
     constructor() {}
 
     today() {
-        return bitmap(20211226)
+        return bitmap(20211226);
 
     }
     yesterday() {
-        return bitmap(20211226 - 1)
+        return bitmap(20211226 - 1);
     }
     tomorrow() {
-        return bitmap(20211226 + 1)
+        return bitmap(20211226 + 1);
     }
 
     thisWeek() {
-        return bitmap(54)
+        return bitmap(54);
     }
     lastWeek() {
-        return bitmap(54-1)
+        return bitmap(54-1);
     }
 
     thisMonth() {
         // keep N months
         // off-thread cleanup of old bitmaps on month change
-        return bitmap(202112)
+        return bitmap(202112);
     }
     thisYear() {
-        return bitmap(2021)
+        return bitmap(2021);
     }
 
     bce() {}
-    bc() { return this.bce() }
+    bc() { return this.bce(); }
     ace() {}
-    ac() { return this.ace() }
+    ac() { return this.ace(); }
 
     add() {
 
@@ -64,4 +64,4 @@ class Timeline {
 
 }
 
-module.exports = Timeline
+module.exports = Timeline;

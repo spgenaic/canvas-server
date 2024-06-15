@@ -1,5 +1,5 @@
 // Utils
-const debug = require('debug')('canvas:transports:http:socketio')
+const debug = require('debug')('canvas:transports:http:socketio');
 
 // Routes
 // TODO: Rework, this does not make logical sense as versioning can be defined in the routes.js file
@@ -10,7 +10,7 @@ const ROUTES = require('./routes.js');
 const ResponseObject = require('../../../schemas/transport/responseObject.js');
 
 module.exports = (io, parent) => {
-    debug('Initializing socket.io routes')
+    debug('Initializing socket.io routes');
     io.on('connection', (socket) => {
         debug(`Client connected: ${socket.id}`);
         socket.sessionManager = parent.sessionManager;
@@ -31,10 +31,10 @@ module.exports = (io, parent) => {
 
         socket.on(ROUTES.SESSION_CREATE, (sessionId, sessionOptions, callback) => {
             debug(`${ROUTES.SESSION_CREATE} event`);
-            debug(`Session ID: ${sessionId}, Options: ${JSON.stringify(sessionOptions)}`)
+            debug(`Session ID: ${sessionId}, Options: ${JSON.stringify(sessionOptions)}`);
             socket.session = socket.sessionManager.createSession(sessionId, sessionOptions);
             socket.context = socket.session.getContext(); // Returns default session context
-            contextRoutes(socket)
+            contextRoutes(socket);
             const response = new ResponseObject();
             callback(response.success(socket.session.id).getResponse());
         });
@@ -63,4 +63,4 @@ module.exports = (io, parent) => {
             console.log(`Client disconnected: ${socket.id}`);
         });
     });
-}
+};

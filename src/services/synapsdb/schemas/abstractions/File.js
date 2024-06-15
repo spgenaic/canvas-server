@@ -2,8 +2,8 @@
  * Data abstraction to store File metadata
  */
 
-const Document = require('../Document')
-const DOCUMENT_SCHEMA_VERSION = '2.0'
+const Document = require('../Document');
+const DOCUMENT_SCHEMA_VERSION = '2.0';
 const DOCUMENT_SCHEMA_TYPE = 'data/abstraction/file';
 const DOCUMENT_DATA_CHECKSUM_ALGO = 'sha1';
 const DOCUMENT_DATA_FORMAT = 'application/json';
@@ -12,7 +12,7 @@ class File extends Document {
 
     constructor(params) {
 
-        if (!params.data) throw new Error('Tab data is not defined')
+        if (!params.data) {throw new Error('Tab data is not defined');}
 
         super({
             id: params.id || null,
@@ -26,11 +26,11 @@ class File extends Document {
                 staticFeatureBitmapFields: [
                     'type',
                     'meta.mimeType',
-                    'meta.extension'
+                    'meta.extension',
                 ],
                 dynamicFeatureBitmapFields: [],
                 fullTextIndexFields: ['meta.name'],
-                embeddingFields: ['data.title'] // TODO: Handle creation of embeddings for the document type URL
+                embeddingFields: ['data.title'], // TODO: Handle creation of embeddings for the document type URL
             },
 
             meta: {
@@ -38,18 +38,18 @@ class File extends Document {
                 mimeType: null,
 
                 checksums: {
-                    sha1: null
+                    sha1: null,
                 },
 
                 paths: {
 
-                }
+                },
             },
 
-            data: {}
-        })
+            data: {},
+        });
 
-        if (!this.meta.checksums[DOCUMENT_DATA_CHECKSUM_ALGO]) throw new Error('Primary checksum is not defined')
+        if (!this.meta.checksums[DOCUMENT_DATA_CHECKSUM_ALGO]) {throw new Error('Primary checksum is not defined');}
 
     }
 
@@ -76,13 +76,13 @@ class File extends Document {
             staticFeatureBitmapFields: ['type', 'meta.browser'],
             dynamicFeatureBitmapFields: [],
             fullTextIndexFields: ['data.title'],
-            embeddingFields: ['data.title']
+            embeddingFields: ['data.title'],
         };
 
         base.meta = {
             dataContentType: DOCUMENT_DATA_FORMAT,
             dataContentEncoding: 'utf8',
-            browser: 'unknown'
+            browser: 'unknown',
         };
 
         base.data.url = 'https://getcanvas.org/';
@@ -93,5 +93,5 @@ class File extends Document {
 
 }
 
-module.exports = File
+module.exports = File;
 

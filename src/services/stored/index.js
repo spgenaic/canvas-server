@@ -1,20 +1,20 @@
-'use strict'
+'use strict';
 
 
 // Utils
-const path = require('path')
-const os = require('os')
-const debug = require('debug')('canvas:stored')
+const path = require('path');
+const os = require('os');
+const debug = require('debug')('canvas:stored');
 
 // Abstractions
 
 // Backends
 
 // Cache
-const Cache = require('./cache')
+const Cache = require('./cache');
 
 // Schemas
-const metaSchema = require('./schemas/meta')
+const metaSchema = require('./schemas/meta');
 
 
 /**
@@ -25,26 +25,26 @@ class Stored {
 
     constructor(options = {}) {
 
-        debug('Initializing Canvas StoreD')
+        debug('Initializing Canvas StoreD');
         options = {
             paths: {
                 data: path.join(os.homedir(), '.stored/data'),
-                cache: path.join(os.homedir(), '.stored/cache')
+                cache: path.join(os.homedir(), '.stored/cache'),
             },
             autoRegisterAbstractions: true,
             autoRegisterBackends: true,
             cachePolicy: 'remote', // all, remote, none
-            ...options
-        }
+            ...options,
+        };
 
-        this.dataPath = options.paths.data
-        this.cachePath = options.paths.cache
+        this.dataPath = options.paths.data;
+        this.cachePath = options.paths.cache;
 
         this.cache = (options.cachePolicy != 'none') ?
             new Cache(this.cachePath) : false;
 
-        this.dataAbstractions = []
-        this.dataBackends = []
+        this.dataAbstractions = [];
+        this.dataBackends = [];
 
     }
 
@@ -55,7 +55,7 @@ class Stored {
 
     get() {}
     getMeta(id) {
-        return []
+        return [];
     }
 
     stat() {}
@@ -107,4 +107,4 @@ class Stored {
 
 }
 
-module.exports = Stored
+module.exports = Stored;

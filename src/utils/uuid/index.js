@@ -1,4 +1,4 @@
-const crypto = require('crypto')
+const crypto = require('crypto');
 
 
 // Credits
@@ -19,5 +19,5 @@ function uuid12(delimiter = true) {
 
 module.exports = {
     uuid,
-    uuid12
-}
+    uuid12,
+};
