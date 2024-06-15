@@ -12,9 +12,9 @@ const {
 // Utils
 const path = require('path');
 const debug = require('debug')('canvas-main');
-const Config = require('./utils/config/index.js');
-const log = require('./utils/log/index.js')('canvas-server');
 const EventEmitter = require('eventemitter2');
+const Config = require('./utils/config/index.js');
+const log = require('./utils/log/index.js');
 
 // Core services
 const EventD = require('./services/eventd/index.js');
@@ -56,7 +56,6 @@ class Canvas extends EventEmitter {
 
         debug('Initializing Canvas Server');
 
-
         /**
          * Utils
          */
@@ -70,13 +69,11 @@ class Canvas extends EventEmitter {
             versioning: false,
         });
 
-        this.logger = log;
-        // TODO: Add proper logging..finally
-        /* new Log({
+        this.logger = log('canvas-server', {
             appName: SERVER.name,
             logLevel: process.env.LOG_LEVEL || 'debug',
-            logPath: path.join(SERVER.paths.var, 'log')
-        })*/
+            logPath: path.join(SERVER.paths.var, 'log'),
+        });
 
         /**
          * Runtime
@@ -84,7 +81,6 @@ class Canvas extends EventEmitter {
 
         this.sessionEnabled = options.sessionEnabled;
         this.enableUserRoles = options.enableUserRoles;
-
 
         /**
          * Core services
@@ -117,24 +113,15 @@ class Canvas extends EventEmitter {
          * Managers
          */
 
-        // TODO: Remove or refactor, this ugliness is not really needed
-        this.serviceManager = new ServiceManager({
-            config: path.join(SERVER.paths.config, 'services.json'),
-            serviceDirs: [
-                path.join(SERVER.paths.src, 'services'),
-                path.join(SERVER.paths.src, 'transports'),
-            ],
-        });
-
-        this.roleManager = new RoleManager();
-
         this.contextManager = new ContextManager({
             db: this.db,
         });
 
         this.sessionManager = new SessionManager({
-            sessionStore: (this.sessionEnabled) ? this.db.createDataset('session') : new Map(),
-            contextManager: this.contextManager, // TODO: Refactor/review
+            sessionStore: (this.sessionEnabled) ?
+                this.db.createDataset('session') : new Map(),
+            // TODO: Refactor/review
+            contextManager: this.contextManager,
             maxSessions: MAX_SESSIONS,
             maxContextsPerSession: MAX_CONTEXTS_PER_SESSION,
         });
@@ -144,7 +131,7 @@ class Canvas extends EventEmitter {
          * Transports
          */
 
-        this.transports = {};
+        this.transports = new Map();
 
         // Static variables
         this.PID = PID;          // Current App instance PID
@@ -265,10 +252,12 @@ class Canvas extends EventEmitter {
      */
 
     async initializeServices() {
+        debug('Initializing services');
         return true;
     }
 
     async shutdownServices() {
+        debug('Shutting down services');
         return true;
     }
 
@@ -278,13 +267,37 @@ class Canvas extends EventEmitter {
      */
 
     async initializeTransports() {
+        debug('Initializing transports');
         // Load configuration options for transports
-        let config = this.config.open('transports');
+        let config = this.config.open('server');
+        const transportsConfig = config.get('transports');
 
+        // This is a (temporary) placeholder implementation
+        const httpTransport = new TransportHttp({
+            protocol: config.get('transports.rest.protocol'),
+            host: config.get('transports.rest.host'),
+            port: config.get('transports.rest.port'),
+            auth: config.get('transports.rest.auth'),
+            canvas: this,
+            db: this.db,
+            contextManager: this.contextManager,
+            sessionManager: this.sessionManager,
+        });
+
+        try {
+            await httpTransport.start();
+        } catch (error) {
+            console.log(`Error initializing http transport:`, error);
+            process.exit(1);
+        }
+
+        this.transports.set('http', httpTransport);
+
+        /*
         const transports = [
             { name: 'http', class: TransportHttp },
-            //{ name: 'rest', class: TransportRest },
-            //{ name: 'socketio', class: TransportSocketIO }
+            { name: 'rest', class: TransportRest },
+            { name: 'socketio', class: TransportSocketIO }
         ];
 
         // TODO: The whole thing has to be refactored
@@ -292,6 +305,7 @@ class Canvas extends EventEmitter {
             this.transports[transport.name] = new transport.class({
                 host: config.get(`${transport.name}.host`),
                 port: config.get(`${transport.name}.port`),
+                auth: config.get(`${transport.name}.auth`),
                 canvas: this,
                 db: this.db,
                 contextManager: this.contextManager,
@@ -304,12 +318,20 @@ class Canvas extends EventEmitter {
                 console.log(`Error initializing ${transport.name} transport:`, error);
                 process.exit(1);
             }
-        }
+        }*/
 
         return true;
     }
 
     async shutdownTransports() {
+        debug('Shutting down transports');
+        for (let [name, transport] of this.transports) {
+            try {
+                await transport.stop();
+            } catch (error) {
+                console.log(`Error shutting down ${name} transport:`, error);
+            }
+        }
         return true;
     }
 

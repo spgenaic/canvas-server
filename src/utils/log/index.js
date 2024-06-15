@@ -54,7 +54,7 @@ class Log {
             ...options,
         };
 
-        this.#path = options.path;
+        this.#path = options.logPath;
 
         this.logLevel = parseLogVerbosity(process.env['LOG_LEVEL'] || options.logLevel); // TODO: Fixme, ugly
         this.color = options.color;
