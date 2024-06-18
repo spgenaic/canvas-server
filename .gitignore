@@ -1,6 +1,7 @@
 ## App config
 /config/**
 !/config/example-*.json
+!/config/default-*.json
 !/config/.keep
 
 ## Var directories
