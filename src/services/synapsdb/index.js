@@ -508,6 +508,11 @@ class SynapsDB extends EE {
         debug(`Current key count: ${keyCount}, doc ID: ${nextDocumentID}`);
         return nextDocumentID;
     }
+
+    async stop() {
+        debug('Stopping database');
+        await this.#db.close();
+    }
 }
 
 
