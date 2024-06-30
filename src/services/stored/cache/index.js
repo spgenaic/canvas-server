@@ -6,85 +6,81 @@
  */
 
 // Utils
-const log = console.log;
 const debug = require('debug')('canvas:stored:cache');
 
-// Lib
+// Includes
 const cacache = require('cacache');
 
 // Default cache/cached configuration
-const defConfig = {
+const DEFAULT_CONFIG = {
     algorithms: ['sha1'],
 };
 
 class Cache {
 
-    constructor(cacheRoot, options) {
-        if (!cacheRoot) { throw new Error('Cache path not set, program will exit'); }
-        this.cacheRoot = cacheRoot;
-        debug(`Canvas cache dir set to ${cacheRoot}`);
+    #moduleConfig;
+    #cacheRoot;
+
+    constructor(cacheRoot, options = {}) {
+        debug('Initializing Canvas StoreD caching layer..');
+        if (!cacheRoot || typeof cacheRoot !== 'string') {
+            throw new Error('Invalid cache path. It must be a non-empty string.');
+        }
+
+        this.#moduleConfig = {
+            ...DEFAULT_CONFIG,
+            ...options
+        };
+
+        this.#cacheRoot = cacheRoot;
+        debug(`Canvas StoreD cache initialized, cache root at "${cacheRoot}"`);
     }
 
     list() {
-        return cacache.ls(this.cacheRoot);
+        return cacache.ls(this.#cacheRoot);
     }
 
     listAsStream() {
-        return cacache.ls.stream(this.cacheRoot);
+        return cacache.ls.stream(this.#cacheRoot);
     }
 
     has(key) {
-        return cacache.get.info(this.cacheRoot, key);
+        return cacache.get.info(this.#cacheRoot, key);
     }
 
-    hasByKey(key) {
-        return cacache.get.info(this.cacheRoot, key);
+    put(key, data, metadata = {}) {
+        return cacache.put(this.#cacheRoot, key, data, {
+            ...this.#moduleConfig,
+            metadata
+        });
     }
 
-    hasByHash(hash) {
-        return cacache.get.hasContent(this.cacheRoot, hash);
+    putAsStream(key, metadata = {}) {
+        return cacache.put.stream(this.#cacheRoot, key, {
+            ...this.#moduleConfig,
+            metadata
+        });
     }
 
-    put(key, data, opts) {
-        return cacache.put(this.cacheRoot, key, data, _merge(defConfig, opts));
+    get(key, metadataOnly = false) {
+        // TODO: Cache metadata will be different to the actual object metadata
+        // This can introduce problems, but hey, we can handle it in stored
+        return (metadataOnly) ? cacache.get.info(this.#cacheRoot, key) : cacache.get(this.#cacheRoot, key)
     }
 
-    putAsStream(key, opts) {
-        return cacache.put.stream(this.cacheRoot, key, _merge(defConfig, opts));
-    }
-
-    get(key) {
-        return cacache.get(this.cacheRoot, key);
-    }
-
-    getByKey(key) {
-        return cacache.get(this.cacheRoot, key);
-    }
-
-    getByHash(hash) {
-        return cacache.get.stream.byDigest(this.cacheRoot, hash);
-    }
-
-    getAsStreamByKey(key) {
-        return cacache.get.stream(this.cacheRoot, key);
-    }
-
-    getAsStreamByHash(hash) {
-        return cache.get.byDigest(this.cacheRoot, hash);
+    getAsStream(key) {
+        return cacache.get.stream(this.#cacheRoot, key);
     }
 
     getInfo(key) {
-        return cacache.get.info(this.cacheRoot, key);
+        return cacache.get.info(this.#cacheRoot, key);
     }
 
-    delByKey(key) {
-        return cacache.rm.entry(this.cacheRoot, key);
+    delete(key, destroy = true) {
+        return cacache.rm.entry(this.#cacheRoot, key, { removeFully: destroy });
     }
 
-    delByHash(hash) {
-        return cacache.rm.content(this.cacheRoot, hash);
-    }
-
+    verify() { return cacache.verify(this.#cacheRoot); }
 }
 
 module.exports = Cache;
