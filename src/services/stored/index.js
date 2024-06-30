@@ -64,6 +64,8 @@ class Stored {
             throw new Error(`File not found: ${filePath}`);
         }
 
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+
     }
 
     async putDocument(document, metadata = {}, backendNameOrArray, options = {}) {
@@ -75,6 +77,12 @@ class Stored {
         if (typeof document !== 'object') {
             throw new Error('Invalid document provided');
         }
+
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+        if (backendNames.length === 0) {
+            throw new Error('No backend specified');
+        }
+
     }
 
     async putBinary(data, metadata = {}, backendNameOrArray, options = {}) {
@@ -84,38 +92,91 @@ class Stored {
         }
 
         if (!metadata || typeof metadata !== 'object') {
-            throw new Error('Invalid metadata provided');
+            throw new Error('Metadata is required and must be an object');
         }
 
-        const objectHash = calculateBinaryChecksum(data);
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+        if (backendNames.length === 0) {
+            throw new Error('No backend specified');
+        }
+
 
     }
 
     // Getters for files, documents and binary support only one backend
     // Could be changed in the future(try to get from multiple backends and return the first one found)
-    async getFile(hash, backendName = null, options = {}) {
-        const backend = this.getBackend(backendName);
-        if (backend.status !== 'ready') {
-            throw new Error(`Backend ${backendName} is not ready`);
+    async getFile(hash, backendNameOrArray = null, options = {}) {
+        if (!hash) {
+            throw new Error('No hash provided');
+        }
+
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+        if (backendNames.length === 0) {
+            throw new Error('No backend specified');
         }
     }
 
-    async getDocument(hash, backendName = null, options = {}) {
+    async getDocument(hash, backendNameOrArray = null, options = {}) {
+        if (!hash) {
+            throw new Error('No hash provided');
+        }
 
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+        if (backendNames.length === 0) {
+            throw new Error('No backend specified');
+        }
+
+        // Documents are not cached for now, so no cache logic here
     }
 
-    async getBinary(hash, backendName = null, options = {}) {
+    async getBinary(hash, backendNameOrArray = null, options = {}) {
+        if (!hash) {
+            throw new Error('No hash provided');
+        }
 
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+        if (backendNames.length === 0) {
+            throw new Error('No backend specified');
+        }
     }
 
-    async has(hash, backendNameOrArray, options = {}) {
+    async has(hash, backendNameOrArray, ) {
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
 
+        for (const backendName of backendNames) {
+            const backend = this.getBackend(backendName);
+
+            if (this.config.backends[backendName].localCacheEnabled) {
+                try {
+                    const cacheInfo = await this.cache.has(hash);
+                    if (cacheInfo) {
+                        debug(`Cache hit for ${hash} in backend ${backendName}`);
+                        // return true;
+                    } else {
+                        debug(`Cache miss for ${hash} in backend ${backendName}`);
+                    }
+                } catch (error) {
+                    debug(`Cache error for ${hash} in backend ${backendName}: ${error.message}`);
+                }
+            }
+
+            try {
+                const exists = await backend.has(hash);
+                if (exists) { return true; }
+            } catch (error) {
+                debug(`Error checking object existence in backend ${backendName}: ${error.message}`);
+                if (this.config.backends[backendName].ignoreBackendErrors) {
+                    continue;
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        return false;
     }
-
 
     async get(backendName, objectHash, metadataOnly = false) {
-
-
         if (this.config.backends[backendName].localCacheEnabled) {
             try {
                 const cacheInfo = await this.cache.has(objectHash);
@@ -156,43 +217,7 @@ class Stored {
         throw new Error(`Object not found: ${objectHash} in backend ${backendName}`);
     }
 
-    async has(backendNameOrArray, objectHash) {
-        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
 
-        for (const backendName of backendNames) {
-            const backend = this.getBackend(backendName);
-
-            if (this.config.backends[backendName].localCacheEnabled) {
-                try {
-                    const cacheInfo = await this.cache.has(objectHash);
-                    if (cacheInfo) {
-                        debug(`Cache hit for ${objectHash} in backend ${backendName}`);
-                        return true;
-                    } else {
-                        debug(`Cache miss for ${objectHash} in backend ${backendName}`);
-                    }
-                } catch (error) {
-                    debug(`Cache error for ${objectHash} in backend ${backendName}: ${error.message}`);
-                }
-            }
-
-            try {
-                const exists = await backend.has(objectHash);
-                if (exists) {
-                    return true;
-                }
-            } catch (error) {
-                debug(`Error checking object existence in backend ${backendName}: ${error.message}`);
-                if (this.config.backends[backendName].ignoreBackendErrors) {
-                    continue;
-                } else {
-                    throw error;
-                }
-            }
-        }
-
-        return false;
-    }
 
     async stat(hash, backendNameOrArray) {
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
