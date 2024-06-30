@@ -2,6 +2,12 @@
 
 // Utils
 const debug = require('debug')('canvas:stored');
+const { isFile, isBinary } = require('./utils/common');
+const {
+    calculateObjectChecksum,
+    calculateBinaryChecksum,
+    calculateFileChecksum
+} = require('./utils/hash');
 
 // StoreD caching layer
 const Cache = require('./cache');
@@ -26,15 +32,10 @@ class Stored {
             throw new Error('No cache configuration provided at config.cache');
         }
 
-        if (!config.cache.rootPath) {
-            throw new Error('No cache root path provided at config.cache.rootPath');
-        }
-
         this.config = config;
-        this.cacheRootPath = this.config.cache.rootPath;
 
         // Initialize StoreD modules
-        this.cache = new Cache(this.cacheRootPath, this.config.cache); // We'll use one global caching layer
+        this.cache = new Cache(this.config.cache); // We'll use one global caching layer
 
         // Initialize backends
         this.backends = {};
@@ -57,8 +58,63 @@ class Stored {
         }
     }
 
-    async get(backendName, objectHash, metadataOnly = false) {
+    async putFile(filePath, metadata = {}, backendNameOrArray, options = {}) {
+        // Implementation for files
+        if (!isFile(filePath)) {
+            throw new Error(`File not found: ${filePath}`);
+        }
+
+    }
+
+    async putDocument(document, metadata = {}, backendNameOrArray, options = {}) {
+        // Implementation for JSON documents
+        if (!document) {
+            throw new Error('No document provided');
+        }
+
+        if (typeof document !== 'object') {
+            throw new Error('Invalid document provided');
+        }
+    }
+
+    async putBinary(data, metadata = {}, backendNameOrArray, options = {}) {
+        // Implementation for binary data
+        if (!isBinary(data)) {
+            throw new Error('Invalid binary data provided');
+        }
+
+        if (!metadata || typeof metadata !== 'object') {
+            throw new Error('Invalid metadata provided');
+        }
+
+        const objectHash = calculateBinaryChecksum(data);
+
+    }
+
+    // Getters for files, documents and binary support only one backend
+    // Could be changed in the future(try to get from multiple backends and return the first one found)
+    async getFile(hash, backendName = null, options = {}) {
         const backend = this.getBackend(backendName);
+        if (backend.status !== 'ready') {
+            throw new Error(`Backend ${backendName} is not ready`);
+        }
+    }
+
+    async getDocument(hash, backendName = null, options = {}) {
+
+    }
+
+    async getBinary(hash, backendName = null, options = {}) {
+
+    }
+
+    async has(hash, backendNameOrArray, options = {}) {
+
+    }
+
+
+    async get(backendName, objectHash, metadataOnly = false) {
+
 
         if (this.config.backends[backendName].localCacheEnabled) {
             try {
@@ -100,32 +156,6 @@ class Stored {
         throw new Error(`Object not found: ${objectHash} in backend ${backendName}`);
     }
 
-    async put(backendNameOrArray, object, metadata = {}, options = {}) {
-        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
-        const results = [];
-
-        for (const backendName of backendNames) {
-            const backend = this.getBackend(backendName);
-            try {
-                const result = await backend.put(object, metadata, options);
-                results.push({ backend: backendName, result });
-
-                // put implies having the data already in cache or locally available
-                // so the below is not really needed
-                /*if (this.config.backends[backendName].localCacheEnabled) {
-                    await this.cache.put(result.hash, object, { metadata });
-                }*/
-            } catch (error) {
-                debug(`Error putting object in backend ${backendName}: ${error.message}`);
-                if (!this.config.backends[backendName].ignoreBackendErrors) {
-                    throw error;
-                }
-            }
-        }
-
-        return results;
-    }
-
     async has(backendNameOrArray, objectHash) {
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
 
@@ -164,13 +194,13 @@ class Stored {
         return false;
     }
 
-    async stat(backendNameOrArray, objectHash) {
+    async stat(hash, backendNameOrArray) {
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
 
         for (const backendName of backendNames) {
             const backend = this.getBackend(backendName);
             try {
-                return await backend.stat(objectHash);
+                return await backend.stat(hash);
             } catch (error) {
                 debug(`Error getting stats for object in backend ${backendName}: ${error.message}`);
                 if (!this.config.backends[backendName].ignoreBackendErrors) {
@@ -181,21 +211,21 @@ class Stored {
             }
         }
 
-        throw new Error(`Object not found: ${objectHash}`);
+        throw new Error(`Object not found: ${hash}`);
     }
 
-    async delete(backendNameOrArray, objectHash) {
+    async delete(hash, backendNameOrArray) {
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
         const results = [];
 
         for (const backendName of backendNames) {
             const backend = this.getBackend(backendName);
             try {
-                const result = await backend.delete(objectHash);
+                const result = await backend.delete(hash);
                 results.push({ backend: backendName, result });
 
                 if (this.config.backends[backendName].localCacheEnabled) {
-                    await this.cache.delete(objectHash);
+                    await this.cache.delete(hash);
                 }
             } catch (error) {
                 debug(`Error deleting object from backend ${backendName}: ${error.message}`);
@@ -231,6 +261,10 @@ class Stored {
         return results;
     }
 
+    /**
+     * Backend methods
+     */
+
     getBackend(backendName) {
         const backend = this.backends[backendName];
         if (!backend) {
@@ -241,6 +275,14 @@ class Stored {
 
     listBackends() {
         return Object.keys(this.backends);
+    }
+
+    setBackendStatus(backendName, status) {
+        this.getBackend(backendName).status = status;
+    }
+
+    getBackendStatus(backendName) {
+        return this.getBackend(backendName).status;
     }
 
     getBackendConfiguration(backendName) {

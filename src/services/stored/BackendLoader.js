@@ -4,6 +4,7 @@
 const path = require('path');
 
 // Temporary backend map(has to do for now)
+// Maybe autogenerate based on the backends folder?
 const SUPPORTED_BACKENDS = {
     'file': './backends/file',
     'lmdb': './backends/lmdb',

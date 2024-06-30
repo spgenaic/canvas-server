@@ -11,28 +11,28 @@ const debug = require('debug')('canvas:stored:cache');
 // Includes
 const cacache = require('cacache');
 
-// Default cache/cached configuration
+// Default cache configuration
 const DEFAULT_CONFIG = {
     algorithms: ['sha1'],
 };
 
 class Cache {
 
-    #moduleConfig;
+    #config;
     #cacheRoot;
 
-    constructor(cacheRoot, options = {}) {
+    constructor(config) {
         debug('Initializing Canvas StoreD caching layer..');
-        if (!cacheRoot || typeof cacheRoot !== 'string') {
-            throw new Error('Invalid cache path. It must be a non-empty string.');
+        if (!config.rootPath || typeof onfig.rootPath !== 'string') {
+            throw new Error('Cache rootPath not defined');
         }
 
-        this.#moduleConfig = {
+        this.#config = {
             ...DEFAULT_CONFIG,
-            ...options
+            ...config
         };
 
-        this.#cacheRoot = cacheRoot;
+        this.#cacheRoot = config.rootPath;
         debug(`Canvas StoreD cache initialized, cache root at "${cacheRoot}"`);
     }
 
@@ -50,22 +50,29 @@ class Cache {
 
     put(key, data, metadata = {}) {
         return cacache.put(this.#cacheRoot, key, data, {
-            ...this.#moduleConfig,
-            metadata
+            ...this.#config,
+            metadata: metadata
         });
     }
 
     putAsStream(key, metadata = {}) {
         return cacache.put.stream(this.#cacheRoot, key, {
-            ...this.#moduleConfig,
-            metadata
+            ...this.#config,
+            metadata: metadata
         });
     }
 
     get(key, metadataOnly = false) {
-        // TODO: Cache metadata will be different to the actual object metadata
+        return (metadataOnly) ? this.getMetadata(key) : cacache.get(this.#cacheRoot, key);
+    }
+
+    getMetadata(key) {
+        return cacache.get.info(this.#cacheRoot, key);
         // This can introduce problems, but hey, we can handle it in stored
-        return (metadataOnly) ? cacache.get.info(this.#cacheRoot, key) : cacache.get(this.#cacheRoot, key)
+        // A better implementation would be to strip cacache metadata
+        // const metadata = cacache.get.info(this.#cacheRoot, key);
+        // if (!metadata.checksum) { metadata.checksums[defaultalgo] = metadata.integrity; }
+        // return metadata.metadata;
     }
 
     getAsStream(key) {
