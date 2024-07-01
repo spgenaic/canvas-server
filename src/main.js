@@ -24,9 +24,9 @@ const StoreD = require('./services/stored/index.js');
 
 // Manager classes
 const ServiceManager = require('./managers/service/index.js');
+const RoleManager = require('./managers/role/index.js');
 const SessionManager = require('./managers/session/index.js');
 const ContextManager = require('./managers/context/index.js');
-const RoleManager = require('./managers/role/index.js');
 
 // Transports
 const TransportHttp = require('./transports/http');
@@ -326,6 +326,7 @@ class Canvas extends EventEmitter {
 
     async shutdownTransports() {
         debug('Shutting down transports');
+
         for (let [name, transport] of this.transports) {
             try {
                 await transport.stop();
