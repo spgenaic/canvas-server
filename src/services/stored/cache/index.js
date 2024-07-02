@@ -23,7 +23,7 @@ class Cache {
 
     constructor(config) {
         debug('Initializing Canvas StoreD caching layer..');
-        if (!config.rootPath || typeof onfig.rootPath !== 'string') {
+        if (!config.rootPath || typeof config.rootPath !== 'string') {
             throw new Error('Cache rootPath not defined');
         }
 
@@ -33,7 +33,7 @@ class Cache {
         };
 
         this.#cacheRoot = config.rootPath;
-        debug(`Canvas StoreD cache initialized, cache root at "${cacheRoot}"`);
+        debug(`Canvas StoreD cache initialized, cache root at "${this.#cacheRoot}"`);
     }
 
     list() {

@@ -229,7 +229,7 @@ class Stored {
             } catch (error) {
                 debug(`Error getting stats for object in backend ${backendName}: ${error.message}`);
                 if (!this.config.backends[backendName].ignoreBackendErrors) {
-                    continue;
+                    continue;3
                 } else {
                     throw error;
                 }
