@@ -15,6 +15,17 @@ const Cache = require('./cache');
 // StoreD backends
 const BackendLoader = require('./BackendLoader');
 
+
+/**
+ * StoreD
+ *
+ * @description StoreD is a content-addressable storage service that allows to store and retrieve files, documents and binary data
+ * on multiple backends, with a caching layer to improve performance.
+ * Adhering to the Unix philosophy, StoreD does not support any indexing or searching, it only stores and retrieves data.
+ * @class Stored
+ * @param {Object} config - StoreD configuration object
+ */
+
 class Stored {
     constructor(config) {
         debug('Initializing Canvas StoreD');
@@ -57,6 +68,33 @@ class Stored {
             this.backends[name] = new BackendClass(backendConfig.driverConfig);
         }
     }
+
+    // Test method to open a file with the default OS application
+    openFile(hash, backendNameOrArray) {
+        const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
+
+        for (const backendName of backendNames) {
+            const backend = this.getBackend(backendName);
+            try {
+                return backend.openFile(hash);
+            } catch (error) {
+                debug(`Error opening file from backend ${backendName}: ${error.message}`);
+                if (!this.config.backends[backendName].ignoreBackendErrors) {
+                    continue;
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        throw new Error(`Object not found: ${hash}`);
+    }
+
+    // Put OPs will first try to store an object in a backend of type: local, honoring the
+    // backend cache configuration for write operations(cfg tbd)
+    // If none is available, we will store it in cache regardless of the cache configuration
+    // Once stored, it will update a syncd queue to sync with the other backends
+    // Cache will be cleared or left-intact after the sync is completed based on the cache configuration
 
     async putFile(filePath, metadata = {}, backendNameOrArray, options = {}) {
         // Implementation for files
@@ -103,12 +141,22 @@ class Stored {
 
     }
 
-    // Getters for files, documents and binary support only one backend
     // Could be changed in the future(try to get from multiple backends and return the first one found)
-    async getFile(hash, backendNameOrArray = null, options = {}) {
-        if (!hash) {
-            throw new Error('No hash provided');
-        }
+
+    /**
+     * getFile: Get a file from the backends
+     * @param {*} hash
+     * @param {*} backendNameOrArray
+     * @param {*} options
+     * @return {  } Returns file data as a stream or a direct file path
+     */
+    async getFile(hash, backendNameOrArray = null, options = {
+        // Return as a stream
+        // stream: false
+        // Return as a direct file path
+        // filePath: false
+    }) {
+        if (!hash) { throw new Error('No hash provided'); }
 
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
         if (backendNames.length === 0) {
@@ -116,10 +164,14 @@ class Stored {
         }
     }
 
-    async getDocument(hash, backendNameOrArray = null, options = {}) {
-        if (!hash) {
-            throw new Error('No hash provided');
-        }
+    // Returns structured data(JSON document) parsed into an object
+    async getDocument(hash, backendNameOrArray = null, options = {
+        // Return raw JSON string instead of parsed object
+        // raw: false
+        // Return only metadata
+        // metadataOnly: false
+    }) {
+        if (!hash) { throw new Error('No hash provided'); }
 
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
         if (backendNames.length === 0) {
@@ -129,10 +181,9 @@ class Stored {
         // Documents are not cached for now, so no cache logic here
     }
 
+    // Returns binary data as a buffer
     async getBinary(hash, backendNameOrArray = null, options = {}) {
-        if (!hash) {
-            throw new Error('No hash provided');
-        }
+        if (!hash) { throw new Error('No hash provided'); }
 
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
         if (backendNames.length === 0) {
@@ -141,6 +192,7 @@ class Stored {
     }
 
     async has(hash, backendNameOrArray, ) {
+        if (!hash) { throw new Error('No hash provided'); }
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
 
         for (const backendName of backendNames) {
@@ -154,6 +206,7 @@ class Stored {
                         // return true;
                     } else {
                         debug(`Cache miss for ${hash} in backend ${backendName}`);
+                        // Log miss and update cache if found?
                     }
                 } catch (error) {
                     debug(`Cache error for ${hash} in backend ${backendName}: ${error.message}`);
@@ -175,49 +228,6 @@ class Stored {
 
         return false;
     }
-
-    async get(backendName, objectHash, metadataOnly = false) {
-        if (this.config.backends[backendName].localCacheEnabled) {
-            try {
-                const cacheInfo = await this.cache.has(objectHash);
-                if (cacheInfo) {
-                    debug(`Cache hit for ${objectHash} in backend ${backendName}`);
-                    if (metadataOnly) {
-                        return { metadata: cacheInfo.metadata };
-                    }
-                    const cachedData = await this.cache.get(objectHash);
-                    return { data: cachedData.data, metadata: cachedData.metadata };
-                } else {
-                    debug(`Cache miss for ${objectHash} in backend ${backendName}`);
-                }
-            } catch (error) {
-                debug(`Cache error for ${objectHash} in backend ${backendName}: ${error.message}`);
-            }
-        }
-
-        try {
-            const result = await backend.get(objectHash, metadataOnly);
-
-            if (this.config.backends[backendName].localCacheEnabled && !metadataOnly) {
-                try {
-                    await this.cache.put(objectHash, result.data, { metadata: result.metadata });
-                } catch (cacheError) {
-                    debug(`Error caching data for ${objectHash}: ${cacheError.message}`);
-                }
-            }
-
-            return result;
-        } catch (error) {
-            debug(`Error getting object from backend ${backendName}: ${error.message}`);
-            if (!this.config.backends[backendName].ignoreBackendErrors) {
-                throw error;
-            }
-        }
-
-        throw new Error(`Object not found: ${objectHash} in backend ${backendName}`);
-    }
-
-
 
     async stat(hash, backendNameOrArray) {
         const backendNames = Array.isArray(backendNameOrArray) ? backendNameOrArray : [backendNameOrArray];
@@ -284,6 +294,29 @@ class Stored {
         }
 
         return results;
+    }
+
+    /**
+     * StoreD Utils
+     */
+
+    #findBackendForHash(hash, backendNames) {
+        for (const backendName of backendNames) {
+            const backend = this.getBackend(backendName);
+            if (backend.status !== 'online') { continue; } // Skip offline backends
+            try {
+                if (backend.has(hash)) { return backendName; }
+            } catch (error) {
+                debug(`Error checking object existence in backend ${backendName}: ${error.message}`);
+                if (this.config.backends[backendName].ignoreBackendErrors) {
+                    continue;
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
