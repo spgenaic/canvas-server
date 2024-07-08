@@ -60,14 +60,13 @@ const env = {
     DEVICE: {
         id: device.id,
         endianness: device.endianness,
-        type: device.type,
         os: device.os,
         network: device.network,
     },
 
     PID: path.join(SERVER_VAR, 'run', 'canvas-server.pid'),
     IPC: (process.platform === 'win32') ?
-        path.join('\\\\?\\pipe', process.cwd(), pkg.name) :
+        path.join('\\\\?\\pipe', 'canvas-server.ipc') :
         path.join(SERVER_VAR, 'run', 'canvas-server.sock'),
 
 };

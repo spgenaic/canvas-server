@@ -34,7 +34,7 @@ $ docker-compose up --build
 # $ docker-compose build --no-cache
 # $ docker-compose up --force-recreate
 # Cleanup
-$ docker-compose down --rmi canvas-server
+$ docker-compose down --rmi all
 
 ```
 
