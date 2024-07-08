@@ -7,7 +7,7 @@ const {
     calculateObjectChecksum,
     calculateBinaryChecksum,
     calculateFileChecksum
-} = require('./utils/hash');
+} = require('./utils/checksum');
 
 // StoreD caching layer
 const Cache = require('./cache');
@@ -15,13 +15,27 @@ const Cache = require('./cache');
 // StoreD backends
 const BackendLoader = require('./BackendLoader');
 
+// Default backends
+
+
 
 /**
  * StoreD
  *
- * @description StoreD is a content-addressable storage service that allows to store and retrieve files, documents and binary data
- * on multiple backends, with a caching layer to improve performance.
- * Adhering to the Unix philosophy, StoreD does not support any indexing or searching, it only stores and retrieves data.
+ * @description StoreD is a content-addressable storage middleware that abstracts storing and retrieving
+ * files, documents and binary data from various storage backends, with a simple caching layer in-between.
+ * Adhering to the Unix philosophy, StoreD does not support any content-based indexing nor searching,
+ * its meant to be a simple low-level "KV" store for data identified either by a checksum or a stored url.
+ *
+ * GET operations will by default try local cache, then cycle through the backends in the order submitted
+ * in the backend array, returning the first successful operation(optionally populating the cache).
+ * See canvas-server architecture diagram for more details.
+ *
+ * PUT operations will first try to store an object in a backend of type: local, honoring the backend cache
+ * configuration for write operations(cfg tbd). If no local backend is provided, we'll default to cache
+ * if enabled, then send the internal cache url to a syncd queue read by a worker process synchronizing
+ * to all selected backends.
+ *
  * @class Stored
  * @param {Object} config - StoreD configuration object
  */
@@ -36,11 +50,28 @@ class Stored {
         }
 
         if (!config.backends || Object.keys(config.backends).length === 0) {
-            throw new Error('No backends configured at config.backends');
+            //throw new Error('No backends configured at config.backends');
+            console.error('No backends configured at config.backends, using default backend: file');
+            config.backends = {
+                file: {
+                    driver: 'file',
+                    driverConfig: {
+                        rootPath: './data'
+                    }
+                }
+            }
         }
 
-        if (!config.cache && !config.cache.enabled) {
-            throw new Error('No cache configuration provided at config.cache');
+        if (!config.cache) {
+            //throw new Error('No cache configuration provided at config.cache');
+            console.error('No cache configuration provided at config.cache, using default cache configuration');
+            config.cache = {
+                enabled: true,
+                type: 'file',
+                maxSizeInMb: 2048,
+                maxAgeInMinutes: -1,
+                rootPath: './cache'
+            }
         }
 
         this.config = config;
@@ -90,12 +121,6 @@ class Stored {
         throw new Error(`Object not found: ${hash}`);
     }
 
-    // Put OPs will first try to store an object in a backend of type: local, honoring the
-    // backend cache configuration for write operations(cfg tbd)
-    // If none is available, we will store it in cache regardless of the cache configuration
-    // Once stored, it will update a syncd queue to sync with the other backends
-    // Cache will be cleared or left-intact after the sync is completed based on the cache configuration
-
     async putFile(filePath, metadata = {}, backendNameOrArray, options = {}) {
         // Implementation for files
         if (!isFile(filePath)) {
@@ -140,8 +165,6 @@ class Stored {
 
 
     }
-
-    // Could be changed in the future(try to get from multiple backends and return the first one found)
 
     /**
      * getFile: Get a file from the backends
@@ -239,7 +262,7 @@ class Stored {
             } catch (error) {
                 debug(`Error getting stats for object in backend ${backendName}: ${error.message}`);
                 if (!this.config.backends[backendName].ignoreBackendErrors) {
-                    continue;3
+                    continue;
                 } else {
                     throw error;
                 }

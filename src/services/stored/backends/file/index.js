@@ -2,6 +2,12 @@
 const path = require('path');
 const fs = require('fs').promises;
 const debug = require('debug')('canvas:stored:backend:files');
+const {
+    calculateBinaryChecksum,
+    calculateObjectChecksum,
+    calculateFileChecksum } = require('../../utils/checksum');
+
+const { isFile, isBinary } = require('../../utils/common');
 
 // Includes
 const StorageBackend = require('../StorageBackend');
@@ -15,6 +21,25 @@ const DEFAULT_METADATA_FORMAT = 'json'; // 'json' or 'binary' (msgpack)
 const DEFAULT_BINARY_EXTENSION = 'bin';
 
 
+/**
+ * FileBackend
+ *
+ * Simple Canvas StoreD file backend module
+ * All objects are stored as files in a directory structure based on their
+ * type supplied in the metadata.
+ * Objects metadata is stored in separate files with the same name as the object file
+ * This is a very simple / naive implementation that should not be used for production
+ * environments and/or with large amounts of data.
+ *
+ * @class FileBackend
+ * @extends {StorageBackend}
+ * @param {Object} config
+ * @param {String} config.rootPath - The root path where the objects will be stored
+ * @param {String} [config.hashAlgorithm='sha1'] - The hash algorithm to use for checksums
+ * @param {String} [config.metadataExtension='meta.json'] - The extension for metadata files
+ * @param {String} [config.metadataFormat='json'] - The format for metadata files (json or msgpack)
+
+ */
 class FileBackend extends StorageBackend {
 
     constructor(config) {

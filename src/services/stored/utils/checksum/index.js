@@ -3,6 +3,8 @@
 const fs = require('fs');
 const crypto = require('crypto');
 
+// TODO: We should use a external lib/bin to calculate checksums
+
 function calculateObjectChecksum(obj, algorithm = 'sha256') {
     const hash = crypto.createHash(algorithm);
     hash.update(JSON.stringify(obj));
