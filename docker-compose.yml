@@ -3,8 +3,8 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.slim
-    image: canvas-server-image:slim
+      dockerfile: Dockerfile
+    image: canvas-server:latest
     ports:
       - "8000:8000"
     environment:
