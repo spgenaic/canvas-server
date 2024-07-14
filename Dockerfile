@@ -14,10 +14,10 @@ RUN git clone --branch dev https://github.com/canvas-ai/canvas-server canvas-ser
 WORKDIR /opt/canvas-server
 
 # Install application dependencies
-RUN npm install
+RUN yarn install
 
 # Expose port 8000
 EXPOSE 8000
 
 # Start the application using npm/node
-CMD ["npm", "run", "start"]
+CMD ["yarn", "start"]

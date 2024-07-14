@@ -32,6 +32,7 @@
     "date-fns": "^2.30.0",
     "debug": "^4.3.4",
     "dockerode": "^4.0.2",
+    "dockerode-compose": "^1.4.0",
     "dotenv": "^16.3.1",
     "dotprop": "^1.2.1",
     "eventemitter2": "^6.4.9",
