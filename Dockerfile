@@ -1,5 +1,5 @@
 # Official Node.js 20.x image as base
-FROM node:20-alpine
+FROM node:20
 
 # Working directory
 WORKDIR /opt
