@@ -7,7 +7,7 @@ const {
     SERVER,
     PID,
     IPC,
-} = require('./bootstrap.js');
+} = require('./env.js');
 
 // Utils
 const path = require('path');

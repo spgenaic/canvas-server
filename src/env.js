@@ -9,15 +9,14 @@ const os = require('os');
 const pkg = require('../package.json');
 const device = require('./managers/device').getCurrentDevice();
 
-
 /**
  * System directories
  *
  * SERVER_ROOT
  * ├── src
- * ├── config   || ~/.canvas/server/config
- * ├── data     || ~/.canvas/server/data
- * ├── var      || ~/.canvas/server/var
+ * ├── config
+ * ├── data
+ * ├── var
  * |   ├── log
  * |   ├── run
  */
@@ -25,40 +24,21 @@ const device = require('./managers/device').getCurrentDevice();
 const SERVER_ROOT = path.dirname(path.resolve(__dirname));
 const SERVER_SRC = path.join(SERVER_ROOT, 'src');
 
+const SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config');
+const SERVER_DATA = process.env['CANVAS_SERVER_DATA'] || path.join(SERVER_ROOT, 'data');
+const SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var');
+
 // I want the server or more precisely the server's data to be portable
 // iow, you should be able to move your entire canvas user env to another
 // machine and have the server work as expected
 // We'll keep the server ./config in-tact to host the server defaults
 // but all settings are to be primarily stored(and overridden) in user's ./config
+const CANVAS_USER_HOME = process.env['CANVAS_USER_HOME'] || getUserHome();
+const CANVAS_USER_CONFIG = process.env['CANVAS_USER_CONFIG'] || path.join(CANVAS_USER_HOME, 'config');
+const CANVAS_USER_DATA = process.env['CANVAS_USER_DATA'] || path.join(CANVAS_USER_HOME, 'data');
+const CANVAS_USER_DB = process.env['CANVAS_USER_DB'] || path.join(CANVAS_USER_HOME, 'db');
+const CANVAS_USER_WORKSPACES = process.env['CANVAS_USER_WORKSPACES'] || path.join(CANVAS_USER_HOME, 'workspaces');
 
-/*
-CANVAS_SERVER_HOME
-CANVAS_SERVER_CONFIG
-CANVAS_SERVER_DATA
-CANVAS_SERVER_EXT
-CANVAS_SERVER_VAR
-
-CANVAS_USER_HOME=
-CANVAS_USER_CONFIG=
-CANVAS_USER_DATA=
-CANVAS_USER_DB=
-
-*/
-
-
-
-var SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config');
-var SERVER_HOME = process.env['CANVAS_SERVER_HOME'] || path.join(SERVER_ROOT, 'user');
-var SERVER_DATA = process.env['CANVAS_SERVER_DATA'] || path.join(SERVER_ROOT, 'data');
-var SERVER_VAR = process.env['CANVAS_SERVER_VAR'] || path.join(SERVER_ROOT, 'var');
-
-// Hack for seamless local development
-if (fs.existsSync(path.join(SERVER_HOME, '.ignore'))) {
-    SERVER_HOME = path.join(os.homedir(), '.canvas');
-    SERVER_CONFIG = path.join(SERVER_HOME, 'config');
-    SERVER_DATA = path.join(SERVER_HOME, 'data');
-    SERVER_VAR = path.join(SERVER_HOME, 'var');
-}
 
 // Collect all ENV constants
 const env = {
@@ -73,7 +53,6 @@ const env = {
             root: SERVER_ROOT,
             src: SERVER_SRC,
             config: SERVER_CONFIG,
-            home: SERVER_HOME,
             data: SERVER_DATA,
             var: SERVER_VAR,
         },
@@ -138,13 +117,24 @@ module.exports = env;
  */
 
 function isPortable() {
-    return fs.existsSync(path.join(SERVER_HOME, '.ignore'));
+    return ! fs.existsSync(path.join(SERVER_ROOT, 'user', '.ignore'));
 }
 
+function getUserHome() {
+    if (isPortable()) {
+        return path.join(SERVER_ROOT, 'user');
+    }
 
+    if (process.platform === 'win32') {
+        return path.join(os.homedir(), 'Canvas');
+    }
+
+    return path.join(os.homedir(), '.canvas');
+}
 
 function generateDotenvFile(iniVars, filePath) {
     let iniContent = '';
+
     Object.keys(iniVars).forEach((key) => {
         let value = iniVars[key];
         if (typeof value === 'object') {
@@ -152,5 +142,6 @@ function generateDotenvFile(iniVars, filePath) {
         }
         iniContent += `${key}="${value}"\n`;
     });
+
     fs.writeFileSync(filePath, iniContent);
 }
