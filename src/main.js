@@ -158,7 +158,6 @@ class Canvas extends EventEmitter {
      * Canvas service controls
      */
 
-
     async start(url, options = {
         // Maybe we should support starting the whole canvas-server with a locked context path
         // but lets be KISS-y for now
@@ -185,7 +184,7 @@ class Canvas extends EventEmitter {
         return true;
     }
 
-    async shutdown(exit = true) {
+    async stop(exit = true) {
         debug(exit ? 'Shutting down Canvas Server...' : 'Shutting down Canvas Server for restart');
         this.emit('before-shutdown');
         this.#status = 'stopping';
@@ -205,7 +204,7 @@ class Canvas extends EventEmitter {
     async restart() {
         debug('Restarting Canvas Server');
         this.emit('restart');
-        await this.shutdown(false);
+        await this.stop(false);
         await this.start();
     }
 
@@ -258,7 +257,7 @@ class Canvas extends EventEmitter {
 
     async shutdownServices() {
         debug('Shutting down services');
-        await this.db.stop()
+        await this.db.stop();
         return true;
     }
 
@@ -359,7 +358,7 @@ class Canvas extends EventEmitter {
 
         process.on('uncaughtException', (error) => {
             console.error(error);
-            this.shutdown().then(() => process.exit(1));
+            this.stop().then(() => process.exit(1));
         });
 
         process.on('unhandledRejection', (reason, promise) => {
@@ -374,20 +373,20 @@ class Canvas extends EventEmitter {
 
         process.on('SIGINT', async (signal) => {
             console.log(`Received ${signal}, gracefully shutting down`);
-            await this.shutdown();
+            await this.stop();
             process.exit(0);
         });
 
         process.on('SIGTERM', async (signal) => {
             console.log(`Received ${signal}, gracefully shutting down`);
-            await this.shutdown();
+            await this.stop();
             process.exit(0);
         });
 
         process.on('beforeExit', async (code) => {
             if (code !== 0) {return;}
             debug('Process beforeExit: ', code);
-            await this.shutdown();
+            await this.stop();
         });
 
         process.on('exit', (code) => {

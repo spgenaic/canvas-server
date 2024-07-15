@@ -15,16 +15,38 @@ const device = require('./managers/device').getCurrentDevice();
  *
  * SERVER_ROOT
  * ├── src
- * ├── home     || ~/.canvas        || Canvas/Server ||
- * ├── data     || ~/.canvas/data   || Canvas/Server/data
- * ├── config   || ~/.canvas/config || Canvas/Server/config
- * ├── var      || ~/.canvas/var    || Canvas/Server/var
+ * ├── config   || ~/.canvas/server/config
+ * ├── data     || ~/.canvas/server/data
+ * ├── var      || ~/.canvas/server/var
  * |   ├── log
  * |   ├── run
  */
 
 const SERVER_ROOT = path.dirname(path.resolve(__dirname));
 const SERVER_SRC = path.join(SERVER_ROOT, 'src');
+
+// I want the server or more precisely the server's data to be portable
+// iow, you should be able to move your entire canvas user env to another
+// machine and have the server work as expected
+// We'll keep the server ./config in-tact to host the server defaults
+// but all settings are to be primarily stored(and overridden) in user's ./config
+
+/*
+CANVAS_SERVER_HOME
+CANVAS_SERVER_CONFIG
+CANVAS_SERVER_DATA
+CANVAS_SERVER_EXT
+CANVAS_SERVER_VAR
+
+CANVAS_USER_HOME=
+CANVAS_USER_CONFIG=
+CANVAS_USER_DATA=
+CANVAS_USER_DB=
+
+*/
+
+
+
 var SERVER_CONFIG = process.env['CANVAS_SERVER_CONFIG'] || path.join(SERVER_ROOT, 'config');
 var SERVER_HOME = process.env['CANVAS_SERVER_HOME'] || path.join(SERVER_ROOT, 'user');
 var SERVER_DATA = process.env['CANVAS_SERVER_DATA'] || path.join(SERVER_ROOT, 'data');
@@ -118,6 +140,8 @@ module.exports = env;
 function isPortable() {
     return fs.existsSync(path.join(SERVER_HOME, '.ignore'));
 }
+
+
 
 function generateDotenvFile(iniVars, filePath) {
     let iniContent = '';

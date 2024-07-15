@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: canvas-server
     image: canvas-server:latest
     ports:
       - "8000:8000"
@@ -18,4 +19,3 @@ services:
       - ${CANVAS_SERVER_HOME}:/opt/canvas-server/user
       - ${CANVAS_SERVER_DATA}:/opt/canvas-server/data
       - ${CANVAS_SERVER_VAR}:/opt/canvas-server/var
-    container_name: canvas-server

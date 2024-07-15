@@ -4,17 +4,24 @@ FROM node:20
 # Working directory
 WORKDIR /opt
 
-# Install git
-RUN apk update && apk add --no-cache git curl
+# Install basic dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends git curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clone the repository (dev for now as its more up-to-date)
 RUN git clone --branch dev https://github.com/canvas-ai/canvas-server canvas-server
 
-# Lets switch the workdir to our beloved src
+# Lets switch the workdir
 WORKDIR /opt/canvas-server
 
 # Install application dependencies
 RUN yarn install
+
+# Accept CONFIG_DIR as a build argument
+ARG CONFIG_DIR=./config
+
+# Copy default server configuration tu support portable deployments
+COPY ${CONFIG_DIR} /opt/canvas-server/config
 
 # Expose port 8000
 EXPOSE 8000
