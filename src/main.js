@@ -5,9 +5,10 @@
 // Environment variables
 const {
     SERVER,
+    USER,
     PID,
     IPC,
-} = require('./env.js');
+} = require('./env.js');                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      2
 
 // Utils
 const path = require('path');
@@ -64,7 +65,7 @@ class Canvas extends EventEmitter {
 
         this.config = Config({
             serverConfigDir: SERVER.paths.config,
-            userConfigDir: SERVER.paths.config,
+            userConfigDir: USER.paths.config,
             configPriority: 'server',
             versioning: false,
         });
@@ -87,8 +88,8 @@ class Canvas extends EventEmitter {
          */
 
         this.db = new SynapsDB({
-            path: path.join(SERVER.paths.home, 'db'),
-            backupPath: path.join(SERVER.paths.home, 'db', 'backup'),
+            path: path.join(USER.paths.db, 'db'),
+            backupPath: path.join(USER.paths.db, 'db', 'backup'),
             backupOnOpen: true,
             backupOnClose: false,
             compression: true,
@@ -102,8 +103,8 @@ class Canvas extends EventEmitter {
 
         this.stored = new StoreD({
             paths: {
-                data: SERVER.paths.data,
-                cache: path.join(SERVER.paths.var, 'cache'),
+                data: USER.paths.data,
+                cache: path.join(USER.paths.data, 'cache'), // This needs to be determined based on where we are running
             },
             cachePolicy: 'pull-through',
         });

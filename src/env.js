@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const pkg = require('../package.json');
+const { paths } = require('./main');
 const device = require('./managers/device').getCurrentDevice();
 
 /**
@@ -65,6 +66,16 @@ const env = {
         network: device.network,
     },
 
+    USER: {
+        paths: {
+            home: CANVAS_USER_HOME,
+            config: CANVAS_USER_CONFIG,
+            data: CANVAS_USER_DATA,
+            db: CANVAS_USER_DB,
+            workspaces: CANVAS_USER_WORKSPACES,
+        },
+    },
+
     PID: path.join(SERVER_VAR, 'run', 'canvas-server.pid'),
     IPC: (process.platform === 'win32') ?
         path.join('\\\\?\\pipe', 'canvas-server.ipc') :
@@ -83,7 +94,6 @@ const INI = {
     CANVAS_SERVER_ROOT: env.SERVER.paths.root,
     CANVAS_SERVER_SRC: env.SERVER.paths.src,
     CANVAS_SERVER_CONFIG: env.SERVER.paths.config,
-    CANVAS_SERVER_HOME: env.SERVER.paths.home,
     CANVAS_SERVER_DATA: env.SERVER.paths.data,
     CANVAS_SERVER_VAR: env.SERVER.paths.var,
 
@@ -94,6 +104,12 @@ const INI = {
     // Developer settings
     NODE_ENV: process.env.NODE_ENV || 'development',
     LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
+
+    CANVAS_USER_HOME: env.USER.paths.home,
+    CANVAS_USER_CONFIG: env.USER.paths.config,
+    CANVAS_USER_DATA: env.USER.paths.data,
+    CANVAS_USER_DB: env.USER.paths.db,
+    CANVAS_USER_WORKSPACES: env.USER.paths.workspaces
 };
 
 // Update .env to-be read by external server roles
