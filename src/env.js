@@ -56,6 +56,7 @@ const env = {
             config: SERVER_CONFIG,
             data: SERVER_DATA,
             var: SERVER_VAR,
+            home: CANVAS_USER_HOME,
         },
     },
 
