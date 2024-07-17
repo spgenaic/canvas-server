@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const pkg = require('../package.json');
+const { paths } = require('./main');
 const device = require('./managers/device').getCurrentDevice();
 
 /**
@@ -63,6 +64,16 @@ const env = {
         endianness: device.endianness,
         os: device.os,
         network: device.network,
+    },
+
+    USER: {
+        paths: {
+            home: CANVAS_USER_HOME,
+            config: CANVAS_USER_CONFIG,
+            data: CANVAS_USER_DATA,
+            db: CANVAS_USER_DB,
+            workspaces: CANVAS_USER_WORKSPACES
+        },
     },
 
     PID: path.join(SERVER_VAR, 'run', 'canvas-server.pid'),

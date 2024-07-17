@@ -3,6 +3,8 @@
  */
 
 
+
+
 // CLI Parser
 // TODO: Implement CLI parser in ./cli
 const argv = require('minimist')(process.argv.slice(2));
