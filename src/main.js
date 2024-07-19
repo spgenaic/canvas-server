@@ -10,13 +10,10 @@ const winston = require('winston');
 const Config = require('./utils/config/index.js');
 
 // Core services
-const EventD = require('./services/eventd/index.js');
 const SynapsDB = require('./services/synapsdb/index.js');
-const NeuralD = require('./services/neurald/index.js');
 const StoreD = require('./services/stored/index.js');
 
 // Manager classes
-const ServiceManager = require('./managers/service/index.js');
 const RoleManager = require('./managers/role/index.js');
 const SessionManager = require('./managers/session/index.js');
 const ContextManager = require('./managers/context/index.js');
@@ -272,8 +269,6 @@ class Canvas extends EventEmitter {
         };
     }
 
-    stats() { return []; }
-
 
     /**
      * Session
@@ -327,6 +322,7 @@ class Canvas extends EventEmitter {
      * Transports
      */
 
+    // TODO: Refactor / remove
     async initializeTransports() {
         debug('Initializing transports');
         // Load configuration options for transports
