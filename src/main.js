@@ -26,6 +26,7 @@ const TransportHttp = require('./transports/http');
 const MAX_SESSIONS = 32; // 2^5
 const MAX_CONTEXTS_PER_SESSION = 32; // 2^5
 
+
 /**
  * Main application
  */
