@@ -10,13 +10,10 @@ const winston = require('winston');
 const Config = require('./utils/config/index.js');
 
 // Core services
-const EventD = require('./services/eventd/index.js');
 const SynapsDB = require('./services/synapsdb/index.js');
-const NeuralD = require('./services/neurald/index.js');
 const StoreD = require('./services/stored/index.js');
 
 // Manager classes
-const ServiceManager = require('./managers/service/index.js');
 const RoleManager = require('./managers/role/index.js');
 const SessionManager = require('./managers/session/index.js');
 const ContextManager = require('./managers/context/index.js');
@@ -30,8 +27,6 @@ const MAX_SESSIONS = 32; // 2^5
 const MAX_CONTEXTS_PER_SESSION = 32; // 2^5
 
 
-// TODO: Refactor needed!
-
 /**
  * Main application
  */
@@ -39,7 +34,6 @@ const MAX_CONTEXTS_PER_SESSION = 32; // 2^5
 class Canvas extends EventEmitter {
 
     #mode;
-    #app;
     #user = {};
     #server = {};
     #device;
@@ -82,9 +76,10 @@ class Canvas extends EventEmitter {
         super(); // EventEmitter2
 
         this.#mode = options.mode;
-        this.#app = options.app;
         this.#server.paths = options.paths.server;
         this.#user.paths = options.paths.user;
+        this.#device = DeviceManager.getCurrentDevice();
+        this.app = options.app;
 
         this.config = Config({
             serverConfigDir: this.#server.paths.config,
@@ -114,7 +109,7 @@ class Canvas extends EventEmitter {
         this.transports = new Map();            // Transport instances
 
         // Bling-bling for the literature lovers
-        this.logger.info(`Starting ${this.#app.name} v${this.#app.version}`);
+        this.logger.info(`Starting ${this.app.name} v${this.app.version}`);
         this.logger.info(`Server mode: ${this.#mode}`);
 
         debug('Server paths:', this.#server.paths);
@@ -184,10 +179,10 @@ class Canvas extends EventEmitter {
     }
 
     // Getters
-    get appName() { return this.#app.name; }
-    get version() { return this.#app.version; }
-    get description() { return this.#app.description; }
-    get license() { return this.#app.license; }
+    get appName() { return this.app.name; }
+    get version() { return this.app.version; }
+    get description() { return this.app.description; }
+    get license() { return this.app.license; }
     get paths() {
         return {
             server: this.#server.paths,
@@ -195,9 +190,9 @@ class Canvas extends EventEmitter {
         };
     }
     get mode() { return this.#mode; }
-    get status() { return this.#status; }
     get pid() { return this.PID; }
     get ipc() { return this.IPC; }
+    get currentDevice() { return this.#device; }
 
 
     /**
@@ -258,7 +253,22 @@ class Canvas extends EventEmitter {
         await this.start();
     }
 
-    stats() { return []; }
+    async status() {
+        return {
+            status: this.#status,
+            pid: this.PID,
+            ipc: this.IPC,
+            device: this.#device,
+            mode: this.#mode,
+            server: {
+                appName: this.app.name,
+                version: this.app.version,
+                description: this.app.description,
+                license: this.app.license,
+            },
+            sessions: this.listActiveSessions(),
+        };
+    }
 
 
     /**
@@ -313,6 +323,7 @@ class Canvas extends EventEmitter {
      * Transports
      */
 
+    // TODO: Refactor / remove
     async initializeTransports() {
         debug('Initializing transports');
         // Load configuration options for transports
