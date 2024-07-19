@@ -8,8 +8,8 @@ WORKDIR /opt
 RUN apt-get update && apt-get install -y --no-install-recommends git curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Clone the repository (dev for now as its more up-to-date)
-RUN git clone --branch dev https://github.com/canvas-ai/canvas-server canvas-server
+# Clone the repository
+RUN git clone --branch main https://github.com/canvas-ai/canvas-server canvas-server
 
 # Lets switch the workdir
 WORKDIR /opt/canvas-server
@@ -28,3 +28,6 @@ EXPOSE 8000
 
 # Start the application using npm/node
 CMD ["yarn", "start"]
+
+# ENTRYPOINT [ "/opt/canvas-server/bin/start-server.sh" ]
+

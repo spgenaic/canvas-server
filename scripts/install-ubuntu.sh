@@ -2,6 +2,7 @@
 
 # This script is a (working) draft only
 # It is not meant to be run as is
+# Do not run this script if you are not installing Canvas Server on a Ubuntu Server
 
 # Script defaults
 # TODO: Add support for command line arguments / ENV vars
