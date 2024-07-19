@@ -85,6 +85,7 @@ class Canvas extends EventEmitter {
         this.#app = options.app;
         this.#server.paths = options.paths.server;
         this.#user.paths = options.paths.user;
+        this.#device = DeviceManager.getCurrentDevice();
 
         this.config = Config({
             serverConfigDir: this.#server.paths.config,
@@ -198,6 +199,7 @@ class Canvas extends EventEmitter {
     get status() { return this.#status; }
     get pid() { return this.PID; }
     get ipc() { return this.IPC; }
+    get currentDevice() { return this.#device; }
 
 
     /**
