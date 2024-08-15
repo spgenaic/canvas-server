@@ -138,8 +138,8 @@ class Canvas extends EventEmitter {
          */
 
         this.db = new SynapsDB({
-            path: path.join(this.#user.paths.db, 'db'),
-            backupPath: path.join(this.#user.paths.db, 'db', 'backup'),
+            path: path.join(this.#user.paths.db),
+            backupPath: path.join(this.#user.paths.db, 'backup'),
             backupOnOpen: true,
             backupOnClose: false,
             compression: true,
