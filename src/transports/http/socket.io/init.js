@@ -29,12 +29,28 @@ module.exports = (io, parent) => {
             callback(response.success(sessions).getResponse());
         });
 
+        socket.on(ROUTES.SESSION_GET, (sessionId, callback) => {
+            debug(`${ROUTES.SESSION_GET} event`);
+            debug(`Session ID: ${sessionId}`);
+            socket.session = socket.sessionManager.getSession(sessionId);
+            const response = new ResponseObject();
+            callback(response.success(socket.session.id).getResponse());
+        });
+
         socket.on(ROUTES.SESSION_CREATE, (sessionId, sessionOptions, callback) => {
             debug(`${ROUTES.SESSION_CREATE} event`);
             debug(`Session ID: ${sessionId}, Options: ${JSON.stringify(sessionOptions)}`);
             socket.session = socket.sessionManager.createSession(sessionId, sessionOptions);
             socket.context = socket.session.getContext(); // Returns default session context
             contextRoutes(socket);
+            const response = new ResponseObject();
+            callback(response.success(socket.session.id).getResponse());
+        });
+
+        socket.on(ROUTES.SESSION_OPEN, (sessionId, callback) => {
+            debug(`${ROUTES.SESSION_OPEN} event`);
+            debug(`Session ID: ${sessionId}`);
+            socket.session = socket.sessionManager.openSession(sessionId);
             const response = new ResponseObject();
             callback(response.success(socket.session.id).getResponse());
         });
